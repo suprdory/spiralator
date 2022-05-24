@@ -139,7 +139,7 @@ const dth = PI2 / 100;
 canvas.height = innerHeight;
 canvas.width = innerWidth;
 
-let disk = new Disk(75,0.75)
+let disk = new Disk(72,0.75)
 let ring = new Ring(105,130);
 let pair = new Pair(ring, disk)
 pointArray = [];
