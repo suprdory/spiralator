@@ -1,32 +1,37 @@
 const canvas = document.getElementById("cw");
 const ctx = canvas.getContext("2d");
-const PI2 = Math.PI * 2
+const PI2 = Math.PI * 2;
 const cursor = {
     x: innerWidth / 2,
     y: innerHeight / 2,
 };
 class Ring {
     constructor(
-        x = cursor.x,
-        y = cursor.y,
-        innerCirc = 105,
-        outerCirc = 150,
+        innerTeeth = 105,
+        outerTeeth = 150,
+        rat=0.5,
     ) {
-        this.x = x;
-        this.y = y;
-        this.innerCirc = innerCirc;
-        this.outerCirc = outerCirc;
+        this.x = cursor.x;
+        this.y = cursor.y;
+        this.innerCirc = innerTeeth * pixPertooth;
+        this.outerCirc = outerTeeth * pixPertooth;
         this.innerRad = this.innerCirc / PI2;
         this.outerRad = this.outerCirc / PI2;
+        this.rat=rat;
         this.color = 'white';
         this.lw = 1;
+        this.th0 = 0;
     }
     draw() {
-        ctx.beginPath();
+
         ctx.fillStyle = this.color;
         ctx.strokeStyle = this.color;
         ctx.lineWidth = this.lw;
+
+        ctx.beginPath();
         ctx.arc(this.x, this.y, this.innerRad, 0, PI2);
+        ctx.stroke();
+        ctx.beginPath();
         ctx.arc(this.x, this.y, this.outerRad, 0, PI2);
         ctx.stroke();
     }
@@ -34,29 +39,124 @@ class Ring {
 
 class Disk {
     constructor(
-        x = cursor.x,
-        y = cursor.y,
-        circ = 80,
+        teeth = 84,
+        rat=0.75,
 
     ) {
-        this.x = x;
-        this.y = y;
-        this.circ = circ;
+        this.x = cursor.x;
+        this.y = cursor.y;
+        this.circ = teeth * pixPertooth;
         this.rad = this.circ / PI2;
+        this.color = 'white';
         this.lw = 1;
+        this.rat = rat;
+        this.th0 = 0;
+        this.th = 0;
     }
     draw() {
-        ctx.beginPath();
         ctx.fillStyle = this.color;
         ctx.strokeStyle = this.color;
         ctx.lineWidth = this.lw;
+        ctx.beginPath();
         ctx.arc(this.x, this.y, this.rad, 0, PI2);
         ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y);
+        ctx.lineTo(
+            this.x + this.rad * Math.cos(this.th),
+            this.y + this.rad * Math.sin(this.th)
+        )
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(
+            this.x + this.rat * this.rad * Math.cos(this.th),
+            this.y + this.rat * this.rad * Math.sin(this.th), 
+            3, 0, PI2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(
+            this.x ,
+            this.y,
+            3, 0, PI2);
+        ctx.stroke();
+
     }
 }
 
-disk = new Disk();
-// ring = new Ring();
+class Point {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+    }
+}
+class Pair {
+    constructor(fixed, moving) {
+        this.fixed = fixed;
+        this.moving = moving;
+        this.th = 0;
+    }
+    update() {
+        this.move(this.th + dth);
+    }
+    move(th) {
+        let f = this.fixed;
+        let m = this.moving;
+        this.moving.x = f.x + (f.innerRad - m.rad) * Math.cos(th);
+        this.moving.y = f.y + (f.innerRad - m.rad) * Math.sin(th);
+        m.th = m.th0 - th * (m.rad / f.innerRad)
+        this.th = th;
+    }
+    tracePoint() {
+        let th = this.th;
+        let f = this.fixed;
+        let m = this.moving;
+        let x = m.x + Math.cos(m.th0 - th * m.rad / f.innerRad) * (m.rad * m.rat)
+        let y = m.y + Math.sin(m.th0 - th * m.rad / f.innerRad) * (m.rad * m.rat)
+        return (new Point(x, y));
+    }
 
-disk.draw();
-// ring.draw();
+}
+function makeArr(startValue, stopValue, cardinality) {
+    var arr = [];
+    var step = (stopValue - startValue) / (cardinality - 1);
+    for (var i = 0; i < cardinality; i++) {
+        arr.push(startValue + (step * i));
+    }
+    return arr;
+}
+
+function plotTrace(trace) {
+    ctx.beginPath();
+    ctx.moveTo(trace[0].x, trace[0].y);
+    trace.forEach(point => {
+        ctx.lineTo(point.x, point.y);
+    })
+    ctx.stroke();
+}
+
+const pixPertooth = 10;
+const dth = PI2 / 100;
+canvas.height = innerHeight;
+canvas.width = innerWidth;
+
+let disk = new Disk(80,0.75)
+let ring = new Ring(105,130);
+let pair = new Pair(ring, disk)
+pointArray = [];
+
+function anim() {
+    requestAnimationFrame(anim);
+    ctx.fillStyle = "rgb(1,0,0)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    pair.update();
+    pair.fixed.draw();
+    pair.moving.draw();
+    pointArray.push(pair.tracePoint());
+    plotTrace(pointArray);
+}
+
+anim();
+
+
+
+
