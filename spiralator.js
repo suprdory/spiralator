@@ -134,7 +134,7 @@ function plotTrace(trace) {
     ctx.stroke();
 }
 
-const pixPertooth = 10;
+const pixPertooth = 9;
 const dth = PI2 / 100;
 canvas.height = innerHeight;
 canvas.width = innerWidth;
