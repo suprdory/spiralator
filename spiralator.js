@@ -94,6 +94,7 @@ class Pair {
         this.fixed = fixed;
         this.moving = moving;
         this.th = 0;
+        this.move(this.th);
     }
     update() {
         this.move(this.th + dth);
@@ -101,17 +102,15 @@ class Pair {
     move(th) {
         let f = this.fixed;
         let m = this.moving;
-        this.moving.x = f.x + (f.innerRad - m.rad) * Math.cos(th);
-        this.moving.y = f.y + (f.innerRad - m.rad) * Math.sin(th);
-        m.th = m.th0 - th * (m.rad / f.innerRad)
+        m.x = f.x + (f.innerRad - m.rad) * Math.cos(th);
+        m.y = f.y + (f.innerRad - m.rad) * Math.sin(th);
+        m.th = m.th0 - th * (f.innerRad / m.rad - 1)
         this.th = th;
     }
     tracePoint() {
-        let th = this.th;
-        let f = this.fixed;
         let m = this.moving;
-        let x = m.x + Math.cos(m.th0 - th * m.rad / f.innerRad) * (m.rad * m.rat)
-        let y = m.y + Math.sin(m.th0 - th * m.rad / f.innerRad) * (m.rad * m.rat)
+        let x = m.x + Math.cos(m.th0 + m.th) * (m.rad * m.rat)
+        let y = m.y + Math.sin(m.th0 + m.th) * (m.rad * m.rat)
         return (new Point(x, y));
     }
 
@@ -127,6 +126,7 @@ function makeArr(startValue, stopValue, cardinality) {
 
 function plotTrace(trace) {
     ctx.beginPath();
+    ctx.strokeStyle="rgb(200,50,100)"
     ctx.moveTo(trace[0].x, trace[0].y);
     trace.forEach(point => {
         ctx.lineTo(point.x, point.y);
@@ -139,20 +139,22 @@ const dth = PI2 / 100;
 canvas.height = innerHeight;
 canvas.width = innerWidth;
 
-let disk = new Disk(80,0.75)
+let disk = new Disk(75,0.75)
 let ring = new Ring(105,130);
 let pair = new Pair(ring, disk)
 pointArray = [];
 
 function anim() {
     requestAnimationFrame(anim);
-    ctx.fillStyle = "rgb(1,0,0)";
+    ctx.fillStyle = "rgb(50,20,30)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    pointArray.push(pair.tracePoint());
+    plotTrace(pointArray);
     pair.update();
     pair.fixed.draw();
     pair.moving.draw();
-    pointArray.push(pair.tracePoint());
-    plotTrace(pointArray);
+
+
 }
 
 anim();
