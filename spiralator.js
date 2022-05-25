@@ -46,7 +46,7 @@ class Disk {
     ) {
         this.x = cursor.x;
         this.y = cursor.y;
-        this.teeth=teeth;
+        this.teeth = teeth;
         this.circ = teeth * pixPertooth;
         this.rad = this.circ / PI2;
         this.color = 'white';
@@ -98,6 +98,8 @@ class Pair {
         this.th = 0;
         this.auto = 0;
         this.trace = []
+        this.penDown = true;
+
         this.move(this.th);
     }
 
@@ -111,7 +113,9 @@ class Pair {
         m.y = f.y + (f.innerRad - m.rad) * Math.sin(th);
         m.th = m.th0 - th * (f.innerRad / m.rad - 1)
         this.th = th;
-        this.trace.push(this.tracePoint());
+        if (this.penDown) {
+            this.trace.push(this.tracePoint());
+        }
     }
     roll(th) {
         if (Math.abs(th - this.th) < dth) {
@@ -138,8 +142,8 @@ class Pair {
         }
     }
     fullRoll() {
-        console.log(this.fixed)
-        this.roll(PI2*calcLCM(this.fixed.innerTeeth,this.moving.teeth)/this.fixed.innerTeeth);
+        // console.log(this.fixed)
+        this.roll(PI2 * calcLCM(this.fixed.innerTeeth, this.moving.teeth) / this.fixed.innerTeeth);
     }
 
     tracePoint() {
@@ -160,7 +164,6 @@ class Pair {
 
 }
 
-
 let date = new Date();
 let dblClickCase = 0;
 let mouseDown = false;
@@ -168,7 +171,10 @@ let lastTouch = date.getTime();
 let thDragSt = 0;
 let dthDrag = 0;
 let showWheels = true;
+let rat0;
+let movTeeth0;
 
+const uiHeight = 0.2;
 const bgFillStyle = "rgb(50,20,30)";
 const pixPertooth = 9;
 const dth = PI2 / 100;
@@ -192,12 +198,10 @@ function anim() {
     if (showWheels) {
         pair.fixed.draw();
         pair.moving.draw();
+        drawUI();
     }
 }
-
 anim();
-
-
 
 addEventListener("mousedown", e => {
     // e.preventDefault();
@@ -238,31 +242,45 @@ function pointerDownHandler(x, y) {
     cursor.y = y;
 
     if (y > canvas.height * 1 / 2) {
-        dblClickCase = 0;
+        dblClickCase = "autoCW";
     }
     if (y < canvas.height * 1 / 2) {
-        dblClickCase = 1;
+        dblClickCase = "autoCCW";
     }
-    if (y < canvas.height * 1 / 4 & x < canvas.width * 1 / 4) {
-        dblClickCase = 2;
+    if (y < canvas.height * uiHeight & x < canvas.width * 1 / 4) {
+        dblClickCase = "hideUI";
     }
-    if (y < canvas.height * 1 / 4 & x > canvas.width * 3 / 4) {
-        dblClickCase = 3;
+    if (y < canvas.height * uiHeight & x > canvas.width * 3 / 4) {
+        dblClickCase = "toEnd";
+    }
+    if (y < canvas.height * uiHeight & x > canvas.width * 2 / 4 & x < canvas.width * 3 / 4) {
+        dblClickCase = "toStart";
+    }
+    if (y < canvas.height * uiHeight & x > canvas.width * 1 / 4 & x < canvas.width * 2 / 4) {
+        dblClickCase = "clear";
     }
 
 
-    if ((x - pair.moving.x) ** 2 + (y - pair.moving.y) ** 2 < pair.moving.rad ** 2) {
-        mselect = true;
+    if (y > canvas.height * (1 - uiHeight) & x < canvas.width * 1 / 4) {
+        mselect = "rat";
+        rat0 = pair.moving.rat;
+    }
+    else if (y > canvas.height * (1 - uiHeight) & x > canvas.width * 3 / 4) {
+        mselect = "movTeeth";
+        movTeeth0 = pair.moving.teeth;
+    }
+    else if ((x - pair.moving.x) ** 2 + (y - pair.moving.y) ** 2 < pair.moving.rad ** 2) {
+        mselect = "moving";
     }
     else {
-        mselect = false;
+        mselect = null;
     }
     mouseDown = true;
     thDragSt = Math.atan2(y - pair.fixed.y, x - pair.fixed.x);
 }
 
 function pointerMoveHandler(x, y) {
-    if (mouseDown & mselect & !pair.auto) {
+    if (mouseDown & mselect == "moving" & !pair.auto) {
         dthDrag = Math.atan2(y - pair.fixed.y, x - pair.fixed.x) - thDragSt;
         if (dthDrag < Math.PI) {
             dthDrag += PI2;
@@ -273,21 +291,47 @@ function pointerMoveHandler(x, y) {
         pair.roll(pair.th + dthDrag);
         thDragSt = Math.atan2(y - pair.fixed.y, x - pair.fixed.x);
     }
+    if (mouseDown & mselect == "rat") {
+        // console.log("adj rat")
+        pair.moving.rat = Math.min(1, Math.max(rat0 - (y - cursor.y) / 200, 0))
+    }
+    if (mouseDown & mselect == "movTeeth") {
+        // console.log("adj rat")
+        pair.penDown=false;
+        pair.moving.teeth = Math.round(Math.min(pair.fixed.innerTeeth - 1, Math.max(movTeeth0 - (y - cursor.y) / 10, 10)));
+        pair.moving.circ = pair.moving.teeth * pixPertooth;
+        pair.moving.rad = pair.moving.circ / PI2;
+        pair.move(pair.th);
+        pair.trace.push(new Point(NaN,NaN));
+        pair.penDown = true;
+    }
 }
 
 function doubleClickHandler(dblClickCase) {
-    if (dblClickCase < 2) {
-        pair.auto = !pair.auto
-        if (dblClickCase) {
-            pair.auto = -pair.auto;
-        }
+    console.log(dblClickCase)
+    if ((dblClickCase == "autoCCW" || dblClickCase == "autoCW") & pair.auto != 0) {
+        pair.auto = 0;
     }
-    if (dblClickCase == 2) {
+    else if (dblClickCase == "autoCCW") {
+        console.log('action')
+        pair.auto = -1;
+    }
+    else if (dblClickCase == "autoCW") {
+        // console.log('autoCW')
+        pair.auto = 1;
+    }
+    if (dblClickCase == "hideUI") {
         showWheels = !showWheels;
     }
-    if (dblClickCase == 3) {
-
+    if (dblClickCase == "toEnd") {
         pair.fullRoll();
+    }
+    if (dblClickCase == "toStart") {
+        pair.roll(0);
+    }
+    if (dblClickCase == "clear") {
+        pair.trace = []
+        pair.move(pair.th);
     }
 
 }
@@ -295,7 +339,7 @@ function doubleClickHandler(dblClickCase) {
 function calcLCM(a, b) {
     // higher number among number1 and number2 is stored in min
     let min = (a > b) ? a : b;
-    while (min<10000) {
+    while (min < 10000) {
         if (min % a == 0 && min % b == 0) {
             // console.log(`The LCM of ${num1} and ${num2} is ${min}`);
             return (min);
@@ -303,6 +347,18 @@ function calcLCM(a, b) {
         }
         min++;
     }
+}
+
+function drawUI() {
+    ctx.strokeStyle = "rgb(200,50,100)"
+    ctx.beginPath()
+    ctx.moveTo(0, uiHeight * canvas.height);
+    ctx.lineTo(canvas.width, uiHeight * canvas.height);
+    ctx.stroke();
+    ctx.beginPath()
+    ctx.moveTo(0, (1 - uiHeight) * canvas.height);
+    ctx.lineTo(canvas.width, (1 - uiHeight) * canvas.height);
+    ctx.stroke();
 }
 
 
