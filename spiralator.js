@@ -97,12 +97,21 @@ class Pair {
         this.moving = moving;
         this.th = 0;
         this.auto = 0;
-        this.trace = []
-        this.penDown = true;
-
+        this.trace = [];
+        this.traces = [];
+        this.tracing = true;
         this.move(this.th);
     }
 
+    penUp() {
+        this.tracing = false;
+        this.traces.push(this.trace);
+        this.trace = [];
+    }
+    penDown() {
+        this.tracing = true;
+        this.move(this.th);
+    }
     update() {
         this.move(this.th + dth * this.auto);
     }
@@ -113,7 +122,7 @@ class Pair {
         m.y = f.y + (f.innerRad - m.rad) * Math.sin(th);
         m.th = m.th0 - th * (f.innerRad / m.rad - 1)
         this.th = th;
-        if (this.penDown) {
+        if (this.tracing) {
             this.trace.push(this.tracePoint());
         }
     }
@@ -152,14 +161,19 @@ class Pair {
         let y = m.y + Math.sin(m.th0 + m.th) * (m.rad * m.rat)
         return (new Point(x, y));
     }
-    drawTrace() {
+    drawTrace(trace) {
         ctx.beginPath();
         ctx.strokeStyle = "rgb(200,50,100)"
-        ctx.moveTo(this.trace[0].x, this.trace[0].y);
-        this.trace.forEach(point => {
+        ctx.moveTo(trace[0].x, trace[0].y);
+        trace.forEach(point => {
             ctx.lineTo(point.x, point.y);
         })
         ctx.stroke();
+    }
+    drawTraces() {
+        this.traces.forEach(trace => {
+            this.drawTrace(trace);
+        })
     }
 
 }
@@ -194,7 +208,8 @@ function anim() {
     if (pair.auto) {
         pair.update();
     }
-    pair.drawTrace();
+    pair.drawTrace(pair.trace);
+    pair.drawTraces();
     if (showWheels) {
         pair.fixed.draw();
         pair.moving.draw();
@@ -293,17 +308,18 @@ function pointerMoveHandler(x, y) {
     }
     if (mouseDown & mselect == "rat") {
         // console.log("adj rat")
+        pair.penUp();
         pair.moving.rat = Math.min(1, Math.max(rat0 - (y - cursor.y) / 200, 0))
+        pair.penDown();
     }
     if (mouseDown & mselect == "movTeeth") {
         // console.log("adj rat")
-        pair.penDown=false;
+        pair.penUp();
         pair.moving.teeth = Math.round(Math.min(pair.fixed.innerTeeth - 1, Math.max(movTeeth0 - (y - cursor.y) / 10, 10)));
         pair.moving.circ = pair.moving.teeth * pixPertooth;
         pair.moving.rad = pair.moving.circ / PI2;
         pair.move(pair.th);
-        pair.trace.push(new Point(NaN,NaN));
-        pair.penDown = true;
+        pair.penDown();
     }
 }
 
