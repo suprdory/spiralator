@@ -15,6 +15,8 @@ class Ring {
         this.y = cursor.y;
         this.innerCirc = innerTeeth * pixPertooth;
         this.outerCirc = outerTeeth * pixPertooth;
+        this.innerTeeth = innerTeeth;
+        this.outerTeeth = outerTeeth;
         this.innerRad = this.innerCirc / PI2;
         this.outerRad = this.outerCirc / PI2;
         this.rat = rat;
@@ -41,10 +43,10 @@ class Disk {
     constructor(
         teeth = 84,
         rat = 0.75,
-
     ) {
         this.x = cursor.x;
         this.y = cursor.y;
+        this.teeth=teeth;
         this.circ = teeth * pixPertooth;
         this.rad = this.circ / PI2;
         this.color = 'white';
@@ -111,6 +113,35 @@ class Pair {
         this.th = th;
         this.trace.push(this.tracePoint());
     }
+    roll(th) {
+        if (Math.abs(th - this.th) < dth) {
+            // normal move, increment is safely small
+            this.move(th)
+        }
+        else {
+            // move in units of dth
+            let n = (th - this.th) / dth;
+            // console.log(n);
+
+            if (n > 0) {
+                for (let i = 1; i < n; i++) {
+                    this.move(this.th + dth);
+                }
+                this.move(this.th + (n - Math.floor(n)) * dth);
+            }
+            else {
+                for (let i = 1; i < -n; i++) {
+                    this.move(this.th - dth);
+                }
+                this.move(this.th - (Math.ceil(n) - n) * dth);
+            }
+        }
+    }
+    fullRoll() {
+        console.log(this.fixed)
+        this.roll(PI2*calcLCM(this.fixed.innerTeeth,this.moving.teeth)/this.fixed.innerTeeth);
+    }
+
     tracePoint() {
         let m = this.moving;
         let x = m.x + Math.cos(m.th0 + m.th) * (m.rad * m.rat)
@@ -128,14 +159,7 @@ class Pair {
     }
 
 }
-// function makeArr(startValue, stopValue, cardinality) {
-//     var arr = [];
-//     var step = (stopValue - startValue) / (cardinality - 1);
-//     for (var i = 0; i < cardinality; i++) {
-//         arr.push(startValue + (step * i));
-//     }
-//     return arr;
-// }
+
 
 let date = new Date();
 let dblClickCase = 0;
@@ -189,7 +213,6 @@ addEventListener('mousemove', e => {
 addEventListener('mouseup', e => {
     mouseDown = false;
 });
-
 addEventListener("touchstart", e => {
     e.preventDefault();
     pointerDownHandler(e.touches[0].clientX, e.touches[0].clientY);
@@ -202,7 +225,6 @@ addEventListener("touchmove", e => {
 },
     { passive: false }
 );
-
 
 function pointerDownHandler(x, y) {
     let now = new Date().getTime();
@@ -224,6 +246,10 @@ function pointerDownHandler(x, y) {
     if (y < canvas.height * 1 / 4 & x < canvas.width * 1 / 4) {
         dblClickCase = 2;
     }
+    if (y < canvas.height * 1 / 4 & x > canvas.width * 3 / 4) {
+        dblClickCase = 3;
+    }
+
 
     if ((x - pair.moving.x) ** 2 + (y - pair.moving.y) ** 2 < pair.moving.rad ** 2) {
         mselect = true;
@@ -233,16 +259,10 @@ function pointerDownHandler(x, y) {
     }
     mouseDown = true;
     thDragSt = Math.atan2(y - pair.fixed.y, x - pair.fixed.x);
-    // console.log(mselect)
-    // if (basex < 2) {
-    //     th0 = baseArray[basex].th;
-    //     sp0 = baseArray[basex].sp;
-    // }
 }
 
 function pointerMoveHandler(x, y) {
     if (mouseDown & mselect & !pair.auto) {
-        // console.log('moving!')
         dthDrag = Math.atan2(y - pair.fixed.y, x - pair.fixed.x) - thDragSt;
         if (dthDrag < Math.PI) {
             dthDrag += PI2;
@@ -250,15 +270,9 @@ function pointerMoveHandler(x, y) {
         if (dthDrag > Math.PI) {
             dthDrag -= PI2;
         }
-        pair.move(pair.th + dthDrag);
+        pair.roll(pair.th + dthDrag);
         thDragSt = Math.atan2(y - pair.fixed.y, x - pair.fixed.x);
     }
-    // if (basex < 2) {
-    //     dth = (x - cursor.x) * dth_sens
-    //     baseArray[basex].th = th0 + dth;
-    //     dsp = (y - cursor.y) * -dsp_sens
-    //     baseArray[basex].sp = Math.max(0, Math.min(sp0 + dsp, maxspeed))
-    // }
 }
 
 function doubleClickHandler(dblClickCase) {
@@ -271,4 +285,24 @@ function doubleClickHandler(dblClickCase) {
     if (dblClickCase == 2) {
         showWheels = !showWheels;
     }
+    if (dblClickCase == 3) {
+
+        pair.fullRoll();
+    }
+
 }
+
+function calcLCM(a, b) {
+    // higher number among number1 and number2 is stored in min
+    let min = (a > b) ? a : b;
+    while (min<10000) {
+        if (min % a == 0 && min % b == 0) {
+            // console.log(`The LCM of ${num1} and ${num2} is ${min}`);
+            return (min);
+            // break;
+        }
+        min++;
+    }
+}
+
+
