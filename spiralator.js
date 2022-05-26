@@ -414,7 +414,7 @@ function pointerMoveHandler(x, y) {
             pair.hue += 360;
         }
 
-        pair.lightness = Math.max(0, Math.min(100, lightness0 + (x - cursor.x) / 3));
+        pair.lightness = Math.max(00, Math.min(100, lightness0 + (x - cursor.x) / 4));
         pair.setColor();
         pair.fixed.color = pair.color;
         pair.moving.color = pair.color;
