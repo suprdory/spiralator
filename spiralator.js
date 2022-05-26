@@ -162,14 +162,26 @@ class Pair {
             this.trace.points.push(this.traces.slice(-1)[0].points.slice(-1)[0])
         }
     }
-
-
     penDown() {
         this.tracing = true;
     }
     update() {
         this.move(this.th + dth * this.auto);
     }
+    nudge(n){
+        this.penUp()
+        let thInc = -n * PI2 / this.fixed.innerTeeth;
+        this.moving.th0 += thInc * this.fixed.innerRad / this.moving.rad;
+        this.move(this.th+thInc);
+        this.penDown()
+    }
+    reset() {
+        this.penUp()
+        this.moving.th0 = 0;
+        this.move(0);
+        this.penDown()
+    }
+
     move(th) {
         let f = this.fixed;
         let m = this.moving;
@@ -207,20 +219,20 @@ class Pair {
     }
     fullRoll() {
         // console.log(this.fixed)
-        this.roll(PI2 * calcLCM(this.fixed.innerTeeth, this.moving.teeth) / this.fixed.innerTeeth);
+        this.roll(this.th+PI2 * calcLCM(this.fixed.innerTeeth, this.moving.teeth) / this.fixed.innerTeeth);
     }
     fullTrace() {
         this.trace = new Trace(this);
-        this.penUp();
-        this.move(0);
-        this.penDown();
+        // this.penUp();
+        // this.move(0);
+        // this.penDown();
         this.fullRoll();
-        this.move(0);
+        // this.move(0);
     }
     tracePoint() {
         let m = this.moving;
-        let x = m.x + Math.cos(m.th0 + m.th) * (m.rad * m.rat)
-        let y = m.y + Math.sin(m.th0 + m.th) * (m.rad * m.rat)
+        let x = m.x + Math.cos(m.th) * (m.rad * m.rat)
+        let y = m.y + Math.sin(m.th) * (m.rad * m.rat)
         return (new Point(x, y));
     }
     drawTrace(trace) {
@@ -240,9 +252,6 @@ class Pair {
         })
     }
     clear() {
-        // console.log("Clearing")
-        // console.log('trace:', this.trace);
-        // console.log('traces:', this.traces);
         if (this.trace.points.length > 0) {
             // console.log("Clear current trace")
             this.trace = new Trace(this);
@@ -251,6 +260,11 @@ class Pair {
             // console.log("Clear last trace")
             this.traces.pop();
             // this.traces=this.traces.splice(-1);
+        }
+    }
+    clearAll(){
+        while(this.traces.length>0){
+            this.clear();
         }
     }
 }
@@ -293,35 +307,43 @@ function pointerDownHandler(x, y) {
     let timeSince = now - lastTouch;
     if (timeSince < 300) {
         //double touch
-        doubleClickHandler(dblClickCase);
+        doubleClickHandler(clickCase);
     }
     lastTouch = new Date().getTime()
     cursor.x = x;
     cursor.y = y;
 
     if (y > .5 * Y & y < (1 - uiY) * Y) {
-        dblClickCase = "autoCW";
+        clickCase = "autoCW";
     }
     else if (y > uiY * Y & y < 0.5 * Y) {
-        dblClickCase = "autoCCW";
+        clickCase = "autoCCW";
     }
     else if (y < Y * uiY & x < X * .25) {
-        dblClickCase = "hideUI";
+        clickCase = "hideUI";
     }
     else if (y < Y * uiY & x > X * .75) {
-        dblClickCase = "fullTrace";
+        clickCase = "fullTrace";
     }
-    else if (y < Y * uiY & x > X * .5 & x < X * .75) {
-        dblClickCase = "toStart";
+    else if (y < Y * uiY / 3 & x > X * .5 & x < X * .75) {
+        clickCase = "toStart";
     }
-    else if (y < Y * uiY & x > X * .25 & x < X * .5) {
-        dblClickCase = "clear";
+    else if (y > Y * uiY / 3 & y < Y * uiY * 2 / 3 & x > X * .5 & x < X * .75) {
+        clickCase = "nudgeUp";
     }
-    else if (y < Y * uiY & x > X * .5 & x < X * .75) {
-        dblClickCase = "color";
+    else if (y > Y * uiY * 2 / 3 & y < Y * uiY * 3 / 3 & x > X * .5 & x < X * .75) {
+        clickCase = "nudgeDown";
+    }
+
+
+    else if (y > Y * uiY / 3 & y < Y * uiY & x > X * .25 & x < X * .5) {
+        clickCase = "clear";
+    }
+    else if (y < Y * uiY / 3 & x > X * .25 & x < X * .5) {
+        clickCase = "clearAll";
     }
     else {
-        dblClickCase = null;
+        clickCase = null;
     }
 
 
@@ -342,6 +364,8 @@ function pointerDownHandler(x, y) {
     }
     else if (y > Y * (1 - uiY) & x > X * .75 & x < 1.0 * X) {
         mselect = "color";
+        pair.fixed.color = pair.color;
+        pair.moving.color = pair.color;
         hue0 = pair.hue;
         lightness0 = pair.lightness;
         showColInfo = true;
@@ -406,8 +430,8 @@ function pointerMoveHandler(x, y) {
         // showWheelsOverride = true;
         pair.penUpCont();
         pair.hue = hue0 - (y - cursor.y) / 2;
-        if (pair.hue > 360){
-            pair.hue-=360;
+        if (pair.hue > 360) {
+            pair.hue -= 360;
         }
         if (pair.hue < 0) {
             pair.hue += 360;
@@ -433,32 +457,40 @@ function pointerUpHandler() {
     pair.moving.color = wheelColor;
 
 }
-function doubleClickHandler(dblClickCase) {
-    console.log(dblClickCase)
-    if ((dblClickCase == "autoCCW" || dblClickCase == "autoCW") & pair.auto != 0) {
+function doubleClickHandler(clickCase) {
+    console.log(clickCase)
+    if ((clickCase == "autoCCW" || clickCase == "autoCW") & pair.auto != 0) {
         pair.auto = 0;
     }
-    else if (dblClickCase == "autoCCW") {
+    else if (clickCase == "autoCCW") {
         pair.auto = -1;
     }
-    else if (dblClickCase == "autoCW") {
+    else if (clickCase == "autoCW") {
         pair.auto = 1;
     }
-    if (dblClickCase == "hideUI") {
+    if (clickCase == "hideUI") {
         showUI = !showUI;
         showWheels = !showWheels;
     }
-    if (dblClickCase == "fullTrace") {
+    if (clickCase == "fullTrace") {
         pair.fullTrace();
     }
-    if (dblClickCase == "toStart") {
-        pair.penUp();
-        pair.move(0);
-        pair.penDown();
+    if (clickCase == "toStart") {
+        pair.reset();
     }
-    if (dblClickCase == "clear") {
+    if (clickCase == "clear") {
         pair.clear();
     }
+    if (clickCase == "clearAll") {
+        pair.clearAll();
+    }
+    if (clickCase == "nudgeUp") {
+        pair.nudge(1);
+    }
+    if (clickCase == "nudgeDown") {
+        pair.nudge(-1);
+    }
+
 
 }
 function calcLCM(a, b) { //lowest common multiple
@@ -470,7 +502,6 @@ function calcLCM(a, b) { //lowest common multiple
         min++;
     }
 }
-
 function drawUI() {
     // ctx.strokeStyle = this.fixed.color;
     // ctx.fillStyle = this.fixed.color;
@@ -486,6 +517,16 @@ function drawUI() {
     ctx.beginPath()
     ctx.moveTo(0, (1 - uiY) * Y);
     ctx.lineTo(X, (1 - uiY) * Y);
+    ctx.stroke();
+
+    ctx.beginPath()
+    ctx.moveTo(0.25 * X, uiY / 3 * Y);
+    ctx.lineTo(0.75 * X, uiY / 3 * Y);
+    ctx.stroke();
+
+    ctx.beginPath()
+    ctx.moveTo(0.5 * X, 2 * uiY / 3 * Y);
+    ctx.lineTo(0.75 * X, 2 * uiY / 3 * Y);
     ctx.stroke();
 
     ctx.beginPath()
@@ -516,9 +557,14 @@ function drawUI() {
     ctx.stroke();
 
     ctx.fillStyle = uiTextColor;
-    ctx.fillText('Hide/Show', (0.25 - 0.125) * X, uiY * Y / 2)
-    ctx.fillText('Clear', (0.50 - 0.125) * X, uiY * Y / 2)
-    ctx.fillText('Reset', (0.75 - 0.125) * X, uiY * Y / 2)
+    ctx.fillText('Hide/Show', (0.25 - 0.125) * X, uiY * Y * 0.5)
+    ctx.fillText('Clear', (0.50 - 0.125) * X, uiY * .333 * Y + .666 * uiY * Y * .5)
+    ctx.fillText('Clear All', (0.50 - 0.125) * X, uiY * .333 * Y * .5)
+
+    ctx.fillText('Reset', (0.75 - 0.125) * X, uiY * Y * 0 + uiY * Y / 6)
+    ctx.fillText('Nudge +', (0.75 - 0.125) * X, uiY * Y * .333 + uiY * Y / 6)
+    ctx.fillText('Nudge -', (0.75 - 0.125) * X, uiY * Y * .666 + uiY * Y / 6)
+
     ctx.fillText('Trace', (1 - 0.125) * X, uiY * Y / 2)
 
     ctx.fillText('Draw Radius', (0.25 - 0.125) * X, (1 - uiY / 2) * Y)
@@ -527,7 +573,6 @@ function drawUI() {
     ctx.fillText('Colour', (1 - 0.125) * X, (1 - uiY / 2) * Y)
 
 }
-
 function anim() {
     requestAnimationFrame(anim);
     ctx.fillStyle = bgFillStyle;
@@ -565,7 +610,7 @@ const cursor = {
     x: innerWidth / 2,
     y: innerHeight / 2,
 };
-let dblClickCase = null;
+let clickCase = null;
 let mouseDown = false;
 let lastTouch = new Date().getTime();
 let thDragSt = 0;
@@ -596,7 +641,7 @@ let X = canvas.width;
 let Y = canvas.height;
 const uiY = 0.2;
 
-let disk = new Disk(56, 0.70)
+let disk = new Disk(70, 0.70)
 let ring = new Ring(105, 15);
 let pair = new Pair(ring, disk)
 
