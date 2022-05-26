@@ -153,13 +153,12 @@ class Pair {
     }
     penUpCont() { //for continuity between traces, start next trace with last point of previous
         this.tracing = false;
-        if (this.trace.points.length > 1) {
+        let cont = this.trace.points.length > 1;
+        if (cont) {
             this.traces.push(this.trace);
-            // this.traces[-1]
         }
         this.trace = new Trace(this);
-        // console.log(this.traces.slice(-1)[0].points.slice(-1)[0])
-        if (this.traces.length > 0) {
+        if (cont & (this.traces.length > 0)) {
             this.trace.points.push(this.traces.slice(-1)[0].points.slice(-1)[0])
         }
     }
