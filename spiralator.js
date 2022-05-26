@@ -1,10 +1,4 @@
-const canvas = document.getElementById("cw");
-const ctx = canvas.getContext("2d");
-const PI2 = Math.PI * 2;
-const cursor = {
-    x: innerWidth / 2,
-    y: innerHeight / 2,
-};
+
 class Ring {
     constructor(
         innerTeeth = 105,
@@ -27,7 +21,6 @@ class Ring {
     }
     draw() {
 
-        ctx.fillStyle = this.color;
         ctx.strokeStyle = this.color;
         ctx.lineWidth = this.lw;
 
@@ -91,11 +84,11 @@ class Point {
     }
 }
 class Trace {
-constructor(pair){
-    this.points=[];
-    this.color="hsl("+ pair.hue +",100%,"+pair.lightness+"%)";
-    this.thickness=1;
-}
+    constructor(pair) {
+        this.points = [];
+        this.color = "hsl(" + pair.hue + "," + pair.saturation + "%," + pair.lightness + "%)";
+        this.thickness = 1;
+    }
 }
 class Pair {
     constructor(fixed, moving) {
@@ -103,17 +96,18 @@ class Pair {
         this.moving = moving;
         this.th = 0;
         this.auto = 0;
-        this.hue = 200;
-        this.lightness=50;
-        this.saturation=100;
+        this.hue = hueInit;
+        this.saturation = 100;
+        this.lightness = 65;
+
         this.setColor();
         this.trace = new Trace(this);
         this.traces = [];
         this.tracing = true;
         this.move(this.th);
     }
-    setColor(){
-        this.color="hsl(" + this.hue + "," + this.saturation + "%," + this.lightness + "%)"
+    setColor() {
+        this.color = "hsl(" + this.hue + "," + this.saturation + "%," + this.lightness + "%)"
     }
 
     drawRadInfo() {
@@ -121,7 +115,7 @@ class Pair {
         ctx.fillStyle = this.fixed.color;
         ctx.textAlign = "center";
         ctx.font = txtSize + 'px sans-serif';
-        ctx.textBaseline = "middle";  
+        ctx.textBaseline = "middle";
         ctx.fillText(Math.round(this.moving.rat * this.moving.teeth), this.fixed.x - txtSize, this.fixed.y);
     }
     drawColInfo() {
@@ -157,6 +151,20 @@ class Pair {
         }
         this.trace = new Trace(this);
     }
+    penUpCont() { //for continuity between traces, start next trace with last point of previous
+        this.tracing = false;
+        if (this.trace.points.length > 1) {
+            this.traces.push(this.trace);
+            // this.traces[-1]
+        }
+        this.trace = new Trace(this);
+        // console.log(this.traces.slice(-1)[0].points.slice(-1)[0])
+        if (this.traces.length > 0) {
+            this.trace.points.push(this.traces.slice(-1)[0].points.slice(-1)[0])
+        }
+    }
+
+
     penDown() {
         this.tracing = true;
     }
@@ -219,10 +227,7 @@ class Pair {
     drawTrace(trace) {
         if (trace.points.length > 0) {
             ctx.beginPath();
-            // console.log(trace.color)
             ctx.strokeStyle = trace.color;
-            // ctx.strokeStyle = "green";
-            // ctx.lineWidth = trace.thickness;
             ctx.moveTo(trace.points[0].x, trace.points[0].y);
             trace.points.forEach(point => {
                 ctx.lineTo(point.x, point.y);
@@ -336,7 +341,7 @@ function pointerDownHandler(x, y) {
         movTeeth0 = pair.fixed.innerTeeth;
         showInfo = true;
     }
-    else if (y > Y * (1 - uiY) & x > X * .75 & x <1.0 * X) {
+    else if (y > Y * (1 - uiY) & x > X * .75 & x < 1.0 * X) {
         mselect = "color";
         hue0 = pair.hue;
         lightness0 = pair.lightness;
@@ -368,7 +373,7 @@ function pointerMoveHandler(x, y) {
         thDragSt = Math.atan2(y - pair.fixed.y, x - pair.fixed.x);
     }
     if (mouseDown & mselect == "rat") {
-        showWheelsOverride=true;
+        showWheelsOverride = true;
         pair.penUp();
         pair.moving.rat = Math.min(1, Math.max(rat0 - (y - cursor.y) / 200, 0))
         pair.penDown();
@@ -400,21 +405,33 @@ function pointerMoveHandler(x, y) {
     }
     if (mouseDown & mselect == "color") {
         // showWheelsOverride = true;
-        pair.penUp();
-        pair.hue = Math.max(0,Math.min(360,hue0 - (y - cursor.y) / 2));
-        pair.lightness = Math.max(0,Math.min(100, lightness0 + (x - cursor.x) / 3));
+        pair.penUpCont();
+        pair.hue = hue0 - (y - cursor.y) / 2;
+        if (pair.hue > 360){
+            pair.hue-=360;
+        }
+        if (pair.hue < 0) {
+            pair.hue += 360;
+        }
+
+        pair.lightness = Math.max(0, Math.min(100, lightness0 + (x - cursor.x) / 3));
         pair.setColor();
+        pair.fixed.color = pair.color;
+        pair.moving.color = pair.color;
+        uiColor = pair.color;
         pair.move(pair.th);
         pair.penDown();
     }
 
 }
-function pointerUpHandler(){
-    mouseDown=false;
-    showWheelsOverride=false;
-    showInfo=false;
-    showRadInfo=false;
-    showColInfo=false;
+function pointerUpHandler() {
+    mouseDown = false;
+    showWheelsOverride = false;
+    showInfo = false;
+    showRadInfo = false;
+    showColInfo = false;
+    pair.fixed.color = wheelColor;
+    pair.moving.color = wheelColor;
 
 }
 function doubleClickHandler(dblClickCase) {
@@ -445,7 +462,6 @@ function doubleClickHandler(dblClickCase) {
     }
 
 }
-
 function calcLCM(a, b) { //lowest common multiple
     let min = (a > b) ? a : b;
     while (min < 1000000) {
@@ -463,7 +479,7 @@ function drawUI() {
     ctx.font = txtSize / 2 + 'px sans-serif';
     ctx.textBaseline = "middle";
 
-    ctx.strokeStyle = "rgb(200,50,100)"
+    ctx.strokeStyle = pair.color;
     ctx.beginPath()
     ctx.moveTo(0, uiY * Y);
     ctx.lineTo(X, uiY * Y);
@@ -500,7 +516,7 @@ function drawUI() {
     ctx.lineTo(0.75 * X, (1 - uiY) * Y);
     ctx.stroke();
 
-
+    ctx.fillStyle = uiTextColor;
     ctx.fillText('Hide/Show', (0.25 - 0.125) * X, uiY * Y / 2)
     ctx.fillText('Clear', (0.50 - 0.125) * X, uiY * Y / 2)
     ctx.fillText('Reset', (0.75 - 0.125) * X, uiY * Y / 2)
@@ -517,10 +533,10 @@ function anim() {
     requestAnimationFrame(anim);
     ctx.fillStyle = bgFillStyle;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    if (pair.auto) {
+    if (pair.auto & !showColInfo & !showInfo & !showRadInfo) {
         pair.update();
     }
- 
+
     pair.drawTraces();
     pair.drawTrace(pair.trace);
     if (showWheels | showWheelsOverride) {
@@ -543,24 +559,36 @@ function anim() {
 
 }
 
+const canvas = document.getElementById("cw");
+const ctx = canvas.getContext("2d");
+const PI2 = Math.PI * 2;
+const cursor = {
+    x: innerWidth / 2,
+    y: innerHeight / 2,
+};
 let dblClickCase = null;
 let mouseDown = false;
 let lastTouch = new Date().getTime();
 let thDragSt = 0;
 let dthDrag = 0;
 let showWheels = true;
-let showWheelsOverride=false;
+let showWheelsOverride = false;
 let showUI = true;
 let rat0;
+let hue0;
+let lightness0;
 let movTeeth0;
 let showInfo = false;
-let showRadInfo=false;
-let showColInfo=false;
+let showRadInfo = false;
+let showColInfo = false;
 
 
 const txtSize = 30;
-const bgFillStyle = "rgb(50,20,30)";
-const traceStyle = "rgb(200,50,100)";
+const hueInit = Math.random() * 360
+const bgFillStyle = "hsl(" + hueInit + ",100%,5%)";
+const wheelColor = "white"
+const uiTextColor = "white"
+
 const pixPertooth = 9;
 const dth = PI2 / 100;
 canvas.height = innerHeight;
@@ -572,5 +600,7 @@ const uiY = 0.2;
 let disk = new Disk(56, 0.70)
 let ring = new Ring(105, 15);
 let pair = new Pair(ring, disk)
+
+// console.log(hueInit,bgFillStyle,pair.color)
 
 anim();
