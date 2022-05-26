@@ -39,7 +39,6 @@ class Ring {
         ctx.stroke();
     }
 }
-
 class Disk {
     constructor(
         teeth = 84,
@@ -91,16 +90,30 @@ class Point {
         this.y = y;
     }
 }
+class Trace {
+constructor(pair){
+    this.points=[];
+    this.color="hsl("+ pair.hue +",100%,"+pair.lightness+"%)";
+    this.thickness=1;
+}
+}
 class Pair {
     constructor(fixed, moving) {
         this.fixed = fixed;
         this.moving = moving;
         this.th = 0;
         this.auto = 0;
-        this.trace = [];
+        this.hue = 200;
+        this.lightness=50;
+        this.saturation=100;
+        this.setColor();
+        this.trace = new Trace(this);
         this.traces = [];
         this.tracing = true;
         this.move(this.th);
+    }
+    setColor(){
+        this.color="hsl(" + this.hue + "," + this.saturation + "%," + this.lightness + "%)"
     }
 
     drawRadInfo() {
@@ -111,6 +124,16 @@ class Pair {
         ctx.textBaseline = "middle";  
         ctx.fillText(Math.round(this.moving.rat * this.moving.teeth), this.fixed.x - txtSize, this.fixed.y);
     }
+    drawColInfo() {
+        ctx.strokeStyle = this.color;
+        ctx.fillStyle = this.color;
+        ctx.textAlign = "center";
+        ctx.font = txtSize + 'px sans-serif';
+        ctx.textBaseline = "middle";
+        ctx.fillText(Math.round(this.hue), this.fixed.x - txtSize, this.fixed.y);
+        ctx.fillText(Math.round(this.lightness), this.fixed.x + txtSize, this.fixed.y);
+    }
+
     drawInfo() {
         ctx.strokeStyle = this.fixed.color;
         ctx.fillStyle = this.fixed.color;
@@ -129,10 +152,10 @@ class Pair {
 
     penUp() {
         this.tracing = false;
-        if (this.trace.length > 1) {
+        if (this.trace.points.length > 1) {
             this.traces.push(this.trace);
         }
-        this.trace = [];
+        this.trace = new Trace(this);
     }
     penDown() {
         this.tracing = true;
@@ -148,7 +171,7 @@ class Pair {
         m.th = m.th0 - th * (f.innerRad / m.rad - 1)
         this.th = th;
         if (this.tracing) {
-            this.trace.push(this.tracePoint());
+            this.trace.points.push(this.tracePoint());
         }
     }
     roll(th) {
@@ -180,7 +203,7 @@ class Pair {
         this.roll(PI2 * calcLCM(this.fixed.innerTeeth, this.moving.teeth) / this.fixed.innerTeeth);
     }
     fullTrace() {
-        this.trace = [];
+        this.trace = new Trace(this);
         this.penUp();
         this.move(0);
         this.penDown();
@@ -194,11 +217,14 @@ class Pair {
         return (new Point(x, y));
     }
     drawTrace(trace) {
-        if (trace.length > 0) {
+        if (trace.points.length > 0) {
             ctx.beginPath();
-            ctx.strokeStyle = traceStyle;
-            ctx.moveTo(trace[0].x, trace[0].y);
-            trace.forEach(point => {
+            // console.log(trace.color)
+            ctx.strokeStyle = trace.color;
+            // ctx.strokeStyle = "green";
+            // ctx.lineWidth = trace.thickness;
+            ctx.moveTo(trace.points[0].x, trace.points[0].y);
+            trace.points.forEach(point => {
                 ctx.lineTo(point.x, point.y);
             })
             ctx.stroke();
@@ -213,9 +239,9 @@ class Pair {
         // console.log("Clearing")
         // console.log('trace:', this.trace);
         // console.log('traces:', this.traces);
-        if (this.trace.length > 0) {
+        if (this.trace.points.length > 0) {
             // console.log("Clear current trace")
-            this.trace = []
+            this.trace = new Trace(this);
         }
         else if (this.traces.length > 0) {
             // console.log("Clear last trace")
@@ -310,6 +336,12 @@ function pointerDownHandler(x, y) {
         movTeeth0 = pair.fixed.innerTeeth;
         showInfo = true;
     }
+    else if (y > Y * (1 - uiY) & x > X * .75 & x <1.0 * X) {
+        mselect = "color";
+        hue0 = pair.hue;
+        lightness0 = pair.lightness;
+        showColInfo = true;
+    }
 
     else if ((x - pair.moving.x) ** 2 + (y - pair.moving.y) ** 2 < pair.moving.rad ** 2) {
         mselect = "moving";
@@ -366,6 +398,15 @@ function pointerMoveHandler(x, y) {
         pair.move(pair.th);
         pair.penDown();
     }
+    if (mouseDown & mselect == "color") {
+        // showWheelsOverride = true;
+        pair.penUp();
+        pair.hue = Math.max(0,Math.min(360,hue0 - (y - cursor.y) / 2));
+        pair.lightness = Math.max(0,Math.min(100, lightness0 + (x - cursor.x) / 3));
+        pair.setColor();
+        pair.move(pair.th);
+        pair.penDown();
+    }
 
 }
 function pointerUpHandler(){
@@ -373,6 +414,7 @@ function pointerUpHandler(){
     showWheelsOverride=false;
     showInfo=false;
     showRadInfo=false;
+    showColInfo=false;
 
 }
 function doubleClickHandler(dblClickCase) {
@@ -467,7 +509,7 @@ function drawUI() {
     ctx.fillText('Draw Radius', (0.25 - 0.125) * X, (1 - uiY / 2) * Y)
     ctx.fillText('Inner Size', (0.50 - 0.125) * X, (1 - uiY / 2) * Y)
     ctx.fillText('Outer Size', (0.75 - 0.125) * X, (1 - uiY / 2) * Y)
-    ctx.fillText('', (1 - 0.125) * X, (1 - uiY / 2) * Y)
+    ctx.fillText('Colour', (1 - 0.125) * X, (1 - uiY / 2) * Y)
 
 }
 
@@ -478,8 +520,9 @@ function anim() {
     if (pair.auto) {
         pair.update();
     }
-    pair.drawTrace(pair.trace);
+ 
     pair.drawTraces();
+    pair.drawTrace(pair.trace);
     if (showWheels | showWheelsOverride) {
         pair.fixed.draw();
         pair.moving.draw();
@@ -492,6 +535,9 @@ function anim() {
     }
     if (showRadInfo) {
         pair.drawRadInfo();
+    }
+    if (showColInfo) {
+        pair.drawColInfo();
     }
 
 
@@ -509,6 +555,7 @@ let rat0;
 let movTeeth0;
 let showInfo = false;
 let showRadInfo=false;
+let showColInfo=false;
 
 
 const txtSize = 30;
