@@ -8,15 +8,16 @@ const cursor = {
 class Ring {
     constructor(
         innerTeeth = 105,
-        outerTeeth = 150,
+        thickness = 15,
         rat = 0.5,
     ) {
         this.x = cursor.x;
         this.y = cursor.y;
+        this.thickness = thickness
         this.innerCirc = innerTeeth * pixPertooth;
-        this.outerCirc = outerTeeth * pixPertooth;
+        this.outerCirc = (innerTeeth + thickness) * pixPertooth;
         this.innerTeeth = innerTeeth;
-        this.outerTeeth = outerTeeth;
+        this.outerTeeth = (innerTeeth + thickness);
         this.innerRad = this.innerCirc / PI2;
         this.outerRad = this.outerCirc / PI2;
         this.rat = rat;
@@ -84,7 +85,6 @@ class Disk {
 
     }
 }
-
 class Point {
     constructor(x, y) {
         this.x = x;
@@ -103,14 +103,39 @@ class Pair {
         this.move(this.th);
     }
 
+    drawRadInfo() {
+        ctx.strokeStyle = this.fixed.color;
+        ctx.fillStyle = this.fixed.color;
+        ctx.textAlign = "center";
+        ctx.font = txtSize + 'px sans-serif';
+        ctx.textBaseline = "middle";  
+        ctx.fillText(Math.round(this.moving.rat * this.moving.teeth), this.fixed.x - txtSize, this.fixed.y);
+    }
+    drawInfo() {
+        ctx.strokeStyle = this.fixed.color;
+        ctx.fillStyle = this.fixed.color;
+        ctx.textAlign = "center";
+        ctx.font = txtSize + 'px sans-serif';
+        ctx.textBaseline = "middle";
+        ctx.fillText(this.fixed.innerTeeth, this.fixed.x - txtSize, this.fixed.y - txtSize * 0.5);
+        ctx.fillText(this.moving.teeth, this.fixed.x - txtSize, this.fixed.y + txtSize * 0.5);
+        ctx.fillText(calcLCM(this.fixed.innerTeeth, this.moving.teeth) / this.moving.teeth, this.fixed.x + txtSize, this.fixed.y);
+
+        ctx.beginPath();
+        ctx.moveTo(this.fixed.x - txtSize * 2, this.fixed.y - txtSize * 0.08);
+        ctx.lineTo(this.fixed.x, this.fixed.y - txtSize * 0.08);
+        ctx.stroke();
+    }
+
     penUp() {
         this.tracing = false;
-        this.traces.push(this.trace);
+        if (this.trace.length > 1) {
+            this.traces.push(this.trace);
+        }
         this.trace = [];
     }
     penDown() {
         this.tracing = true;
-        this.move(this.th);
     }
     update() {
         this.move(this.th + dth * this.auto);
@@ -154,7 +179,14 @@ class Pair {
         // console.log(this.fixed)
         this.roll(PI2 * calcLCM(this.fixed.innerTeeth, this.moving.teeth) / this.fixed.innerTeeth);
     }
-
+    fullTrace() {
+        this.trace = [];
+        this.penUp();
+        this.move(0);
+        this.penDown();
+        this.fullRoll();
+        this.move(0);
+    }
     tracePoint() {
         let m = this.moving;
         let x = m.x + Math.cos(m.th0 + m.th) * (m.rad * m.rat)
@@ -162,61 +194,36 @@ class Pair {
         return (new Point(x, y));
     }
     drawTrace(trace) {
-        ctx.beginPath();
-        ctx.strokeStyle = "rgb(200,50,100)"
-        ctx.moveTo(trace[0].x, trace[0].y);
-        trace.forEach(point => {
-            ctx.lineTo(point.x, point.y);
-        })
-        ctx.stroke();
+        if (trace.length > 0) {
+            ctx.beginPath();
+            ctx.strokeStyle = traceStyle;
+            ctx.moveTo(trace[0].x, trace[0].y);
+            trace.forEach(point => {
+                ctx.lineTo(point.x, point.y);
+            })
+            ctx.stroke();
+        }
     }
     drawTraces() {
         this.traces.forEach(trace => {
             this.drawTrace(trace);
         })
     }
-
-}
-
-let date = new Date();
-let dblClickCase = 0;
-let mouseDown = false;
-let lastTouch = date.getTime();
-let thDragSt = 0;
-let dthDrag = 0;
-let showWheels = true;
-let rat0;
-let movTeeth0;
-
-const uiHeight = 0.2;
-const bgFillStyle = "rgb(50,20,30)";
-const pixPertooth = 9;
-const dth = PI2 / 100;
-canvas.height = innerHeight;
-canvas.width = innerWidth;
-
-
-let disk = new Disk(37, 0.70)
-let ring = new Ring(105, 130);
-let pair = new Pair(ring, disk)
-
-
-function anim() {
-    requestAnimationFrame(anim);
-    ctx.fillStyle = bgFillStyle;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    if (pair.auto) {
-        pair.update();
-    }
-    pair.drawTrace(pair.trace);
-    pair.drawTraces();
-    if (showWheels) {
-        pair.fixed.draw();
-        pair.moving.draw();
-        drawUI();
+    clear() {
+        // console.log("Clearing")
+        // console.log('trace:', this.trace);
+        // console.log('traces:', this.traces);
+        if (this.trace.length > 0) {
+            // console.log("Clear current trace")
+            this.trace = []
+        }
+        else if (this.traces.length > 0) {
+            // console.log("Clear last trace")
+            this.traces.pop();
+            // this.traces=this.traces.splice(-1);
+        }
     }
 }
-anim();
 
 addEventListener("mousedown", e => {
     // e.preventDefault();
@@ -230,7 +237,7 @@ addEventListener('mousemove', e => {
     }
 });
 addEventListener('mouseup', e => {
-    mouseDown = false;
+    pointerUpHandler();
 });
 addEventListener("touchstart", e => {
     e.preventDefault();
@@ -241,6 +248,12 @@ addEventListener("touchstart", e => {
 addEventListener("touchmove", e => {
     e.preventDefault();
     pointerMoveHandler(e.touches[0].clientX, e.touches[0].clientY)
+},
+    { passive: false }
+);
+addEventListener("touchend", e => {
+    e.preventDefault();
+    pointerUpHandler();
 },
     { passive: false }
 );
@@ -256,44 +269,60 @@ function pointerDownHandler(x, y) {
     cursor.x = x;
     cursor.y = y;
 
-    if (y > canvas.height * 1 / 2) {
+    if (y > .5 * Y & y < (1 - uiY) * Y) {
         dblClickCase = "autoCW";
     }
-    if (y < canvas.height * 1 / 2) {
+    else if (y > uiY * Y & y < 0.5 * Y) {
         dblClickCase = "autoCCW";
     }
-    if (y < canvas.height * uiHeight & x < canvas.width * 1 / 4) {
+    else if (y < Y * uiY & x < X * .25) {
         dblClickCase = "hideUI";
     }
-    if (y < canvas.height * uiHeight & x > canvas.width * 3 / 4) {
-        dblClickCase = "toEnd";
+    else if (y < Y * uiY & x > X * .75) {
+        dblClickCase = "fullTrace";
     }
-    if (y < canvas.height * uiHeight & x > canvas.width * 2 / 4 & x < canvas.width * 3 / 4) {
+    else if (y < Y * uiY & x > X * .5 & x < X * .75) {
         dblClickCase = "toStart";
     }
-    if (y < canvas.height * uiHeight & x > canvas.width * 1 / 4 & x < canvas.width * 2 / 4) {
+    else if (y < Y * uiY & x > X * .25 & x < X * .5) {
         dblClickCase = "clear";
     }
+    else if (y < Y * uiY & x > X * .5 & x < X * .75) {
+        dblClickCase = "color";
+    }
+    else {
+        dblClickCase = null;
+    }
 
 
-    if (y > canvas.height * (1 - uiHeight) & x < canvas.width * 1 / 4) {
+    if (y > Y * (1 - uiY) & x < X * .25) {
         mselect = "rat";
         rat0 = pair.moving.rat;
+        showRadInfo = true;
     }
-    else if (y > canvas.height * (1 - uiHeight) & x > canvas.width * 3 / 4) {
+    else if (y > Y * (1 - uiY) & x > X * .25 & x < 0.5 * X) {
         mselect = "movTeeth";
         movTeeth0 = pair.moving.teeth;
+        showInfo = true;
     }
+    else if (y > Y * (1 - uiY) & x > X * .5 & x < 0.75 * X) {
+        mselect = "fixedTeeth";
+        movTeeth0 = pair.fixed.innerTeeth;
+        showInfo = true;
+    }
+
     else if ((x - pair.moving.x) ** 2 + (y - pair.moving.y) ** 2 < pair.moving.rad ** 2) {
         mselect = "moving";
+        showInfo = false;
     }
     else {
         mselect = null;
+        showInfo = false;
+
     }
     mouseDown = true;
     thDragSt = Math.atan2(y - pair.fixed.y, x - pair.fixed.x);
 }
-
 function pointerMoveHandler(x, y) {
     if (mouseDown & mselect == "moving" & !pair.auto) {
         dthDrag = Math.atan2(y - pair.fixed.y, x - pair.fixed.x) - thDragSt;
@@ -307,13 +336,14 @@ function pointerMoveHandler(x, y) {
         thDragSt = Math.atan2(y - pair.fixed.y, x - pair.fixed.x);
     }
     if (mouseDown & mselect == "rat") {
-        // console.log("adj rat")
+        showWheelsOverride=true;
         pair.penUp();
         pair.moving.rat = Math.min(1, Math.max(rat0 - (y - cursor.y) / 200, 0))
         pair.penDown();
+
     }
     if (mouseDown & mselect == "movTeeth") {
-        // console.log("adj rat")
+        showWheelsOverride = true;
         pair.penUp();
         pair.moving.teeth = Math.round(Math.min(pair.fixed.innerTeeth - 1, Math.max(movTeeth0 - (y - cursor.y) / 10, 10)));
         pair.moving.circ = pair.moving.teeth * pixPertooth;
@@ -321,60 +351,179 @@ function pointerMoveHandler(x, y) {
         pair.move(pair.th);
         pair.penDown();
     }
-}
 
+    if (mouseDown & mselect == "fixedTeeth") {
+        showWheelsOverride = true;
+        pair.penUp();
+        pair.fixed.innerTeeth = Math.round(Math.min(150, Math.max(movTeeth0 - (y - cursor.y) / 10, 50)));
+        pair.fixed.innerCirc = pair.fixed.innerTeeth * pixPertooth;
+        pair.fixed.innerRad = pair.fixed.innerCirc / PI2;
+
+        pair.fixed.outerTeeth = pair.fixed.innerTeeth + pair.fixed.thickness;
+        pair.fixed.outerCirc = pair.fixed.outerTeeth * pixPertooth;
+        pair.fixed.outerRad = pair.fixed.outerCirc / PI2;
+
+        pair.move(pair.th);
+        pair.penDown();
+    }
+
+}
+function pointerUpHandler(){
+    mouseDown=false;
+    showWheelsOverride=false;
+    showInfo=false;
+    showRadInfo=false;
+
+}
 function doubleClickHandler(dblClickCase) {
     console.log(dblClickCase)
     if ((dblClickCase == "autoCCW" || dblClickCase == "autoCW") & pair.auto != 0) {
         pair.auto = 0;
     }
     else if (dblClickCase == "autoCCW") {
-        console.log('action')
         pair.auto = -1;
     }
     else if (dblClickCase == "autoCW") {
-        // console.log('autoCW')
         pair.auto = 1;
     }
     if (dblClickCase == "hideUI") {
+        showUI = !showUI;
         showWheels = !showWheels;
     }
-    if (dblClickCase == "toEnd") {
-        pair.fullRoll();
+    if (dblClickCase == "fullTrace") {
+        pair.fullTrace();
     }
     if (dblClickCase == "toStart") {
-        pair.roll(0);
+        pair.penUp();
+        pair.move(0);
+        pair.penDown();
     }
     if (dblClickCase == "clear") {
-        pair.trace = []
-        pair.move(pair.th);
+        pair.clear();
     }
 
 }
 
-function calcLCM(a, b) {
-    // higher number among number1 and number2 is stored in min
+function calcLCM(a, b) { //lowest common multiple
     let min = (a > b) ? a : b;
-    while (min < 10000) {
+    while (min < 1000000) {
         if (min % a == 0 && min % b == 0) {
-            // console.log(`The LCM of ${num1} and ${num2} is ${min}`);
             return (min);
-            // break;
         }
         min++;
     }
 }
 
 function drawUI() {
+    // ctx.strokeStyle = this.fixed.color;
+    // ctx.fillStyle = this.fixed.color;
+    ctx.textAlign = "center";
+    ctx.font = txtSize / 2 + 'px sans-serif';
+    ctx.textBaseline = "middle";
+
     ctx.strokeStyle = "rgb(200,50,100)"
     ctx.beginPath()
-    ctx.moveTo(0, uiHeight * canvas.height);
-    ctx.lineTo(canvas.width, uiHeight * canvas.height);
+    ctx.moveTo(0, uiY * Y);
+    ctx.lineTo(X, uiY * Y);
     ctx.stroke();
     ctx.beginPath()
-    ctx.moveTo(0, (1 - uiHeight) * canvas.height);
-    ctx.lineTo(canvas.width, (1 - uiHeight) * canvas.height);
+    ctx.moveTo(0, (1 - uiY) * Y);
+    ctx.lineTo(X, (1 - uiY) * Y);
     ctx.stroke();
+
+    ctx.beginPath()
+    ctx.moveTo(0.25 * X, 0 * Y);
+    ctx.lineTo(0.25 * X, uiY * Y);
+    ctx.stroke();
+    ctx.beginPath()
+    ctx.moveTo(0.5 * X, 0 * Y);
+    ctx.lineTo(0.5 * X, uiY * Y);
+    ctx.stroke();
+    ctx.beginPath()
+    ctx.moveTo(0.75 * X, 0 * Y);
+    ctx.lineTo(0.75 * X, uiY * Y);
+    ctx.stroke();
+
+
+    ctx.beginPath()
+    ctx.moveTo(0.25 * X, Y);
+    ctx.lineTo(0.25 * X, (1 - uiY) * Y);
+    ctx.stroke();
+    ctx.beginPath()
+    ctx.moveTo(0.5 * X, Y);
+    ctx.lineTo(0.5 * X, (1 - uiY) * Y);
+    ctx.stroke();
+    ctx.beginPath()
+    ctx.moveTo(0.75 * X, Y);
+    ctx.lineTo(0.75 * X, (1 - uiY) * Y);
+    ctx.stroke();
+
+
+    ctx.fillText('Hide/Show', (0.25 - 0.125) * X, uiY * Y / 2)
+    ctx.fillText('Clear', (0.50 - 0.125) * X, uiY * Y / 2)
+    ctx.fillText('Reset', (0.75 - 0.125) * X, uiY * Y / 2)
+    ctx.fillText('Trace', (1 - 0.125) * X, uiY * Y / 2)
+
+    ctx.fillText('Draw Radius', (0.25 - 0.125) * X, (1 - uiY / 2) * Y)
+    ctx.fillText('Inner Size', (0.50 - 0.125) * X, (1 - uiY / 2) * Y)
+    ctx.fillText('Outer Size', (0.75 - 0.125) * X, (1 - uiY / 2) * Y)
+    ctx.fillText('', (1 - 0.125) * X, (1 - uiY / 2) * Y)
+
 }
 
+function anim() {
+    requestAnimationFrame(anim);
+    ctx.fillStyle = bgFillStyle;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (pair.auto) {
+        pair.update();
+    }
+    pair.drawTrace(pair.trace);
+    pair.drawTraces();
+    if (showWheels | showWheelsOverride) {
+        pair.fixed.draw();
+        pair.moving.draw();
+    }
+    if (showUI) {
+        drawUI();
+    }
+    if (showInfo) {
+        pair.drawInfo();
+    }
+    if (showRadInfo) {
+        pair.drawRadInfo();
+    }
 
+
+}
+
+let dblClickCase = null;
+let mouseDown = false;
+let lastTouch = new Date().getTime();
+let thDragSt = 0;
+let dthDrag = 0;
+let showWheels = true;
+let showWheelsOverride=false;
+let showUI = true;
+let rat0;
+let movTeeth0;
+let showInfo = false;
+let showRadInfo=false;
+
+
+const txtSize = 30;
+const bgFillStyle = "rgb(50,20,30)";
+const traceStyle = "rgb(200,50,100)";
+const pixPertooth = 9;
+const dth = PI2 / 100;
+canvas.height = innerHeight;
+canvas.width = innerWidth;
+let X = canvas.width;
+let Y = canvas.height;
+const uiY = 0.2;
+
+let disk = new Disk(56, 0.70)
+let ring = new Ring(105, 15);
+let pair = new Pair(ring, disk)
+
+anim();
