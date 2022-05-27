@@ -495,7 +495,7 @@ function drawUI() {
     // ctx.strokeStyle = this.fixed.color;
     // ctx.fillStyle = this.fixed.color;
     ctx.textAlign = "center";
-    ctx.font = txtSize / 2 + 'px sans-serif';
+    ctx.font = txtSize / 3 + 'px sans-serif';
     ctx.textBaseline = "middle";
 
     ctx.strokeStyle = pair.color;
@@ -601,13 +601,14 @@ const cursor = {
     y: innerHeight / 2,
 };
 
-// Set actual size in memory (scaled to account for extra pixel density).
-var scale = window.devicePixelRatio; // Change to 1 on retina screens to see blurry canvas.
-canvas.width = Math.floor(innerWidth * scale);
-canvas.height = Math.floor(innerHeight * scale);
-// Normalize coordinate system to use CSS pixels.
-ctx.scale(scale, scale);
+// // Set actual size in memory (scaled to account for extra pixel density).
+// var scale = window.devicePixelRatio; // Change to 1 on retina screens to see blurry canvas.
+// canvas.width = Math.floor(innerWidth * scale);
+// canvas.height = Math.floor(innerHeight * scale);
+// // Normalize coordinate system to use CSS pixels.
+// ctx.scale(scale, scale);
 
+// location.reload(true)
 let clickCase = null;
 let mouseDown = false;
 let lastTouch = new Date().getTime();
@@ -624,13 +625,13 @@ let showInfo = false;
 let showRadInfo = false;
 let showColInfo = false;
 
-const txtSize = 30;
+const txtSize = 60*window.devicePixelRatio;
 const hueInit = Math.random() * 360
 const bgFillStyle = "hsl(" + hueInit + ",100%,5%)";
 const wheelColor = "white"
 const uiTextColor = "white"
 
-const pixPertooth = 9;
+const pixPertooth = 9*window.devicePixelRatio;
 const dth = PI2 / 100;
 canvas.height = innerHeight;
 canvas.width = innerWidth;
