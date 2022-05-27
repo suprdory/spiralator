@@ -93,7 +93,7 @@ class Trace {
         if (this.points.length > 0) {
             ctx.beginPath();
             ctx.strokeStyle = this.color;
-            ctx.lineWidth=this.thickness;
+            ctx.lineWidth = this.thickness;
             ctx.moveTo(this.points[0].x, this.points[0].y);
             this.points.forEach(point => {
                 ctx.lineTo(point.x, point.y);
@@ -177,11 +177,11 @@ class Pair {
     update() {
         this.move(this.th + dth * this.auto);
     }
-    nudge(n){
+    nudge(n) {
         this.penUp()
         let thInc = -n * PI2 / this.fixed.innerTeeth;
         this.moving.th0 += thInc * this.fixed.innerRad / this.moving.rad;
-        this.move(this.th+thInc);
+        this.move(this.th + thInc);
         this.penDown()
     }
     reset() {
@@ -229,7 +229,7 @@ class Pair {
     fullTrace() {
         this.penUp();
         this.penDown();
-        this.roll(this.th+PI2 * calcLCM(this.fixed.innerTeeth, this.moving.teeth) / this.fixed.innerTeeth);
+        this.roll(this.th + PI2 * calcLCM(this.fixed.innerTeeth, this.moving.teeth) / this.fixed.innerTeeth);
         this.penUp();
         this.penDown();
     }
@@ -253,8 +253,8 @@ class Pair {
             this.traces.pop();
         }
     }
-    clearAll(){
-        while(this.traces.length>0 || this.trace.points.length > 0){
+    clearAll() {
+        while (this.traces.length > 0 || this.trace.points.length > 0) {
             this.clear();
         }
     }
@@ -499,7 +499,7 @@ function drawUI() {
     ctx.textAlign = "center";
     ctx.font = txtSize / 4 + 'px sans-serif';
     ctx.textBaseline = "middle";
-    ctx.lineWidth=baseLW;
+    ctx.lineWidth = baseLW;
     ctx.strokeStyle = pair.color;
     ctx.beginPath()
     ctx.moveTo(0, uiY * Y);
@@ -626,9 +626,9 @@ let showRadInfo = false;
 let showColInfo = false;
 
 
-const txtSize = 60*window.devicePixelRatio;
-const baseLW=1*window.devicePixelRatio;
-const pixPertooth = 9*window.devicePixelRatio;
+const txtSize = 60 * window.devicePixelRatio;
+const baseLW = 1 * window.devicePixelRatio;
+const pixPertooth = 9 * window.devicePixelRatio;
 const hueInit = Math.random() * 360
 const bgFillStyle = "hsl(" + hueInit + ",100%,5%)";
 const wheelColor = "white"
