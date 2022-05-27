@@ -1,41 +1,7 @@
 
-class Ring {
-    constructor(
-        innerTeeth = 105,
-        thickness = 15,
-        rat = 0.5,
-    ) {
-        this.x = cursor.x;
-        this.y = cursor.y;
-        this.thickness = thickness
-        this.innerCirc = innerTeeth * pixPertooth;
-        this.outerCirc = (innerTeeth + thickness) * pixPertooth;
-        this.innerTeeth = innerTeeth;
-        this.outerTeeth = (innerTeeth + thickness);
-        this.innerRad = this.innerCirc / PI2;
-        this.outerRad = this.outerCirc / PI2;
-        this.rat = rat;
-        this.color = 'white';
-        this.lw = baseLW;
-        this.th0 = 0;
-    }
-    draw() {
-
-        ctx.strokeStyle = this.color;
-        ctx.lineWidth = this.lw;
-
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.innerRad, 0, PI2);
-        ctx.stroke();
-        // ctx.beginPath();
-        // ctx.arc(this.x, this.y, this.outerRad, 0, PI2);
-        // ctx.stroke();
-    }
-}
-class Disk {
+class Disc {
     constructor(
         teeth = 84,
-        rat = 0.75,
     ) {
         this.x = cursor.x;
         this.y = cursor.y;
@@ -44,9 +10,6 @@ class Disk {
         this.rad = this.circ / PI2;
         this.color = 'white';
         this.lw = baseLW;
-        this.rat = rat;
-        this.th0 = 0;
-        this.th = 0;
     }
     draw() {
         ctx.fillStyle = this.color;
@@ -55,6 +18,19 @@ class Disk {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.rad, 0, PI2);
         ctx.stroke();
+    }
+}
+class MovingDisc extends Disc {
+    constructor(
+        teeth = 84,
+    ) {
+        super(teeth)
+        this.rat = .75;
+        this.th0 = 0;
+        this.th = 0;
+    }
+    draw() {
+        super.draw();
         ctx.beginPath();
         ctx.moveTo(this.x, this.y);
         ctx.lineTo(
@@ -66,15 +42,8 @@ class Disk {
         ctx.arc(
             this.x + this.rat * this.rad * Math.cos(this.th),
             this.y + this.rat * this.rad * Math.sin(this.th),
-            3*baseLW, 0, PI2);
+            3 * baseLW, 0, PI2);
         ctx.fill();
-        // ctx.beginPath();
-        // ctx.arc(
-        //     this.x,
-        //     this.y,
-        //     3 * baseLW, 0, PI2);
-        // ctx.stroke();
-
     }
 }
 class Point {
@@ -144,9 +113,9 @@ class Pair {
         ctx.textAlign = "center";
         ctx.font = txtSize + 'px sans-serif';
         ctx.textBaseline = "middle";
-        ctx.fillText(this.fixed.innerTeeth, this.fixed.x - txtSize, this.fixed.y - txtSize * 0.5);
+        ctx.fillText(this.fixed.teeth, this.fixed.x - txtSize, this.fixed.y - txtSize * 0.5);
         ctx.fillText(this.moving.teeth, this.fixed.x - txtSize, this.fixed.y + txtSize * 0.5);
-        ctx.fillText(calcLCM(this.fixed.innerTeeth, this.moving.teeth) / this.moving.teeth, this.fixed.x + txtSize, this.fixed.y);
+        ctx.fillText(calcLCM(this.fixed.teeth, this.moving.teeth) / this.moving.teeth, this.fixed.x + txtSize, this.fixed.y);
 
         ctx.beginPath();
         ctx.moveTo(this.fixed.x - txtSize * 2, this.fixed.y - txtSize * 0.08);
@@ -179,8 +148,8 @@ class Pair {
     }
     nudge(n) {
         this.penUp()
-        let thInc = -n * PI2 / this.fixed.innerTeeth;
-        this.moving.th0 += thInc * this.fixed.innerRad / this.moving.rad;
+        let thInc = -n * PI2 / this.fixed.teeth;
+        this.moving.th0 += thInc * this.fixed.rad / this.moving.rad;
         this.move(this.th + thInc);
         this.penDown()
     }
@@ -193,9 +162,9 @@ class Pair {
     move(th) {
         let f = this.fixed;
         let m = this.moving;
-        m.x = f.x + (f.innerRad - m.rad) * Math.cos(th);
-        m.y = f.y + (f.innerRad - m.rad) * Math.sin(th);
-        m.th = m.th0 - th * (f.innerRad / m.rad - 1)
+        m.x = f.x + (f.rad - m.rad) * Math.cos(th);
+        m.y = f.y + (f.rad - m.rad) * Math.sin(th);
+        m.th = m.th0 - th * (f.rad / m.rad - 1)
         this.th = th;
         if (this.tracing) {
             this.trace.points.push(this.tracePoint());
@@ -229,7 +198,7 @@ class Pair {
     fullTrace() {
         this.penUp();
         this.penDown();
-        this.roll(this.th + PI2 * calcLCM(this.fixed.innerTeeth, this.moving.teeth) / this.fixed.innerTeeth);
+        this.roll(this.th + PI2 * calcLCM(this.fixed.teeth, this.moving.teeth) / this.fixed.teeth);
         this.penUp();
         this.penDown();
     }
@@ -292,7 +261,6 @@ addEventListener("touchend", e => {
 },
     { passive: false }
 );
-
 function pointerDownHandler(x, y) {
     let now = new Date().getTime();
     let timeSince = now - lastTouch;
@@ -350,7 +318,7 @@ function pointerDownHandler(x, y) {
     }
     else if (y > Y * (1 - uiY) & x > X * .5 & x < 0.75 * X) {
         mselect = "fixedTeeth";
-        movTeeth0 = pair.fixed.innerTeeth;
+        movTeeth0 = pair.fixed.teeth;
         showInfo = true;
     }
     else if (y > Y * (1 - uiY) & x > X * .75 & x < 1.0 * X) {
@@ -406,11 +374,11 @@ function pointerMoveHandler(x, y) {
     if (mouseDown & mselect == "fixedTeeth") {
         showWheelsOverride = true;
         pair.penUp();
-        pair.fixed.innerTeeth = Math.round(Math.min(maxWheelSize, Math.max(movTeeth0 - (y - cursor.y) / 10, minWheelSize)));
-        pair.fixed.innerCirc = pair.fixed.innerTeeth * pixPertooth;
-        pair.fixed.innerRad = pair.fixed.innerCirc / PI2;
+        pair.fixed.teeth = Math.round(Math.min(maxWheelSize, Math.max(movTeeth0 - (y - cursor.y) / 10, minWheelSize)));
+        pair.fixed.circ = pair.fixed.teeth * pixPertooth;
+        pair.fixed.rad = pair.fixed.circ / PI2;
 
-        pair.fixed.outerTeeth = pair.fixed.innerTeeth + pair.fixed.thickness;
+        pair.fixed.outerTeeth = pair.fixed.teeth + pair.fixed.thickness;
         pair.fixed.outerCirc = pair.fixed.outerTeeth * pixPertooth;
         pair.fixed.outerRad = pair.fixed.outerCirc / PI2;
 
@@ -436,7 +404,6 @@ function pointerMoveHandler(x, y) {
         pair.move(pair.th);
         pair.penDown();
     }
-
 }
 function pointerUpHandler() {
     mouseDown = false;
@@ -633,8 +600,8 @@ const hueInit = Math.random() * 360
 const bgFillStyle = "hsl(" + hueInit + ",100%,5%)";
 const wheelColor = "white"
 const uiTextColor = "white"
-const maxWheelSize=150;
-const minWheelSize=10;
+const maxWheelSize = 150;
+const minWheelSize = 10;
 const maxDrawRadiusRatio = 2;
 
 const dth = PI2 / 100;
@@ -644,10 +611,8 @@ let X = canvas.width;
 let Y = canvas.height;
 const uiY = 0.2;
 
-let disk = new Disk(70, 0.70)
-let ring = new Ring(105, 15);
-let pair = new Pair(ring, disk)
-
-// alert("Device Pixel Ratio = " + window.devicePixelRatio);
+let fixedDisc = new Disc(105)
+let movingDisc = new MovingDisc(70);
+let pair = new Pair(fixedDisc, movingDisc)
 
 anim();
