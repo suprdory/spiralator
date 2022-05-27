@@ -27,9 +27,9 @@ class Ring {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.innerRad, 0, PI2);
         ctx.stroke();
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.outerRad, 0, PI2);
-        ctx.stroke();
+        // ctx.beginPath();
+        // ctx.arc(this.x, this.y, this.outerRad, 0, PI2);
+        // ctx.stroke();
     }
 }
 class Disk {
@@ -66,14 +66,14 @@ class Disk {
         ctx.arc(
             this.x + this.rat * this.rad * Math.cos(this.th),
             this.y + this.rat * this.rad * Math.sin(this.th),
-            3, 0, PI2);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.arc(
-            this.x,
-            this.y,
-            3, 0, PI2);
-        ctx.stroke();
+            3*baseLW, 0, PI2);
+        ctx.fill();
+        // ctx.beginPath();
+        // ctx.arc(
+        //     this.x,
+        //     this.y,
+        //     3 * baseLW, 0, PI2);
+        // ctx.stroke();
 
     }
 }
@@ -396,7 +396,7 @@ function pointerMoveHandler(x, y) {
     if (mouseDown & mselect == "movTeeth") {
         showWheelsOverride = true;
         pair.penUp();
-        pair.moving.teeth = Math.round(Math.min(pair.fixed.innerTeeth - 1, Math.max(movTeeth0 - (y - cursor.y) / 10, 10)));
+        pair.moving.teeth = Math.round(Math.min(maxWheelSize, Math.max(movTeeth0 - (y - cursor.y) / 10, minWheelSize)));
         pair.moving.circ = pair.moving.teeth * pixPertooth;
         pair.moving.rad = pair.moving.circ / PI2;
         pair.move(pair.th);
@@ -406,7 +406,7 @@ function pointerMoveHandler(x, y) {
     if (mouseDown & mselect == "fixedTeeth") {
         showWheelsOverride = true;
         pair.penUp();
-        pair.fixed.innerTeeth = Math.round(Math.min(150, Math.max(movTeeth0 - (y - cursor.y) / 10, 50)));
+        pair.fixed.innerTeeth = Math.round(Math.min(maxWheelSize, Math.max(movTeeth0 - (y - cursor.y) / 10, minWheelSize)));
         pair.fixed.innerCirc = pair.fixed.innerTeeth * pixPertooth;
         pair.fixed.innerRad = pair.fixed.innerCirc / PI2;
 
@@ -558,9 +558,9 @@ function drawUI() {
 
     ctx.fillText('Trace', (1 - 0.125) * X, uiY * Y / 2)
 
-    ctx.fillText('Draw Radius', (0.25 - 0.125) * X, (1 - uiY / 2) * Y)
-    ctx.fillText('Inner Size', (0.50 - 0.125) * X, (1 - uiY / 2) * Y)
-    ctx.fillText('Outer Size', (0.75 - 0.125) * X, (1 - uiY / 2) * Y)
+    ctx.fillText('Radius', (0.25 - 0.125) * X, (1 - uiY / 2) * Y)
+    ctx.fillText('Moving Disc', (0.50 - 0.125) * X, (1 - uiY / 2) * Y)
+    ctx.fillText('Fixed Disc', (0.75 - 0.125) * X, (1 - uiY / 2) * Y)
     ctx.fillText('Colour', (1 - 0.125) * X, (1 - uiY / 2) * Y)
 
 }
@@ -633,6 +633,8 @@ const hueInit = Math.random() * 360
 const bgFillStyle = "hsl(" + hueInit + ",100%,5%)";
 const wheelColor = "white"
 const uiTextColor = "white"
+const maxWheelSize=150;
+const minWheelSize=10;
 
 const dth = PI2 / 100;
 canvas.height = innerHeight;
