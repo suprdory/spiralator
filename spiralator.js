@@ -268,7 +268,7 @@ function pointerDownHandler(x, y) {
         //double touch
         doubleClickHandler(clickCase);
     }
-    lastTouch = new Date().getTime()
+    lastTouch = now;
     cursor.x = x;
     cursor.y = y;
 
@@ -387,7 +387,9 @@ function pointerMoveHandler(x, y) {
     }
     if (mouseDown & mselect == "color") {
         // showWheelsOverride = true;
+        pair.move(pair.th); 
         pair.penUpCont();
+        
         pair.hue = hue0 - (y - cursor.y) / 2;
         if (pair.hue > 360) {
             pair.hue -= 360;
