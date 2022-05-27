@@ -16,7 +16,7 @@ class Ring {
         this.outerRad = this.outerCirc / PI2;
         this.rat = rat;
         this.color = 'white';
-        this.lw = 1;
+        this.lw = baseLW;
         this.th0 = 0;
     }
     draw() {
@@ -43,7 +43,7 @@ class Disk {
         this.circ = teeth * pixPertooth;
         this.rad = this.circ / PI2;
         this.color = 'white';
-        this.lw = 1;
+        this.lw = baseLW;
         this.rat = rat;
         this.th0 = 0;
         this.th = 0;
@@ -87,7 +87,19 @@ class Trace {
     constructor(pair) {
         this.points = [];
         this.color = "hsl(" + pair.hue + "," + pair.saturation + "%," + pair.lightness + "%)";
-        this.thickness = 1;
+        this.thickness = baseLW;
+    }
+    draw() {
+        if (this.points.length > 0) {
+            ctx.beginPath();
+            ctx.strokeStyle = this.color;
+            ctx.lineWidth=this.thickness;
+            ctx.moveTo(this.points[0].x, this.points[0].y);
+            this.points.forEach(point => {
+                ctx.lineTo(point.x, point.y);
+            })
+            ctx.stroke();
+        }
     }
 }
 class Pair {
@@ -227,21 +239,11 @@ class Pair {
         let y = m.y + Math.sin(m.th) * (m.rad * m.rat)
         return (new Point(x, y));
     }
-    drawTrace(trace) {
-        if (trace.points.length > 0) {
-            ctx.beginPath();
-            ctx.strokeStyle = trace.color;
-            ctx.moveTo(trace.points[0].x, trace.points[0].y);
-            trace.points.forEach(point => {
-                ctx.lineTo(point.x, point.y);
-            })
-            ctx.stroke();
-        }
-    }
     drawTraces() {
         this.traces.forEach(trace => {
-            this.drawTrace(trace);
+            trace.draw();
         })
+        this.trace.draw();
     }
     clear() {
         if (this.trace.points.length > 0) {
@@ -497,7 +499,7 @@ function drawUI() {
     ctx.textAlign = "center";
     ctx.font = txtSize / 4 + 'px sans-serif';
     ctx.textBaseline = "middle";
-
+    ctx.lineWidth=baseLW;
     ctx.strokeStyle = pair.color;
     ctx.beginPath()
     ctx.moveTo(0, uiY * Y);
@@ -569,9 +571,7 @@ function anim() {
     if (pair.auto & !showColInfo & !showInfo & !showRadInfo) {
         pair.update();
     }
-
     pair.drawTraces();
-    pair.drawTrace(pair.trace);
     if (showWheels | showWheelsOverride) {
         pair.fixed.draw();
         pair.moving.draw();
@@ -625,13 +625,15 @@ let showInfo = false;
 let showRadInfo = false;
 let showColInfo = false;
 
+
 const txtSize = 60*window.devicePixelRatio;
+const baseLW=1*window.devicePixelRatio;
+const pixPertooth = 9*window.devicePixelRatio;
 const hueInit = Math.random() * 360
 const bgFillStyle = "hsl(" + hueInit + ",100%,5%)";
 const wheelColor = "white"
 const uiTextColor = "white"
 
-const pixPertooth = 9*window.devicePixelRatio;
 const dth = PI2 / 100;
 canvas.height = innerHeight;
 canvas.width = innerWidth;
