@@ -25,7 +25,7 @@ class MovingDisc extends Disc {
         teeth = 84,
     ) {
         super(teeth)
-        this.rat = .75;
+        this.rat = .66;
         this.th0 = 0;
         this.th = 0;
     }
@@ -75,6 +75,7 @@ class Pair {
     constructor(fixed, moving) {
         this.fixed = fixed;
         this.moving = moving;
+        this.out = false;
         this.th = 0;
         this.auto = 0;
         this.hue = hueInit;
@@ -149,7 +150,12 @@ class Pair {
     nudge(n) {
         this.penUp()
         let thInc = -n * PI2 / this.fixed.teeth;
+        if (!this.out){
         this.moving.th0 += thInc * this.fixed.rad / this.moving.rad;
+        }
+        if (this.out) {
+            this.moving.th0 -= thInc * this.fixed.rad / this.moving.rad;
+        }
         this.move(this.th + thInc);
         this.penDown()
     }
@@ -162,13 +168,28 @@ class Pair {
     move(th) {
         let f = this.fixed;
         let m = this.moving;
-        m.x = f.x + (f.rad - m.rad) * Math.cos(th);
-        m.y = f.y + (f.rad - m.rad) * Math.sin(th);
-        m.th = m.th0 - th * (f.rad / m.rad - 1)
+        if (this.out) {
+            m.x = f.x + (f.rad + m.rad) * Math.cos(th);
+            m.y = f.y + (f.rad + m.rad) * Math.sin(th);
+            m.th = m.th0 + th * (f.rad / m.rad + 1)
+        }
+        if (!this.out) {
+            m.x = f.x + (f.rad - m.rad) * Math.cos(th);
+            m.y = f.y + (f.rad - m.rad) * Math.sin(th);
+            m.th = m.th0 - th * (f.rad / m.rad - 1)
+        }
+
         this.th = th;
         if (this.tracing) {
             this.trace.points.push(this.tracePoint());
         }
+    }
+    inOut(){
+        this.penUp();
+        this.out = !pair.out;
+        this.moving.th0+=PI2/2;
+        this.move(pair.th);
+        this.penDown();
     }
     roll(th) {
         this.move(this.th)
@@ -281,9 +302,13 @@ function pointerDownHandler(x, y) {
     else if (y < Y * uiY & x < X * .25) {
         clickCase = "hideUI";
     }
-    else if (y < Y * uiY & x > X * .75) {
+    else if (y > Y * uiY / 3 & y < Y * uiY & x > X * .75) {
         clickCase = "fullTrace";
     }
+    else if (y < Y * uiY & x > X * .75) {
+        clickCase = "inOut";
+    }
+
     else if (y < Y * uiY / 3 & x > X * .5 & x < X * .75) {
         clickCase = "toStart";
     }
@@ -387,9 +412,9 @@ function pointerMoveHandler(x, y) {
     }
     if (mouseDown & mselect == "color") {
         // showWheelsOverride = true;
-        pair.move(pair.th); 
+        pair.move(pair.th);
         pair.penUpCont();
-        
+
         pair.hue = hue0 - (y - cursor.y) / 2;
         if (pair.hue > 360) {
             pair.hue -= 360;
@@ -450,6 +475,9 @@ function doubleClickHandler(clickCase) {
     if (clickCase == "nudgeDown") {
         pair.nudge(-1);
     }
+    if (clickCase == "inOut"){
+        pair.inOut();
+    }
 
 
 }
@@ -481,8 +509,10 @@ function drawUI() {
 
     ctx.beginPath()
     ctx.moveTo(0.25 * X, uiY / 3 * Y);
-    ctx.lineTo(0.75 * X, uiY / 3 * Y);
+    ctx.lineTo(1.00 * X, uiY / 3 * Y);
     ctx.stroke();
+
+
 
     ctx.beginPath()
     ctx.moveTo(0.5 * X, 2 * uiY / 3 * Y);
@@ -525,7 +555,8 @@ function drawUI() {
     ctx.fillText('Nudge +', (0.75 - 0.125) * X, uiY * Y * .333 + uiY * Y / 6)
     ctx.fillText('Nudge -', (0.75 - 0.125) * X, uiY * Y * .666 + uiY * Y / 6)
 
-    ctx.fillText('Trace', (1 - 0.125) * X, uiY * Y / 2)
+    ctx.fillText('In/Out', (1 - 0.125) * X, uiY * Y * 0 + uiY * Y / 6)
+    ctx.fillText('Trace', (1 - 0.125) * X, uiY * .333 * Y + .666 * uiY * Y * .5)
 
     ctx.fillText('Radius', (0.25 - 0.125) * X, (1 - uiY / 2) * Y)
     ctx.fillText('Moving Disc', (0.50 - 0.125) * X, (1 - uiY / 2) * Y)
