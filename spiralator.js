@@ -495,7 +495,7 @@ function drawUI() {
     // ctx.strokeStyle = this.fixed.color;
     // ctx.fillStyle = this.fixed.color;
     ctx.textAlign = "center";
-    ctx.font = txtSize / 3 + 'px sans-serif';
+    ctx.font = txtSize / 4 + 'px sans-serif';
     ctx.textBaseline = "middle";
 
     ctx.strokeStyle = pair.color;
