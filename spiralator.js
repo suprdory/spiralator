@@ -245,17 +245,14 @@ class Pair {
     }
     clear() {
         if (this.trace.points.length > 0) {
-            // console.log("Clear current trace")
             this.trace = new Trace(this);
         }
         else if (this.traces.length > 0) {
-            // console.log("Clear last trace")
             this.traces.pop();
-            // this.traces=this.traces.splice(-1);
         }
     }
     clearAll(){
-        while(this.traces.length>0){
+        while(this.traces.length>0 || this.trace.points.length > 0){
             this.clear();
         }
     }
