@@ -389,7 +389,7 @@ function pointerMoveHandler(x, y) {
     if (mouseDown & mselect == "rat") {
         showWheelsOverride = true;
         pair.penUp();
-        pair.moving.rat = Math.min(1, Math.max(rat0 - (y - cursor.y) / 200, 0))
+        pair.moving.rat = Math.min(maxDrawRadiusRatio, Math.max(rat0 - (y - cursor.y) / 200, 0))
         pair.penDown();
 
     }
@@ -635,6 +635,7 @@ const wheelColor = "white"
 const uiTextColor = "white"
 const maxWheelSize=150;
 const minWheelSize=10;
+const maxDrawRadiusRatio = 2;
 
 const dth = PI2 / 100;
 canvas.height = innerHeight;
