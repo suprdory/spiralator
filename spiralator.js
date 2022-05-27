@@ -58,8 +58,8 @@ class Disk {
         ctx.beginPath();
         ctx.moveTo(this.x, this.y);
         ctx.lineTo(
-            this.x + this.rad * Math.cos(this.th),
-            this.y + this.rad * Math.sin(this.th)
+            this.x + this.rad * Math.cos(this.th) * this.rat,
+            this.y + this.rad * Math.sin(this.th) * this.rat
         )
         ctx.stroke();
         ctx.beginPath();
