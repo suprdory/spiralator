@@ -598,10 +598,19 @@ function anim() {
 const canvas = document.getElementById("cw");
 const ctx = canvas.getContext("2d");
 const PI2 = Math.PI * 2;
+
 const cursor = {
     x: innerWidth / 2,
     y: innerHeight / 2,
 };
+
+// Set actual size in memory (scaled to account for extra pixel density).
+var scale = window.devicePixelRatio; // Change to 1 on retina screens to see blurry canvas.
+canvas.width = Math.floor(innerWidth * scale);
+canvas.height = Math.floor(innerHeight * scale);
+// Normalize coordinate system to use CSS pixels.
+ctx.scale(scale, scale);
+
 let clickCase = null;
 let mouseDown = false;
 let lastTouch = new Date().getTime();
@@ -617,7 +626,6 @@ let movTeeth0;
 let showInfo = false;
 let showRadInfo = false;
 let showColInfo = false;
-
 
 const txtSize = 30;
 const hueInit = Math.random() * 360
@@ -637,6 +645,6 @@ let disk = new Disk(70, 0.70)
 let ring = new Ring(105, 15);
 let pair = new Pair(ring, disk)
 
-// console.log(hueInit,bgFillStyle,pair.color)
+// alert("Device Pixel Ratio = " + window.devicePixelRatio);
 
 anim();
