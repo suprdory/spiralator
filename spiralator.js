@@ -109,7 +109,6 @@ class Pair {
     setColor() {
         this.color = "hsl(" + this.hue + "," + this.saturation + "%," + this.lightness + "%)"
     }
-
     drawRadInfo() {
         ctx.strokeStyle = this.fixed.color;
         ctx.fillStyle = this.fixed.color;
@@ -127,7 +126,6 @@ class Pair {
         ctx.fillText(Math.round(this.hue), this.fixed.x - txtSize, this.fixed.y);
         ctx.fillText(Math.round(this.lightness), this.fixed.x + txtSize, this.fixed.y);
     }
-
     drawInfo() {
         ctx.strokeStyle = this.fixed.color;
         ctx.fillStyle = this.fixed.color;
@@ -143,7 +141,6 @@ class Pair {
         ctx.lineTo(this.fixed.x, this.fixed.y - txtSize * 0.08);
         ctx.stroke();
     }
-
     penUp() {
         this.tracing = false;
         if (this.trace.points.length > 1) {
@@ -181,7 +178,6 @@ class Pair {
         this.move(0);
         this.penDown()
     }
-
     move(th) {
         let f = this.fixed;
         let m = this.moving;
@@ -194,6 +190,7 @@ class Pair {
         }
     }
     roll(th) {
+        this.move(this.th)
         if (Math.abs(th - this.th) < dth) {
             // normal move, increment is safely small
             this.move(th)
@@ -217,17 +214,12 @@ class Pair {
             }
         }
     }
-    fullRoll() {
-        // console.log(this.fixed)
-        this.roll(this.th+PI2 * calcLCM(this.fixed.innerTeeth, this.moving.teeth) / this.fixed.innerTeeth);
-    }
     fullTrace() {
-        this.trace = new Trace(this);
-        // this.penUp();
-        // this.move(0);
-        // this.penDown();
-        this.fullRoll();
-        // this.move(0);
+        this.penUp();
+        this.penDown();
+        this.roll(this.th+PI2 * calcLCM(this.fixed.innerTeeth, this.moving.teeth) / this.fixed.innerTeeth);
+        this.penUp();
+        this.penDown();
     }
     tracePoint() {
         let m = this.moving;
