@@ -58,17 +58,35 @@ class Trace {
         this.color = "hsl(" + pair.hue + "," + pair.saturation + "%," + pair.lightness + "%)";
         this.thickness = baseLW;
     }
-    draw() {
+    draw(ctx, xoff = 0, yoff = 0) {
         if (this.points.length > 0) {
             ctx.beginPath();
             ctx.strokeStyle = this.color;
             ctx.lineWidth = this.thickness;
-            ctx.moveTo(this.points[0].x, this.points[0].y);
+            ctx.moveTo(this.points[0].x + xoff, this.points[0].y + yoff);
             this.points.forEach(point => {
-                ctx.lineTo(point.x, point.y);
+                ctx.lineTo(point.x + xoff, point.y + yoff);
             })
             ctx.stroke();
         }
+    }
+    bounds() {
+        let xmin = X / 2;
+        let xmax = X / 2;
+        let ymin = Y / 2;
+        let ymax = Y / 2;
+        this.points.forEach(point => {
+            xmin = Math.min(xmin, point.x);
+            xmax = Math.max(xmax, point.x);
+            ymin = Math.min(ymin, point.y);
+            ymax = Math.max(ymax, point.y);
+        })
+        return ({
+            xmin: xmin,
+            xmax: xmax,
+            ymin: ymin,
+            ymax: ymax,
+        })
     }
 }
 class Pair {
@@ -229,11 +247,12 @@ class Pair {
         let y = m.y + Math.sin(m.th) * (m.rad * m.rat)
         return (new Point(x, y));
     }
-    drawTraces() {
+    drawTraces(ctx,xoff=0,yoff=0) {
+        // console.log(xoff,yoff)
         this.traces.forEach(trace => {
-            trace.draw();
+            trace.draw(ctx, xoff, yoff);
         })
-        this.trace.draw();
+        this.trace.draw(ctx, xoff, yoff);
     }
     clear() {
         if (this.trace.points.length > 0) {
@@ -247,6 +266,26 @@ class Pair {
         while (this.traces.length > 0 || this.trace.points.length > 0) {
             this.clear();
         }
+    }
+    getTracesBounds() {
+        let xmin = X / 2;
+        let xmax = X / 2;
+        let ymin = Y / 2;
+        let ymax = Y / 2;
+        this.traces.forEach(trace => {
+            // console.log(trace.bounds())
+            xmin = Math.min(trace.bounds().xmin, xmin);
+            xmax = Math.max(trace.bounds().xmax, xmax);
+            ymin = Math.min(trace.bounds().ymin, ymin);
+            ymax = Math.max(trace.bounds().ymax, ymax);
+        })
+        return ({
+            xmin: xmin,
+            xmax: xmax,
+            ymin: ymin,
+            ymax: ymax,
+        })
+
     }
 }
 
@@ -483,7 +522,7 @@ function doubleClickHandler(clickCase) {
         pair.inOut();
     }
     if (clickCase == "share") {
-        shareNext = true;
+        shareImage();
     }
 }
 function calcLCM(a, b) { //lowest common multiple
@@ -579,12 +618,7 @@ function anim() {
     if (pair.auto & !showColInfo & !showInfo & !showRadInfo) {
         pair.update();
     }
-    pair.drawTraces();
-
-    if (shareNext) {
-        shareImage();
-    }
-    shareNext = false;
+    pair.drawTraces(ctx);
 
     if (showWheels | showWheelsOverride) {
         pair.fixed.draw();
@@ -606,9 +640,24 @@ function anim() {
 
 }
 function shareImage() {
-    // const uiState = showUI;
-    // showUI = false;
-    canvas.toBlob(function (blob) {
+    pair.penUp();
+    let tracesBounds = pair.getTracesBounds();
+    let size = (shareBorderfrac+1)* Math.max(
+        tracesBounds.xmax - tracesBounds.xmin,
+        tracesBounds.ymax - tracesBounds.ymin
+    )
+    let xoff = -tracesBounds.xmin + (size - (tracesBounds.xmax - tracesBounds.xmin)) / 2;
+    let yoff = - tracesBounds.ymin+ (size - (tracesBounds.ymax - tracesBounds.ymin)) / 2;
+
+    console.log(size,xoff,yoff);
+    var canvasSh = document.createElement('canvas');
+    canvasSh.width = size;
+    canvasSh.height = size;
+    var ctxSh = canvasSh.getContext('2d');
+    ctxSh.fillStyle = bgFillStyle;
+    ctxSh.fillRect(0, 0, canvasSh.width, canvasSh.height);
+    pair.drawTraces(ctxSh,xoff,yoff);
+    canvasSh.toBlob(function (blob) {
         const filesArray = [
             new File(
                 [blob],
@@ -624,7 +673,6 @@ function shareImage() {
         };
         navigator.share(shareData)
     })
-    // showUI = uiState;
 }
 
 const canvas = document.getElementById("cw");
@@ -636,14 +684,6 @@ const cursor = {
     y: innerHeight / 2,
 };
 
-// // Set actual size in memory (scaled to account for extra pixel density).
-// var scale = window.devicePixelRatio; // Change to 1 on retina screens to see blurry canvas.
-// canvas.width = Math.floor(innerWidth * scale);
-// canvas.height = Math.floor(innerHeight * scale);
-// // Normalize coordinate system to use CSS pixels.
-// ctx.scale(scale, scale);
-
-// location.reload(true)
 let clickCase = null;
 let mouseDown = false;
 let lastTouch = new Date().getTime();
@@ -662,7 +702,7 @@ let showColInfo = false;
 let shareNext = false;
 
 
-
+const shareBorderfrac = 0.15;
 const txtSize = 60 * window.devicePixelRatio;
 const baseLW = 1 * window.devicePixelRatio;
 const pixPertooth = 9 * window.devicePixelRatio;
