@@ -150,8 +150,8 @@ class Pair {
     nudge(n) {
         this.penUp()
         let thInc = -n * PI2 / this.fixed.teeth;
-        if (!this.out){
-        this.moving.th0 += thInc * this.fixed.rad / this.moving.rad;
+        if (!this.out) {
+            this.moving.th0 += thInc * this.fixed.rad / this.moving.rad;
         }
         if (this.out) {
             this.moving.th0 -= thInc * this.fixed.rad / this.moving.rad;
@@ -184,10 +184,10 @@ class Pair {
             this.trace.points.push(this.tracePoint());
         }
     }
-    inOut(){
+    inOut() {
         this.penUp();
         this.out = !pair.out;
-        this.moving.th0+=PI2/2;
+        this.moving.th0 += PI2 / 2;
         this.move(pair.th);
         this.penDown();
     }
@@ -293,60 +293,64 @@ function pointerDownHandler(x, y) {
     cursor.x = x;
     cursor.y = y;
 
-    if (y > .5 * Y & y < (1 - uiY) * Y) {
+    if (y > .5 * Y & y < (Y - uiY)) {
         clickCase = "autoCW";
     }
-    else if (y > uiY * Y & y < 0.5 * Y) {
+    else if (y > uiY & y < 0.5 * Y) {
         clickCase = "autoCCW";
     }
-    else if (y < Y * uiY & x < X * .25) {
+
+    else if (x < X * .25 & y < uiY * .333) {
+        clickCase = "share";
+    }
+    else if (x < X * .25 & y > uiY * .333 & y < uiY) {
         clickCase = "hideUI";
     }
-    else if (y > Y * uiY / 3 & y < Y * uiY & x > X * .75) {
-        clickCase = "fullTrace";
+    else if (x > X * .25 & x < X * .5 & y > 0 & y < uiY * .333) {
+        clickCase = "clearAll";
     }
-    else if (y < Y * uiY & x > X * .75) {
-        clickCase = "inOut";
+    else if (x > X * .25 & x < X * .5 & y > uiY * 0.33 & y < uiY) {
+        clickCase = "clear";
     }
 
-    else if (y < Y * uiY / 3 & x > X * .5 & x < X * .75) {
+    else if (x > X * .5 & x < X * .75 & y < uiY * .333) {
         clickCase = "toStart";
     }
-    else if (y > Y * uiY / 3 & y < Y * uiY * 2 / 3 & x > X * .5 & x < X * .75) {
+    else if (x > X * .5 & x < X * .75 & y > uiY / 3 & y < uiY * 2 / 3) {
         clickCase = "nudgeUp";
     }
-    else if (y > Y * uiY * 2 / 3 & y < Y * uiY * 3 / 3 & x > X * .5 & x < X * .75) {
+    else if (x > X * .5 & x < X * .75 & y > uiY * 2 / 3 & y < uiY * 3 / 3) {
         clickCase = "nudgeDown";
     }
 
+    else if (x > X * .75 & y < uiY * .333) {
+        clickCase = "inOut";
+    }
+    else if (x > X * .75 & y > uiY * .333 & y < uiY) {
+        clickCase = "fullTrace";
+    }
 
-    else if (y > Y * uiY / 3 & y < Y * uiY & x > X * .25 & x < X * .5) {
-        clickCase = "clear";
-    }
-    else if (y < Y * uiY / 3 & x > X * .25 & x < X * .5) {
-        clickCase = "clearAll";
-    }
     else {
         clickCase = null;
     }
 
 
-    if (y > Y * (1 - uiY) & x < X * .25) {
+    if (y > (Y - uiY) & x < X * .25) {
         mselect = "rat";
         rat0 = pair.moving.rat;
         showRadInfo = true;
     }
-    else if (y > Y * (1 - uiY) & x > X * .25 & x < 0.5 * X) {
+    else if (y > (Y - uiY) & x > X * .25 & x < 0.5 * X) {
         mselect = "movTeeth";
         movTeeth0 = pair.moving.teeth;
         showInfo = true;
     }
-    else if (y > Y * (1 - uiY) & x > X * .5 & x < 0.75 * X) {
+    else if (y > (Y - uiY) & x > X * .5 & x < 0.75 * X) {
         mselect = "fixedTeeth";
         movTeeth0 = pair.fixed.teeth;
         showInfo = true;
     }
-    else if (y > Y * (1 - uiY) & x > X * .75 & x < 1.0 * X) {
+    else if (y > (Y - uiY) & x > X * .75 & x < 1.0 * X) {
         mselect = "color";
         pair.fixed.color = pair.color;
         pair.moving.color = pair.color;
@@ -475,11 +479,12 @@ function doubleClickHandler(clickCase) {
     if (clickCase == "nudgeDown") {
         pair.nudge(-1);
     }
-    if (clickCase == "inOut"){
+    if (clickCase == "inOut") {
         pair.inOut();
     }
-
-
+    if (clickCase == "share") {
+        shareNext = true;
+    }
 }
 function calcLCM(a, b) { //lowest common multiple
     let min = (a > b) ? a : b;
@@ -499,69 +504,72 @@ function drawUI() {
     ctx.lineWidth = baseLW;
     ctx.strokeStyle = pair.color;
     ctx.beginPath()
-    ctx.moveTo(0, uiY * Y);
-    ctx.lineTo(X, uiY * Y);
+    ctx.moveTo(0, uiY);
+    ctx.lineTo(X, uiY);
     ctx.stroke();
     ctx.beginPath()
-    ctx.moveTo(0, (1 - uiY) * Y);
-    ctx.lineTo(X, (1 - uiY) * Y);
-    ctx.stroke();
-
-    ctx.beginPath()
-    ctx.moveTo(0.25 * X, uiY / 3 * Y);
-    ctx.lineTo(1.00 * X, uiY / 3 * Y);
-    ctx.stroke();
-
-
-
-    ctx.beginPath()
-    ctx.moveTo(0.5 * X, 2 * uiY / 3 * Y);
-    ctx.lineTo(0.75 * X, 2 * uiY / 3 * Y);
+    ctx.moveTo(0, Y - uiY);
+    ctx.lineTo(X, Y - uiY);
     ctx.stroke();
 
     ctx.beginPath()
-    ctx.moveTo(0.25 * X, 0 * Y);
-    ctx.lineTo(0.25 * X, uiY * Y);
+    ctx.moveTo(0.00 * X, uiY * .333);
+    ctx.lineTo(1.00 * X, uiY * .333);
+    ctx.stroke();
+
+
+    ctx.beginPath()
+    ctx.moveTo(0.5 * X, uiY * .666);
+    ctx.lineTo(0.75 * X, uiY * .666);
+    ctx.stroke();
+
+    ctx.beginPath()
+    ctx.moveTo(0.25 * X, 0);
+    ctx.lineTo(0.25 * X, uiY);
     ctx.stroke();
     ctx.beginPath()
-    ctx.moveTo(0.5 * X, 0 * Y);
-    ctx.lineTo(0.5 * X, uiY * Y);
+    ctx.moveTo(0.5 * X, 0);
+    ctx.lineTo(0.5 * X, uiY);
     ctx.stroke();
     ctx.beginPath()
-    ctx.moveTo(0.75 * X, 0 * Y);
-    ctx.lineTo(0.75 * X, uiY * Y);
+    ctx.moveTo(0.75 * X, 0);
+    ctx.lineTo(0.75 * X, uiY);
     ctx.stroke();
 
 
     ctx.beginPath()
     ctx.moveTo(0.25 * X, Y);
-    ctx.lineTo(0.25 * X, (1 - uiY) * Y);
+    ctx.lineTo(0.25 * X, Y - uiY);
     ctx.stroke();
     ctx.beginPath()
     ctx.moveTo(0.5 * X, Y);
-    ctx.lineTo(0.5 * X, (1 - uiY) * Y);
+    ctx.lineTo(0.5 * X, Y - uiY);
     ctx.stroke();
     ctx.beginPath()
     ctx.moveTo(0.75 * X, Y);
-    ctx.lineTo(0.75 * X, (1 - uiY) * Y);
+    ctx.lineTo(0.75 * X, Y - uiY);
     ctx.stroke();
 
     ctx.fillStyle = uiTextColor;
-    ctx.fillText('Hide/Show', (0.25 - 0.125) * X, uiY * Y * 0.5)
-    ctx.fillText('Clear', (0.50 - 0.125) * X, uiY * .333 * Y + .666 * uiY * Y * .5)
-    ctx.fillText('Clear All', (0.50 - 0.125) * X, uiY * .333 * Y * .5)
 
-    ctx.fillText('Reset', (0.75 - 0.125) * X, uiY * Y * 0 + uiY * Y / 6)
-    ctx.fillText('Nudge +', (0.75 - 0.125) * X, uiY * Y * .333 + uiY * Y / 6)
-    ctx.fillText('Nudge -', (0.75 - 0.125) * X, uiY * Y * .666 + uiY * Y / 6)
+    ctx.fillText('Share', (0.25 - 0.125) * X, uiY * .333 * .5)
+    ctx.fillText('Hide/Show', (0.25 - 0.125) * X, uiY * .333 + .666 * uiY * .5)
 
-    ctx.fillText('In/Out', (1 - 0.125) * X, uiY * Y * 0 + uiY * Y / 6)
-    ctx.fillText('Trace', (1 - 0.125) * X, uiY * .333 * Y + .666 * uiY * Y * .5)
+    ctx.fillText('Clear All', (0.50 - 0.125) * X, uiY * .333 * .5)
+    ctx.fillText('Clear', (0.50 - 0.125) * X, uiY * .333 + .666 * uiY * .5)
 
-    ctx.fillText('Radius', (0.25 - 0.125) * X, (1 - uiY / 2) * Y)
-    ctx.fillText('Moving Disc', (0.50 - 0.125) * X, (1 - uiY / 2) * Y)
-    ctx.fillText('Fixed Disc', (0.75 - 0.125) * X, (1 - uiY / 2) * Y)
-    ctx.fillText('Colour', (1 - 0.125) * X, (1 - uiY / 2) * Y)
+
+    ctx.fillText('Reset', (0.75 - 0.125) * X, uiY * 0 + uiY / 6)
+    ctx.fillText('Nudge +', (0.75 - 0.125) * X, uiY * .333 + uiY / 6)
+    ctx.fillText('Nudge -', (0.75 - 0.125) * X, uiY * .666 + uiY / 6)
+
+    ctx.fillText('In/Out', (1 - 0.125) * X, uiY * 0 + uiY / 6)
+    ctx.fillText('Trace', (1 - 0.125) * X, uiY * .333 + .666 * uiY * .5)
+
+    ctx.fillText('Radius', (0.25 - 0.125) * X, Y - uiY / 2)
+    ctx.fillText('Moving Disc', (0.50 - 0.125) * X, Y - uiY / 2)
+    ctx.fillText('Fixed Disc', (0.75 - 0.125) * X, Y - uiY / 2)
+    ctx.fillText('Colour', (1 - 0.125) * X, Y - uiY / 2)
 
 }
 function anim() {
@@ -572,6 +580,12 @@ function anim() {
         pair.update();
     }
     pair.drawTraces();
+
+    if (shareNext) {
+        shareImage();
+    }
+    shareNext = false;
+
     if (showWheels | showWheelsOverride) {
         pair.fixed.draw();
         pair.moving.draw();
@@ -590,6 +604,27 @@ function anim() {
     }
 
 
+}
+function shareImage() {
+    // const uiState = showUI;
+    // showUI = false;
+    canvas.toBlob(function (blob) {
+        const filesArray = [
+            new File(
+                [blob],
+                "canvas.png",
+                {
+                    type: "image/jpeg",
+                    lastModified: new Date().getTime()
+                }
+            )
+        ];
+        const shareData = {
+            files: filesArray,
+        };
+        navigator.share(shareData)
+    })
+    // showUI = uiState;
 }
 
 const canvas = document.getElementById("cw");
@@ -624,6 +659,8 @@ let movTeeth0;
 let showInfo = false;
 let showRadInfo = false;
 let showColInfo = false;
+let shareNext = false;
+
 
 
 const txtSize = 60 * window.devicePixelRatio;
@@ -642,7 +679,7 @@ canvas.height = innerHeight;
 canvas.width = innerWidth;
 let X = canvas.width;
 let Y = canvas.height;
-const uiY = 0.2;
+const uiY = 0.2 * Y;
 
 let fixedDisc = new Disc(105)
 let movingDisc = new MovingDisc(70);
