@@ -358,7 +358,7 @@ function pointerDownHandler(x, y) {
         clickCase = null;
         if (timeSince > 500) {
             console.log("Gallery")
-            window.location.href='/gallery.html'
+            window.location.href='gallery.html'
         }
     }
 
