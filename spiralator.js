@@ -6,46 +6,46 @@ class Disc {
     constructor(
         teeth = 84,
     ) {
-        this.x = X/2;
-        this.y = Y/2;
+        this.x = 0;
+        this.y = 0;
         this.teeth = teeth;
         this.circ = teeth * pixPertooth;
         this.rad = this.circ / PI2;
         this.color = 'white';
-        this.lw = baseLW*1;
+        this.lw = baseLW * 1;
     }
-    draw() {
+    draw(xoff=X/2,yoff=Y/2,scl=1) {
         ctx.fillStyle = this.color;
         ctx.strokeStyle = this.color;
         ctx.lineWidth = this.lw;
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.rad, 0, PI2);
+        ctx.arc((scl*this.x)+xoff, yoff+(scl*this.y), scl*this.rad, 0, PI2);
         ctx.stroke();
     }
 }
 class MovingDisc extends Disc {
     constructor(
-        teeth = 84,rat=0.7
+        teeth = 84, rat = 0.7
     ) {
         super(teeth)
         this.rat = rat;
         this.th0 = 0;
-        this.th = 0; 
+        this.th = 0;
         this.lw = baseLW * 2;
     }
-    draw() {
-        super.draw();
+    draw(xoff = X / 2, yoff = Y / 2, scl = 1) {
+        super.draw(xoff = X / 2, yoff = Y / 2, scl = 1);
         ctx.beginPath();
-        ctx.moveTo(this.x, this.y);
+        ctx.moveTo((scl * this.x) + xoff, yoff + (scl * this.y));
         ctx.lineTo(
-            this.x + this.rad * Math.cos(this.th) * this.rat,
-            this.y + this.rad * Math.sin(this.th) * this.rat
+            (scl * this.x) + xoff + this.rad * Math.cos(this.th) * this.rat,
+            yoff + (scl * this.y) + this.rad * Math.sin(this.th) * this.rat
         )
         ctx.stroke();
         ctx.beginPath();
         ctx.arc(
-            this.x + this.rat * this.rad * Math.cos(this.th),
-            this.y + this.rat * this.rad * Math.sin(this.th),
+            (scl * this.x) + xoff + this.rat * this.rad * Math.cos(this.th),
+            yoff + (scl * this.y) + this.rat * this.rad * Math.sin(this.th),
             3 * baseLW, 0, PI2);
         ctx.fill();
     }
@@ -62,23 +62,23 @@ class Trace {
         this.color = "hsl(" + pair.hue + "," + pair.saturation + "%," + pair.lightness + "%)";
         this.thickness = baseLW;
     }
-    draw(ctx, xoff = 0, yoff = 0) {
+    draw(ctx, xoff = X/2, yoff = Y/2,scl=1) {
         if (this.points.length > 0) {
             ctx.beginPath();
             ctx.strokeStyle = this.color;
             ctx.lineWidth = this.thickness;
-            ctx.moveTo(this.points[0].x + xoff, this.points[0].y + yoff);
+            ctx.moveTo(scl*this.points[0].x + xoff, scl*this.points[0].y + yoff);
             this.points.forEach(point => {
-                ctx.lineTo(point.x + xoff, point.y + yoff);
+                ctx.lineTo(scl*point.x + xoff, scl*point.y + yoff);
             })
             ctx.stroke();
         }
     }
     bounds() {
-        let xmin = X / 2;
-        let xmax = X / 2;
-        let ymin = Y / 2;
-        let ymax = Y / 2;
+        let xmin = 0;
+        let xmax = 0;
+        let ymin = 0;
+        let ymax = 0;
         this.points.forEach(point => {
             xmin = Math.min(xmin, point.x);
             xmax = Math.max(xmax, point.x);
@@ -119,7 +119,7 @@ class Pair {
         ctx.textAlign = "center";
         ctx.font = txtSize + 'px sans-serif';
         ctx.textBaseline = "middle";
-        ctx.fillText(Math.round(this.moving.rat * this.moving.teeth), this.fixed.x - txtSize, this.fixed.y);
+        ctx.fillText(Math.round(this.moving.rat * this.moving.teeth), X/2 - txtSize, Y/2);
     }
     drawColInfo() {
         ctx.strokeStyle = this.color;
@@ -127,8 +127,8 @@ class Pair {
         ctx.textAlign = "center";
         ctx.font = txtSize + 'px sans-serif';
         ctx.textBaseline = "middle";
-        ctx.fillText(Math.round(this.hue), this.fixed.x - txtSize, this.fixed.y);
-        ctx.fillText(Math.round(this.lightness), this.fixed.x + txtSize, this.fixed.y);
+        ctx.fillText(Math.round(this.hue), X/2 - txtSize, Y/2);
+        ctx.fillText(Math.round(this.lightness), X / 2 + txtSize, Y / 2);
     }
     drawInfo() {
         ctx.strokeStyle = this.fixed.color;
@@ -136,13 +136,13 @@ class Pair {
         ctx.textAlign = "center";
         ctx.font = txtSize + 'px sans-serif';
         ctx.textBaseline = "middle";
-        ctx.fillText(this.fixed.teeth, this.fixed.x - txtSize, this.fixed.y - txtSize * 0.5);
-        ctx.fillText(this.moving.teeth, this.fixed.x - txtSize, this.fixed.y + txtSize * 0.5);
-        ctx.fillText(calcLCM(this.fixed.teeth, this.moving.teeth) / this.moving.teeth, this.fixed.x + txtSize, this.fixed.y);
+        ctx.fillText(this.fixed.teeth, X / 2 - txtSize, Y / 2 - txtSize * 0.5);
+        ctx.fillText(this.moving.teeth, X / 2 - txtSize, Y / 2 + txtSize * 0.5);
+        ctx.fillText(calcLCM(this.fixed.teeth, this.moving.teeth) / this.moving.teeth, X / 2 + txtSize, Y / 2);
 
         ctx.beginPath();
-        ctx.moveTo(this.fixed.x - txtSize * 2, this.fixed.y - txtSize * 0.08);
-        ctx.lineTo(this.fixed.x, this.fixed.y - txtSize * 0.08);
+        ctx.moveTo(X / 2 - txtSize * 2, Y / 2 - txtSize * 0.08);
+        ctx.lineTo(X / 2, Y / 2 - txtSize * 0.08);
         ctx.stroke();
     }
     penUp() {
@@ -167,7 +167,7 @@ class Pair {
         this.tracing = true;
     }
     update() {
-        this.roll(this.th + .05/Math.max(Math.abs(1-this.fixed.circ/this.moving.circ),.15) * this.auto);
+        this.roll(this.th + .05 / Math.max(Math.abs(1 - this.fixed.circ / this.moving.circ), .15) * this.auto);
     }
     nudge(n) {
         this.penUp()
@@ -251,12 +251,12 @@ class Pair {
         let y = m.y + Math.sin(m.th) * (m.rad * m.rat)
         return (new Point(x, y));
     }
-    drawTraces(ctx,xoff=0,yoff=0) {
+    drawTraces(ctx, xoff = X/2, yoff = Y/2,scl=1) {
         // console.log(xoff,yoff)
         this.traces.forEach(trace => {
-            trace.draw(ctx, xoff, yoff);
+            trace.draw(ctx, xoff, yoff,scl);
         })
-        this.trace.draw(ctx, xoff, yoff);
+        this.trace.draw(ctx, xoff, yoff,scl);
     }
     clear() {
         if (this.trace.points.length > 0) {
@@ -272,10 +272,10 @@ class Pair {
         }
     }
     getTracesBounds() {
-        let xmin = X / 2;
-        let xmax = X / 2;
-        let ymin = Y / 2;
-        let ymax = Y / 2;
+        let xmin = 0;
+        let xmax = 0;
+        let ymin = 0;
+        let ymax = 0;
         this.traces.forEach(trace => {
             // console.log(trace.bounds())
             xmin = Math.min(trace.bounds().xmin, xmin);
@@ -326,8 +326,8 @@ addEventListener("touchend", e => {
     { passive: false }
 );
 function pointerDownHandler(x, y) {
-    showUI=true;
-    showWheels=true;
+    showUI = true;
+    showWheels = true;
     let now = new Date().getTime();
     let timeSince = now - lastTouch;
     if (timeSince < 300) {
@@ -337,8 +337,35 @@ function pointerDownHandler(x, y) {
     lastTouch = now;
     cursor.x = x;
     cursor.y = y;
+    if (showShare & x > Xshare0 & x < (Xshare0 + Xshare) & y > Yshare0 & y < (Yshare0 + Yshare * 0.1)) {
+        showShare = false;
+    }
+    else if (showShare & shareButton.contains(x, y)) {
+        console.log("Share!")
+        clickCase = null;
+        if (timeSince > 500) {
+            shareImage();
+        }
+    }
+    else if (showShare & uploadButton.contains(x, y)) {
+        clickCase = null;
+        if (timeSince > 500) {
+            console.log("Upload!")
+            uploadImage();
+        }
+    }
+    else if (showShare & galleryButton.contains(x, y)) {
+        clickCase = null;
+        if (timeSince > 500) {
+            console.log("Gallery")
+            window.location.href='/gallery.html'
+        }
+    }
 
-    if (y > .5 * Y & y < (Y - uiY)) {
+    else if (showShare & x > Xshare0 & x < (Xshare0 + Xshare) & y > Yshare0 & y < (Yshare0 + Yshare)) {
+        clickCase = null;
+    }
+    else if (y > .5 * Y & y < (Y - uiY)) {
         clickCase = "autoCW";
     }
     else if (y > uiY & y < 0.5 * Y) {
@@ -404,7 +431,7 @@ function pointerDownHandler(x, y) {
         showColInfo = true;
     }
 
-    else if ((x - pair.moving.x) ** 2 + (y - pair.moving.y) ** 2 < pair.moving.rad ** 2) {
+    else if ((x - (pair.moving.x+X/2)) ** 2 + (y - (pair.moving.y+Y/2)) ** 2 < pair.moving.rad ** 2) {
         mselect = "moving";
         showInfo = false;
     }
@@ -414,11 +441,11 @@ function pointerDownHandler(x, y) {
 
     }
     mouseDown = true;
-    thDragSt = Math.atan2(y - pair.fixed.y, x - pair.fixed.x);
+    thDragSt = Math.atan2(y - Y/2, x - X/2);
 }
 function pointerMoveHandler(x, y) {
     if (mouseDown & mselect == "moving" & !pair.auto) {
-        dthDrag = Math.atan2(y - pair.fixed.y, x - pair.fixed.x) - thDragSt;
+        dthDrag = Math.atan2(y - Y / 2, x - X / 2) - thDragSt;
         if (dthDrag < Math.PI) {
             dthDrag += PI2;
         }
@@ -426,7 +453,7 @@ function pointerMoveHandler(x, y) {
             dthDrag -= PI2;
         }
         pair.roll(pair.th + dthDrag);
-        thDragSt = Math.atan2(y - pair.fixed.y, x - pair.fixed.x);
+        thDragSt = Math.atan2(y - Y / 2, x - X / 2);
     }
     if (mouseDown & mselect == "rat") {
         showWheelsOverride = true;
@@ -439,7 +466,7 @@ function pointerMoveHandler(x, y) {
         showWheelsOverride = true;
         pair.penUp();
         pair.moving.teeth = Math.round(Math.min(maxWheelSize, Math.max(movTeeth0 - (y - cursor.y) / 10, minWheelSize)));
-        if (pair.moving.teeth == pair.fixed.teeth){
+        if (pair.moving.teeth == pair.fixed.teeth) {
             pair.moving.teeth--;
         }
         pair.moving.circ = pair.moving.teeth * pixPertooth;
@@ -534,7 +561,7 @@ function doubleClickHandler(clickCase) {
         pair.inOut();
     }
     if (clickCase == "share") {
-        showShare=true;
+        showShare = true;
         // shareImage();
     }
 }
@@ -547,7 +574,6 @@ function calcLCM(a, b) { //lowest common multiple
         min++;
     }
 }
-
 function drawUI() {
     // ctx.strokeStyle = this.fixed.color;
     // ctx.fillStyle = this.fixed.color;
@@ -651,28 +677,36 @@ function anim() {
     if (showColInfo) {
         pair.drawColInfo();
     }
+    if (showShare) {
+        drawShareMenu();
+    }
 
 
 }
-function shareImage() {
+function drawSquareFullImage(n=500) {
     pair.penUp();
     let tracesBounds = pair.getTracesBounds();
-    let size = (shareBorderfrac+1)* Math.max(
+    let size = (shareBorderfrac + 1) * Math.max(
         tracesBounds.xmax - tracesBounds.xmin,
         tracesBounds.ymax - tracesBounds.ymin
     )
-    let xoff = -tracesBounds.xmin + (size - (tracesBounds.xmax - tracesBounds.xmin)) / 2;
-    let yoff = - tracesBounds.ymin+ (size - (tracesBounds.ymax - tracesBounds.ymin)) / 2;
+    scl=n/size;
+    let xoff = scl*(-tracesBounds.xmin + (size - (tracesBounds.xmax - tracesBounds.xmin)) / 2);
+    let yoff = scl*(- tracesBounds.ymin + (size - (tracesBounds.ymax - tracesBounds.ymin)) / 2);
 
-    console.log(size,xoff,yoff);
+    console.log(size, xoff, yoff,scl);
     var canvasSh = document.createElement('canvas');
-    canvasSh.width = size;
-    canvasSh.height = size;
+    canvasSh.width = n;
+    canvasSh.height = n;
     var ctxSh = canvasSh.getContext('2d');
     ctxSh.fillStyle = bgFillStyle;
     ctxSh.fillRect(0, 0, canvasSh.width, canvasSh.height);
-    pair.drawTraces(ctxSh,xoff,yoff);
-    canvasSh.toBlob(function (blob) {
+    pair.drawTraces(ctxSh, xoff, yoff,scl);
+    return (canvasSh)
+}
+function shareImage() {
+    canvasSq = drawSquareFullImage(1200);
+    canvasSq.toBlob(function (blob) {
         const filesArray = [
             new File(
                 [blob],
@@ -689,16 +723,103 @@ function shareImage() {
         navigator.share(shareData)
     })
 }
+function uploadImage() {
+    canvasSq = drawSquareFullImage(600);
+    canvasSq.toBlob(function (blob) {
+        imgFile = new File(
+            [blob],
+            "canvas.png",
+            {
+                type: "image/png",
+                lastModified: new Date().getTime()
+            }
+        )
+        let formData = new FormData();
+        formData.append('name', 'JStest');
+        formData.append('comment', 'JStest comment');
+        formData.append('file', imgFile, "upload.png");
+        console.log(formData)
+
+        // fetch('http://localhost:5000/', {
+        fetch('https://spiralator-api.herokuapp.com/upload_image', {
+            method: 'POST',
+            // WARNING!!!! DO NOT set Content Type!
+            // headers: { 'Content-Type': 'multipart/form-data' },
+            body: formData,
+        }).then(response => response.json())
+            .then(data => console.log(data));;
+    })
+}
 // function setScale(pair) {
 //     let minSpace=Math.min(X/2,(Y-2*uiY)/2);
-//     let maxRad=Math.max(pair.fixed.rad,pair.moving.rad);
+//     let maxRad=Math.max(pair.fixed.teeth,pair.moving.teeth);
 //     pixPertooth=20*minSpace/maxRad;
 // }
+function drawShareMenu() {
+
+
+    ctx.beginPath();
+    ctx.fillStyle = bgFillStyleAlpha;
+    ctx.fillRect(0, 0, X, Y);
+
+    ctx.strokeStyle = pair.color;
+    ctx.rect(Xshare0, Yshare0, Xshare, Yshare);
+
+    ctx.fillStyle = bgFillStyle;
+    ctx.fillRect(Xshare0, Yshare0, Xshare, Yshare);
+
+    ctx.strokeStyle = pair.color;
+    ctx.rect(Xshare0, Yshare0, Xshare, Yshare);
+    ctx.stroke();
+
+    ctx.moveTo(Xshare0, Yshare0 + Yshare * .10);
+    ctx.lineTo(Xshare0 + Xshare, Yshare0 + Yshare * .10);
+    ctx.stroke();
+
+    ctx.moveTo(Xshare0 + Xshare * 0.46, Yshare0 + Yshare * 0.025);
+    ctx.lineTo(Xshare0 + Xshare * 0.54, Yshare0 + Yshare * 0.075);
+    ctx.stroke();
+    ctx.moveTo(Xshare0 + Xshare * 0.54, Yshare0 + Yshare * 0.025);
+    ctx.lineTo(Xshare0 + Xshare * 0.46, Yshare0 + Yshare * 0.075);
+    ctx.stroke();
+
+    shareButton.draw();
+    uploadButton.draw();
+    galleryButton.draw();
+
+}
+
+class Button {
+    constructor(y0, txt) {
+        this.x = Xshare0 + Xshare * 0.1
+        this.y = Yshare0 + Yshare * y0;
+        this.h = 0.1 * Yshare;
+        this.w = 0.8 * Xshare;
+        this.txt = txt
+    }
+    draw() {
+        ctx.moveTo(this.x, this.y);
+        ctx.lineTo(this.x + this.w, this.y);
+        ctx.lineTo(this.x + this.w, this.y + this.h);
+        ctx.lineTo(this.x, this.y + this.h);
+        ctx.lineTo(this.x, this.y);
+        ctx.stroke();
+        ctx.fillStyle = uiTextColor;
+        ctx.textAlign = "center";
+        ctx.font = txtSize / 4 + 'px sans-serif';
+        ctx.textBaseline = "middle";
+        ctx.lineWidth = baseLW;
+        ctx.fillText(this.txt, this.x + this.w / 2, this.y + this.h / 2);
+    }
+    contains(x, y) {
+        return (x > this.x & x < (this.x + this.w) & y > this.y & y < (this.y + this.h));
+    }
+
+}
 
 const canvas = document.getElementById("cw");
 const ctx = canvas.getContext("2d");
 const PI2 = Math.PI * 2;
-
 const cursor = {
     x: innerWidth / 2,
     y: innerHeight / 2,
@@ -715,12 +836,11 @@ let showUI = true;
 let rat0;
 let hue0;
 let lightness0;
-let movTeeth0; 
+let movTeeth0;
 let showInfo = false;
 let showRadInfo = false;
 let showColInfo = false;
-let shareNext = false;
-
+let showShare = false;
 
 const shareBorderfrac = 0.15;
 const txtSize = 60 * window.devicePixelRatio;
@@ -728,6 +848,7 @@ const baseLW = 1 * window.devicePixelRatio;
 let pixPertooth = 9 * window.devicePixelRatio;
 const hueInit = Math.random() * 360
 const bgFillStyle = "hsl(" + hueInit + ",100%,5%)";
+const bgFillStyleAlpha = "hsla(" + hueInit + ",100%,5%,.80)";
 const wheelColor = "white"
 const uiTextColor = "white"
 const maxWheelSize = 150;
@@ -740,14 +861,21 @@ canvas.width = innerWidth;
 let X = canvas.width;
 let Y = canvas.height;
 const uiY = 0.2 * Y;
+let Xshare = 200 * window.devicePixelRatio;
+let Yshare = 400 * window.devicePixelRatio;
+let Xshare0 = (X - Xshare) / 2;
+let Yshare0 = (Y - Yshare) / 2;
 
+shareButton = new Button(0.2, "Share Image");
+uploadButton = new Button(0.5, "Upload to Gallery");
+galleryButton = new Button(0.8, "View Gallery");
 
-ringSizes=[96,105]//,144,150]
-discSizes=[24,30,32,40,42,45,48,52,56,60,63,72,75,80,84]
+ringSizes = [96, 105]//,144,150]
+discSizes = [24, 30, 32, 40, 42, 45, 48, 52, 56, 60, 63, 72, 75, 80, 84]
 
 // console.log(Math.random())
 let fixedDisc = new Disc(ringSizes.random())
-let movingDisc = new MovingDisc(discSizes.random(),Math.random()/2+0.5);
+let movingDisc = new MovingDisc(discSizes.random(), Math.random() / 2 + 0.5);
 let pair = new Pair(fixedDisc, movingDisc)
 // setScale(pair);
 
