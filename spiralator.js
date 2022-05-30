@@ -1,3 +1,6 @@
+Array.prototype.random = function () {
+    return this[Math.floor((Math.random() * this.length))];
+}
 
 class Disc {
     constructor(
@@ -9,7 +12,7 @@ class Disc {
         this.circ = teeth * pixPertooth;
         this.rad = this.circ / PI2;
         this.color = 'white';
-        this.lw = baseLW;
+        this.lw = baseLW*1;
     }
     draw() {
         ctx.fillStyle = this.color;
@@ -22,12 +25,13 @@ class Disc {
 }
 class MovingDisc extends Disc {
     constructor(
-        teeth = 84,
+        teeth = 84,rat=0.7
     ) {
         super(teeth)
-        this.rat = .66;
+        this.rat = rat;
         this.th0 = 0;
-        this.th = 0;
+        this.th = 0; 
+        this.lw = baseLW * 2;
     }
     draw() {
         super.draw();
@@ -322,6 +326,8 @@ addEventListener("touchend", e => {
     { passive: false }
 );
 function pointerDownHandler(x, y) {
+    showUI=true;
+    showWheels=true;
     let now = new Date().getTime();
     let timeSince = now - lastTouch;
     if (timeSince < 300) {
@@ -522,6 +528,7 @@ function doubleClickHandler(clickCase) {
         pair.inOut();
     }
     if (clickCase == "share") {
+        // showShare=true;
         shareImage();
     }
 }
@@ -534,6 +541,7 @@ function calcLCM(a, b) { //lowest common multiple
         min++;
     }
 }
+
 function drawUI() {
     // ctx.strokeStyle = this.fixed.color;
     // ctx.fillStyle = this.fixed.color;
@@ -592,7 +600,7 @@ function drawUI() {
     ctx.fillStyle = uiTextColor;
 
     ctx.fillText('Share', (0.25 - 0.125) * X, uiY * .333 * .5)
-    ctx.fillText('Hide/Show', (0.25 - 0.125) * X, uiY * .333 + .666 * uiY * .5)
+    ctx.fillText('Hide', (0.25 - 0.125) * X, uiY * .333 + .666 * uiY * .5)
 
     ctx.fillText('Clear All', (0.50 - 0.125) * X, uiY * .333 * .5)
     ctx.fillText('Clear', (0.50 - 0.125) * X, uiY * .333 + .666 * uiY * .5)
@@ -602,7 +610,7 @@ function drawUI() {
     ctx.fillText('Nudge +', (0.75 - 0.125) * X, uiY * .333 + uiY / 6)
     ctx.fillText('Nudge -', (0.75 - 0.125) * X, uiY * .666 + uiY / 6)
 
-    ctx.fillText('In/Out', (1 - 0.125) * X, uiY * 0 + uiY / 6)
+    ctx.fillText('Invert', (1 - 0.125) * X, uiY * 0 + uiY / 6)
     ctx.fillText('Trace', (1 - 0.125) * X, uiY * .333 + .666 * uiY * .5)
 
     ctx.fillText('Radius', (0.25 - 0.125) * X, Y - uiY / 2)
@@ -613,6 +621,7 @@ function drawUI() {
 }
 function anim() {
     requestAnimationFrame(anim);
+    // setScale(pair)
     ctx.fillStyle = bgFillStyle;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     if (pair.auto & !showColInfo & !showInfo & !showRadInfo) {
@@ -663,7 +672,7 @@ function shareImage() {
                 [blob],
                 "canvas.png",
                 {
-                    type: "image/jpeg",
+                    type: "image/png",
                     lastModified: new Date().getTime()
                 }
             )
@@ -674,6 +683,11 @@ function shareImage() {
         navigator.share(shareData)
     })
 }
+// function setScale(pair) {
+//     let minSpace=Math.min(X/2,(Y-2*uiY)/2);
+//     let maxRad=Math.max(pair.fixed.rad,pair.moving.rad);
+//     pixPertooth=20*minSpace/maxRad;
+// }
 
 const canvas = document.getElementById("cw");
 const ctx = canvas.getContext("2d");
@@ -695,7 +709,7 @@ let showUI = true;
 let rat0;
 let hue0;
 let lightness0;
-let movTeeth0;
+let movTeeth0; 
 let showInfo = false;
 let showRadInfo = false;
 let showColInfo = false;
@@ -705,7 +719,7 @@ let shareNext = false;
 const shareBorderfrac = 0.15;
 const txtSize = 60 * window.devicePixelRatio;
 const baseLW = 1 * window.devicePixelRatio;
-const pixPertooth = 9 * window.devicePixelRatio;
+let pixPertooth = 9 * window.devicePixelRatio;
 const hueInit = Math.random() * 360
 const bgFillStyle = "hsl(" + hueInit + ",100%,5%)";
 const wheelColor = "white"
@@ -721,8 +735,14 @@ let X = canvas.width;
 let Y = canvas.height;
 const uiY = 0.2 * Y;
 
-let fixedDisc = new Disc(105)
-let movingDisc = new MovingDisc(70);
+
+ringSizes=[96,105]//,144,150]
+discSizes=[24,30,32,40,42,45,48,52,56,60,63,72,75,80,84]
+
+// console.log(Math.random())
+let fixedDisc = new Disc(ringSizes.random())
+let movingDisc = new MovingDisc(discSizes.random(),Math.random()/2+0.5);
 let pair = new Pair(fixedDisc, movingDisc)
+// setScale(pair);
 
 anim();
