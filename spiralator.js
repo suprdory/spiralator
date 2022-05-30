@@ -6,8 +6,8 @@ class Disc {
     constructor(
         teeth = 84,
     ) {
-        this.x = cursor.x;
-        this.y = cursor.y;
+        this.x = X/2;
+        this.y = Y/2;
         this.teeth = teeth;
         this.circ = teeth * pixPertooth;
         this.rad = this.circ / PI2;
@@ -167,7 +167,7 @@ class Pair {
         this.tracing = true;
     }
     update() {
-        this.move(this.th + dth * this.auto);
+        this.roll(this.th + .05/Math.max(Math.abs(1-this.fixed.circ/this.moving.circ),.15) * this.auto);
     }
     nudge(n) {
         this.penUp()
@@ -431,7 +431,7 @@ function pointerMoveHandler(x, y) {
     if (mouseDown & mselect == "rat") {
         showWheelsOverride = true;
         pair.penUp();
-        pair.moving.rat = Math.min(maxDrawRadiusRatio, Math.max(rat0 - (y - cursor.y) / 200, 0))
+        pair.moving.rat = Math.min(maxDrawRadiusRatio, Math.max(rat0 - (y - cursor.y) * 0.002, 0))
         pair.penDown();
 
     }
@@ -439,6 +439,9 @@ function pointerMoveHandler(x, y) {
         showWheelsOverride = true;
         pair.penUp();
         pair.moving.teeth = Math.round(Math.min(maxWheelSize, Math.max(movTeeth0 - (y - cursor.y) / 10, minWheelSize)));
+        if (pair.moving.teeth == pair.fixed.teeth){
+            pair.moving.teeth--;
+        }
         pair.moving.circ = pair.moving.teeth * pixPertooth;
         pair.moving.rad = pair.moving.circ / PI2;
         pair.move(pair.th);
@@ -449,6 +452,9 @@ function pointerMoveHandler(x, y) {
         showWheelsOverride = true;
         pair.penUp();
         pair.fixed.teeth = Math.round(Math.min(maxWheelSize, Math.max(movTeeth0 - (y - cursor.y) / 10, minWheelSize)));
+        if (pair.moving.teeth == pair.fixed.teeth) {
+            pair.fixed.teeth--;
+        }
         pair.fixed.circ = pair.fixed.teeth * pixPertooth;
         pair.fixed.rad = pair.fixed.circ / PI2;
 
@@ -528,8 +534,8 @@ function doubleClickHandler(clickCase) {
         pair.inOut();
     }
     if (clickCase == "share") {
-        // showShare=true;
-        shareImage();
+        showShare=true;
+        // shareImage();
     }
 }
 function calcLCM(a, b) { //lowest common multiple
