@@ -724,7 +724,7 @@ function shareImage() {
     })
 }
 function uploadImage() {
-    canvasSq = drawSquareFullImage(600);
+    canvasSq = drawSquareFullImage(800);
     canvasSq.toBlob(function (blob) {
         imgFile = new File(
             [blob],

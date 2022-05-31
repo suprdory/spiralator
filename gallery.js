@@ -6,7 +6,7 @@ function add_image(n) {
 
     const image = document.createElement('img');
     image.src = galleryAPIurl + '/get_image?n=' + n;
-    image.width="600"
+    image.width="800"
     // image.style.cssText =
     //     'margin-left: auto; margin-right: auto;';
     
