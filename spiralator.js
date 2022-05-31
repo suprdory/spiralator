@@ -14,12 +14,12 @@ class Disc {
         this.color = 'white';
         this.lw = baseLW * 1;
     }
-    draw(xoff=X/2,yoff=Y/2,scl=1) {
+    draw(xoff = X / 2, yoff = Y / 2, scl = 1) {
         ctx.fillStyle = this.color;
         ctx.strokeStyle = this.color;
         ctx.lineWidth = this.lw;
         ctx.beginPath();
-        ctx.arc((scl*this.x)+xoff, yoff+(scl*this.y), scl*this.rad, 0, PI2);
+        ctx.arc((scl * this.x) + xoff, yoff + (scl * this.y), scl * this.rad, 0, PI2);
         ctx.stroke();
     }
 }
@@ -62,14 +62,14 @@ class Trace {
         this.color = "hsl(" + pair.hue + "," + pair.saturation + "%," + pair.lightness + "%)";
         this.thickness = baseLW;
     }
-    draw(ctx, xoff = X/2, yoff = Y/2,scl=1) {
+    draw(ctx, xoff = X / 2, yoff = Y / 2, scl = 1) {
         if (this.points.length > 0) {
             ctx.beginPath();
             ctx.strokeStyle = this.color;
             ctx.lineWidth = this.thickness;
-            ctx.moveTo(scl*this.points[0].x + xoff, scl*this.points[0].y + yoff);
+            ctx.moveTo(scl * this.points[0].x + xoff, scl * this.points[0].y + yoff);
             this.points.forEach(point => {
-                ctx.lineTo(scl*point.x + xoff, scl*point.y + yoff);
+                ctx.lineTo(scl * point.x + xoff, scl * point.y + yoff);
             })
             ctx.stroke();
         }
@@ -119,7 +119,7 @@ class Pair {
         ctx.textAlign = "center";
         ctx.font = txtSize + 'px sans-serif';
         ctx.textBaseline = "middle";
-        ctx.fillText(Math.round(this.moving.rat * this.moving.teeth), X/2 - txtSize, Y/2);
+        ctx.fillText(Math.round(this.moving.rat * this.moving.teeth), X / 2 - txtSize, Y / 2);
     }
     drawColInfo() {
         ctx.strokeStyle = this.color;
@@ -127,7 +127,7 @@ class Pair {
         ctx.textAlign = "center";
         ctx.font = txtSize + 'px sans-serif';
         ctx.textBaseline = "middle";
-        ctx.fillText(Math.round(this.hue), X/2 - txtSize, Y/2);
+        ctx.fillText(Math.round(this.hue), X / 2 - txtSize, Y / 2);
         ctx.fillText(Math.round(this.lightness), X / 2 + txtSize, Y / 2);
     }
     drawInfo() {
@@ -251,12 +251,12 @@ class Pair {
         let y = m.y + Math.sin(m.th) * (m.rad * m.rat)
         return (new Point(x, y));
     }
-    drawTraces(ctx, xoff = X/2, yoff = Y/2,scl=1) {
+    drawTraces(ctx, xoff = X / 2, yoff = Y / 2, scl = 1) {
         // console.log(xoff,yoff)
         this.traces.forEach(trace => {
-            trace.draw(ctx, xoff, yoff,scl);
+            trace.draw(ctx, xoff, yoff, scl);
         })
-        this.trace.draw(ctx, xoff, yoff,scl);
+        this.trace.draw(ctx, xoff, yoff, scl);
     }
     clear() {
         if (this.trace.points.length > 0) {
@@ -358,7 +358,7 @@ function pointerDownHandler(x, y) {
         clickCase = null;
         if (timeSince > 500) {
             console.log("Gallery")
-            window.location.href='gallery.html'
+            window.location.href = 'gallery.html'
         }
     }
 
@@ -431,7 +431,7 @@ function pointerDownHandler(x, y) {
         showColInfo = true;
     }
 
-    else if ((x - (pair.moving.x+X/2)) ** 2 + (y - (pair.moving.y+Y/2)) ** 2 < pair.moving.rad ** 2) {
+    else if ((x - (pair.moving.x + X / 2)) ** 2 + (y - (pair.moving.y + Y / 2)) ** 2 < pair.moving.rad ** 2) {
         mselect = "moving";
         showInfo = false;
     }
@@ -441,7 +441,7 @@ function pointerDownHandler(x, y) {
 
     }
     mouseDown = true;
-    thDragSt = Math.atan2(y - Y/2, x - X/2);
+    thDragSt = Math.atan2(y - Y / 2, x - X / 2);
 }
 function pointerMoveHandler(x, y) {
     if (mouseDown & mselect == "moving" & !pair.auto) {
@@ -686,33 +686,56 @@ function anim() {
 
 
 }
-function drawSquareFullImage(n=500) {
+function drawSquareFullImage(n = 500) {
     pair.penUp();
     let tracesBounds = pair.getTracesBounds();
     let size = (shareBorderfrac + 1) * Math.max(
         tracesBounds.xmax - tracesBounds.xmin,
         tracesBounds.ymax - tracesBounds.ymin
     )
-    scl=n/size;
-    let xoff = scl*(-tracesBounds.xmin + (size - (tracesBounds.xmax - tracesBounds.xmin)) / 2);
-    let yoff = scl*(- tracesBounds.ymin + (size - (tracesBounds.ymax - tracesBounds.ymin)) / 2);
+    scl = n / size;
+    let xoff = scl * (-tracesBounds.xmin + (size - (tracesBounds.xmax - tracesBounds.xmin)) / 2);
+    let yoff = scl * (- tracesBounds.ymin + (size - (tracesBounds.ymax - tracesBounds.ymin)) / 2);
 
-    console.log(size, xoff, yoff,scl);
+    console.log(size, xoff, yoff, scl);
     var canvasSh = document.createElement('canvas');
     canvasSh.width = n;
     canvasSh.height = n;
     var ctxSh = canvasSh.getContext('2d');
     ctxSh.fillStyle = bgFillStyle;
     ctxSh.fillRect(0, 0, canvasSh.width, canvasSh.height);
-    pair.drawTraces(ctxSh, xoff, yoff,scl);
+    pair.drawTraces(ctxSh, xoff, yoff, scl);
     return (canvasSh)
 }
 function shareImage() {
-    showWait=true;
-    canvasSq = drawSquareFullImage(1200);
-    canvasSq.toBlob(function (blob) {
-        const filesArray = [
-            new File(
+    if (pair.traces.length > 0) {
+        showWait = true;
+        canvasSq = drawSquareFullImage(1200);
+        canvasSq.toBlob(function (blob) {
+            const filesArray = [
+                new File(
+                    [blob],
+                    "canvas.png",
+                    {
+                        type: "image/png",
+                        lastModified: new Date().getTime()
+                    }
+                )
+            ];
+            const shareData = {
+                files: filesArray,
+            };
+            navigator.share(shareData)
+            showWait = false;
+        })
+    }
+}
+function uploadImage() {
+    if (pair.traces.length > 0) {
+        showWait = true;
+        canvasSq = drawSquareFullImage(800);
+        canvasSq.toBlob(function (blob) {
+            imgFile = new File(
                 [blob],
                 "canvas.png",
                 {
@@ -720,43 +743,24 @@ function shareImage() {
                     lastModified: new Date().getTime()
                 }
             )
-        ];
-        const shareData = {
-            files: filesArray,
-        };
-        navigator.share(shareData)
-        showWait=false;
-    })
-}
-function uploadImage() {
-    showWait=true;
-    canvasSq = drawSquareFullImage(800);
-    canvasSq.toBlob(function (blob) {
-        imgFile = new File(
-            [blob],
-            "canvas.png",
-            {
-                type: "image/png",
-                lastModified: new Date().getTime()
-            }
-        )
-        let formData = new FormData();
-        formData.append('name', 'JStest');
-        formData.append('comment', 'JStest comment');
-        formData.append('file', imgFile, "upload.png");
-        console.log(formData)
+            let formData = new FormData();
+            formData.append('name', 'JStest');
+            formData.append('comment', 'JStest comment');
+            formData.append('file', imgFile, "upload.png");
+            console.log(formData)
 
-        fetch(galleryAPIurl + '/upload_image', {
-            method: 'POST',
-            // WARNING!!!! DO NOT set Content Type!
-            // headers: { 'Content-Type': 'multipart/form-data' },
-            body: formData,
-        }).then(response => response.json())
-            .then(data => {
-                console.log(data);
-                showWait=false;
-            });
-    })
+            fetch(galleryAPIurl + '/upload_image', {
+                method: 'POST',
+                // WARNING!!!! DO NOT set Content Type!
+                // headers: { 'Content-Type': 'multipart/form-data' },
+                body: formData,
+            }).then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    showWait = false;
+                });
+        })
+    }
 }
 // function setScale(pair) {
 //     let minSpace=Math.min(X/2,(Y-2*uiY)/2);
@@ -824,8 +828,8 @@ class Button {
 
 }
 
-function drawWait(){
-    
+function drawWait() {
+
     // ctx.fillStyle = bgFillStyleAlpha;
     // ctx.fillRect(0, 0, X, Y);
 
@@ -878,7 +882,7 @@ let showInfo = false;
 let showRadInfo = false;
 let showColInfo = false;
 let showShare = false;
-let showWait= false;
+let showWait = false;
 
 const shareBorderfrac = 0.15;
 const txtSize = 60 * window.devicePixelRatio;
