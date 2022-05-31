@@ -741,7 +741,7 @@ function uploadImage() {
         console.log(formData)
 
         // fetch('http://localhost:5000/', {
-        fetch('https://spiralator-api.herokuapp.com/upload_image', {
+        fetch(galleryAPIurl + '/upload_image', {
             method: 'POST',
             // WARNING!!!! DO NOT set Content Type!
             // headers: { 'Content-Type': 'multipart/form-data' },
