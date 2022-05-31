@@ -680,6 +680,9 @@ function anim() {
     if (showShare) {
         drawShareMenu();
     }
+    if (showWait) {
+        drawWait();
+    }
 
 
 }
@@ -705,6 +708,7 @@ function drawSquareFullImage(n=500) {
     return (canvasSh)
 }
 function shareImage() {
+    showWait=true;
     canvasSq = drawSquareFullImage(1200);
     canvasSq.toBlob(function (blob) {
         const filesArray = [
@@ -721,9 +725,11 @@ function shareImage() {
             files: filesArray,
         };
         navigator.share(shareData)
+        showWait=false;
     })
 }
 function uploadImage() {
+    showWait=true;
     canvasSq = drawSquareFullImage(800);
     canvasSq.toBlob(function (blob) {
         imgFile = new File(
@@ -740,14 +746,16 @@ function uploadImage() {
         formData.append('file', imgFile, "upload.png");
         console.log(formData)
 
-        // fetch('http://localhost:5000/', {
         fetch(galleryAPIurl + '/upload_image', {
             method: 'POST',
             // WARNING!!!! DO NOT set Content Type!
             // headers: { 'Content-Type': 'multipart/form-data' },
             body: formData,
         }).then(response => response.json())
-            .then(data => console.log(data));;
+            .then(data => {
+                console.log(data);
+                showWait=false;
+            });
     })
 }
 // function setScale(pair) {
@@ -756,8 +764,6 @@ function uploadImage() {
 //     pixPertooth=20*minSpace/maxRad;
 // }
 function drawShareMenu() {
-
-
     ctx.beginPath();
     ctx.fillStyle = bgFillStyleAlpha;
     ctx.fillRect(0, 0, X, Y);
@@ -798,6 +804,7 @@ class Button {
         this.txt = txt
     }
     draw() {
+        ctx.beginPath();
         ctx.moveTo(this.x, this.y);
         ctx.lineTo(this.x + this.w, this.y);
         ctx.lineTo(this.x + this.w, this.y + this.h);
@@ -814,6 +821,36 @@ class Button {
     contains(x, y) {
         return (x > this.x & x < (this.x + this.w) & y > this.y & y < (this.y + this.h));
     }
+
+}
+
+function drawWait(){
+    
+    // ctx.fillStyle = bgFillStyleAlpha;
+    // ctx.fillRect(0, 0, X, Y);
+
+    // ctx.strokeStyle = pair.color;
+    // ctx.rect(Xshare0, Yshare0, Xshare, Yshare);
+    ctx.beginPath();
+    ctx.fillStyle = bgFillStyle;
+    ctx.fillRect(Xshare0, Yshare0, Xshare, Yshare);
+
+    ctx.strokeStyle = pair.color;
+    ctx.rect(Xshare0, Yshare0, Xshare, Yshare);
+    ctx.stroke();
+
+    // ctx.moveTo(Xshare0, Yshare0 + Yshare * .10);
+    // ctx.lineTo(Xshare0 + Xshare, Yshare0 + Yshare * .10);
+    // ctx.stroke();
+
+    ctx.fillStyle = uiTextColor;
+    ctx.textAlign = "center";
+    ctx.font = txtSize / 4 + 'px sans-serif';
+    ctx.textBaseline = "middle";
+    ctx.lineWidth = baseLW;
+    ctx.fillText('Please wait...', Xshare0 + Xshare / 2, Yshare0 + Yshare / 2);
+
+
 
 }
 
@@ -841,6 +878,7 @@ let showInfo = false;
 let showRadInfo = false;
 let showColInfo = false;
 let showShare = false;
+let showWait= false;
 
 const shareBorderfrac = 0.15;
 const txtSize = 60 * window.devicePixelRatio;

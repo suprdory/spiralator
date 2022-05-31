@@ -5,8 +5,11 @@ function add_image(n) {
     'text-align:center;';
 
     const image = document.createElement('img');
+    image.loading = "lazy"
     image.src = galleryAPIurl + '/get_image?n=' + n;
-    image.width="800"
+    // image.onerror = "this.onerror=null;this.src='/home/metatron/projects/spiralator/img/android-icon-192x192.png';"
+    // image.width="800"
+
     // image.style.cssText =
     //     'margin-left: auto; margin-right: auto;';
     
@@ -14,6 +17,6 @@ function add_image(n) {
     document.body.appendChild(elemDiv);
 }
 
-for (let i=0;i<5;i++){
+for (let i=0;i<20;i++){
     add_image(i)
 }
