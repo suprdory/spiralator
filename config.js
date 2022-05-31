@@ -1,0 +1,1 @@
+const galleryAPIurl ='https://spiralator-api.herokuapp.com'
