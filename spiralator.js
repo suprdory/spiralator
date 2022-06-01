@@ -828,6 +828,7 @@ class Button {
 
 }
 
+
 function drawWait() {
 
     // ctx.fillStyle = bgFillStyleAlpha;
@@ -857,6 +858,57 @@ function drawWait() {
 
 
 }
+
+class PButton {
+    constructor(x, y, w, h, txt, fun) {
+        this.x = x;
+        this.y = y;
+        this.w = X;
+        this.h = h;
+        this.txt = txt;
+        this.fun = fun;
+    }
+    draw() {
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y);
+        ctx.lineTo(this.x + this.w, this.y);
+        ctx.lineTo(this.x + this.w, this.y + this.h);
+        ctx.lineTo(this.x, this.y + this.h);
+        ctx.lineTo(this.x, this.y);
+        ctx.stroke();
+        ctx.fillStyle = uiTextColor;
+        ctx.textAlign = "center";
+        ctx.font = txtSize / 4 + 'px sans-serif';
+        ctx.textBaseline = "middle";
+        ctx.lineWidth = baseLW;
+        ctx.fillText(this.txt, this.x + this.w / 2, this.y + this.h / 2);
+    }
+    contains(x, y) {
+        return (x > this.x & x < (this.x + this.w) & y > this.y & y < (this.y + this.h));
+    }
+}
+
+class Panel {
+    constructor() {
+        this.active = true;
+        this.x = 0;
+        this.y = 0;
+        this.w = X;
+        this.h = uiY;
+        this.buttonArray = [];
+    }
+
+}
+
+function createPanel(){
+    
+}
+
+function buttonTest(txt) {
+    console.log("Button test:", txt);
+}
+
+
 
 const canvas = document.getElementById("cw");
 const ctx = canvas.getContext("2d");
