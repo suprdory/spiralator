@@ -358,31 +358,8 @@ function pointerDownHandler(x, y) {
     }
 
 
-    if (y > (Y - uiY) & x < X * .25) {
-        mselect = "rat";
-        rat0 = pair.moving.rat;
-        showRadInfo = true;
-    }
-    else if (y > (Y - uiY) & x > X * .25 & x < 0.5 * X) {
-        mselect = "movTeeth";
-        movTeeth0 = pair.moving.teeth;
-        showInfo = true;
-    }
-    else if (y > (Y - uiY) & x > X * .5 & x < 0.75 * X) {
-        mselect = "fixedTeeth";
-        movTeeth0 = pair.fixed.teeth;
-        showInfo = true;
-    }
-    else if (y > (Y - uiY) & x > X * .75 & x < 1.0 * X) {
-        mselect = "color";
-        pair.fixed.color = pair.color;
-        pair.moving.color = pair.color;
-        hue0 = pair.hue;
-        lightness0 = pair.lightness;
-        showColInfo = true;
-    }
 
-    else if ((x - (pair.moving.x + X / 2)) ** 2 + (y - (pair.moving.y + Y / 2)) ** 2 < pair.moving.rad ** 2) {
+    if ((x - (pair.moving.x + X / 2)) ** 2 + (y - (pair.moving.y + Y / 2)) ** 2 < pair.moving.rad ** 2) {
         mselect = "moving";
         // showInfo = false;
     }
@@ -395,7 +372,20 @@ function pointerDownHandler(x, y) {
     thDragSt = Math.atan2(y - Y / 2, x - X / 2);
 }
 function pointerMoveHandler(x, y) {
-    panelArray.forEach(panel => panel.pointerMove(x, y))
+    panelArray.forEach(panel => panel.pointerMove(x, y));
+    if (mouseDown & mselect == "moving" & !pair.auto) {
+        dthDrag = Math.atan2(y - Y / 2, x - X / 2) - thDragSt;
+        if (dthDrag < Math.PI) {
+            dthDrag += PI2;
+        }
+        if (dthDrag > Math.PI) {
+            dthDrag -= PI2;
+        }
+        pair.roll(pair.th + dthDrag);
+        thDragSt = Math.atan2(y - Y / 2, x - X / 2);
+    }
+
+
 }
 function pointerUpHandler(x, y) {
     mouseDown = false;
@@ -417,7 +407,6 @@ function doubleClickHandler(clickCase) {
         pair.auto = 1;
     }
 }
-
 function calcLCM(a, b) { //lowest common multiple
     let min = (a > b) ? a : b;
     while (min < 1000000) {
@@ -503,43 +492,6 @@ function uploadImage() {
         })
     }
 }
-// function setScale(pair) {
-//     let minSpace=Math.min(X/2,(Y-2*uiY)/2);
-//     let maxRad=Math.max(pair.fixed.teeth,pair.moving.teeth);
-//     pixPertooth=20*minSpace/maxRad;
-// }
-
-function anim() {
-    requestAnimationFrame(anim);
-    // setScale(pair)
-    ctx.fillStyle = bgFillStyle;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    if (pair.auto & !showColInfo & !showInfo & !showRadInfo) {
-        pair.update();
-    }
-    pair.drawTraces(ctx);
-
-    if (showWheels | showWheelsOverride) {
-        pair.fixed.draw();
-        pair.moving.draw();
-    }
-
-    panelArray.forEach(panel => panel.draw())
-
-    if (showInfo) {
-        pair.drawInfo();
-    }
-    if (showRadInfo) {
-        pair.drawRadInfo();
-    }
-    if (showColInfo) {
-        pair.drawColInfo();
-    }
-
-
-}
-
-
 class PButton {
     constructor(panel, x, y, w, h, txt, fun, argObj, getXdragVar, getYdragVar, isDepressedFun) {
         this.x = panel.x + x * panel.w;
@@ -861,6 +813,34 @@ function createBottomPanel() {
 
     return panel;
 }
+function anim() {
+    requestAnimationFrame(anim);
+    ctx.fillStyle = bgFillStyle;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (pair.auto & !showColInfo & !showInfo & !showRadInfo) {
+        pair.update();
+    }
+    pair.drawTraces(ctx);
+
+    if (showWheels | showWheelsOverride) {
+        pair.fixed.draw();
+        pair.moving.draw();
+    }
+
+    panelArray.forEach(panel => panel.draw())
+
+    if (showInfo) {
+        pair.drawInfo();
+    }
+    if (showRadInfo) {
+        pair.drawRadInfo();
+    }
+    if (showColInfo) {
+        pair.drawColInfo();
+    }
+
+
+}
 
 const canvas = document.getElementById("cw");
 const ctx = canvas.getContext("2d");
@@ -882,7 +862,7 @@ let showColInfo = false;
 const shareBorderfrac = 0.15;
 const txtSize = 60 * window.devicePixelRatio;
 const baseLW = 1 * window.devicePixelRatio;
-let pixPertooth = 9 * window.devicePixelRatio;
+const pixPertooth = 9 * window.devicePixelRatio;
 const hueInit = Math.random() * 360
 const bgFillStyle = "hsl(" + hueInit + ",100%,5%)";
 const bgFillStyleAlpha = "hsla(" + hueInit + ",100%,5%,.80)";
@@ -913,8 +893,10 @@ topPanel = createTopPanel();
 sharePanel = createSharePanel();
 bottomPanel = createBottomPanel();
 panelArray = [topPanel, bottomPanel, sharePanel];
+
 //wake gallery server
 fetch(galleryAPIurl)
     .then(response => response.text())
     .then(data => console.log(data));
+
 anim();
