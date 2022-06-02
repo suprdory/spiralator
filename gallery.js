@@ -17,6 +17,6 @@ function add_image(n) {
     document.body.appendChild(elemDiv);
 }
 
-for (let i=0;i<20;i++){
+for (let i=0;i<40;i++){
     add_image(i)
 }
