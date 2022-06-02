@@ -305,7 +305,7 @@ addEventListener('mousemove', e => {
     }
 });
 addEventListener('mouseup', e => {
-    pointerUpHandler();
+    pointerUpHandler(e.offsetX, e.offsetY);
 });
 addEventListener("touchstart", e => {
     e.preventDefault();
@@ -321,11 +321,15 @@ addEventListener("touchmove", e => {
 );
 addEventListener("touchend", e => {
     e.preventDefault();
-    pointerUpHandler();
+    pointerUpHandler(e.changedTouches[0].pageX, e.changedTouches[0].pageY);
 },
     { passive: false }
 );
+
 function pointerDownHandler(x, y) {
+    
+    panel.pointerDown(x, y);
+
     showUI = true;
     showWheels = true;
     let now = new Date().getTime();
@@ -372,36 +376,6 @@ function pointerDownHandler(x, y) {
         clickCase = "autoCCW";
     }
 
-    else if (x < X * .25 & y < uiY * .333) {
-        clickCase = "share";
-    }
-    else if (x < X * .25 & y > uiY * .333 & y < uiY) {
-        clickCase = "hideUI";
-    }
-    else if (x > X * .25 & x < X * .5 & y > 0 & y < uiY * .333) {
-        clickCase = "clearAll";
-    }
-    else if (x > X * .25 & x < X * .5 & y > uiY * 0.33 & y < uiY) {
-        clickCase = "clear";
-    }
-
-    else if (x > X * .5 & x < X * .75 & y < uiY * .333) {
-        clickCase = "toStart";
-    }
-    else if (x > X * .5 & x < X * .75 & y > uiY / 3 & y < uiY * 2 / 3) {
-        clickCase = "nudgeUp";
-    }
-    else if (x > X * .5 & x < X * .75 & y > uiY * 2 / 3 & y < uiY * 3 / 3) {
-        clickCase = "nudgeDown";
-    }
-
-    else if (x > X * .75 & y < uiY * .333) {
-        clickCase = "inOut";
-    }
-    else if (x > X * .75 & y > uiY * .333 & y < uiY) {
-        clickCase = "fullTrace";
-    }
-
     else {
         clickCase = null;
     }
@@ -444,6 +418,7 @@ function pointerDownHandler(x, y) {
     thDragSt = Math.atan2(y - Y / 2, x - X / 2);
 }
 function pointerMoveHandler(x, y) {
+    panel.pointerMove(x, y);
     if (mouseDown & mselect == "moving" & !pair.auto) {
         dthDrag = Math.atan2(y - Y / 2, x - X / 2) - thDragSt;
         if (dthDrag < Math.PI) {
@@ -514,7 +489,7 @@ function pointerMoveHandler(x, y) {
         pair.penDown();
     }
 }
-function pointerUpHandler() {
+function pointerUpHandler(x, y) {
     mouseDown = false;
     showWheelsOverride = false;
     showInfo = false;
@@ -522,6 +497,8 @@ function pointerUpHandler() {
     showColInfo = false;
     pair.fixed.color = wheelColor;
     pair.moving.color = wheelColor;
+
+    panel.pointerUp(x, y);
 
 }
 function doubleClickHandler(clickCase) {
@@ -535,36 +512,8 @@ function doubleClickHandler(clickCase) {
     else if (clickCase == "autoCW") {
         pair.auto = 1;
     }
-    if (clickCase == "hideUI") {
-        showUI = !showUI;
-        showWheels = !showWheels;
     }
-    if (clickCase == "fullTrace") {
-        pair.fullTrace();
-    }
-    if (clickCase == "toStart") {
-        pair.reset();
-    }
-    if (clickCase == "clear") {
-        pair.clear();
-    }
-    if (clickCase == "clearAll") {
-        pair.clearAll();
-    }
-    if (clickCase == "nudgeUp") {
-        pair.nudge(1);
-    }
-    if (clickCase == "nudgeDown") {
-        pair.nudge(-1);
-    }
-    if (clickCase == "inOut") {
-        pair.inOut();
-    }
-    if (clickCase == "share") {
-        showShare = true;
-        // shareImage();
-    }
-}
+
 function calcLCM(a, b) { //lowest common multiple
     let min = (a > b) ? a : b;
     while (min < 1000000) {
@@ -575,46 +524,18 @@ function calcLCM(a, b) { //lowest common multiple
     }
 }
 function drawUI() {
-    // ctx.strokeStyle = this.fixed.color;
-    // ctx.fillStyle = this.fixed.color;
+
     ctx.textAlign = "center";
     ctx.font = txtSize / 4 + 'px sans-serif';
     ctx.textBaseline = "middle";
     ctx.lineWidth = baseLW;
     ctx.strokeStyle = pair.color;
     ctx.beginPath()
-    ctx.moveTo(0, uiY);
-    ctx.lineTo(X, uiY);
-    ctx.stroke();
+
     ctx.beginPath()
     ctx.moveTo(0, Y - uiY);
     ctx.lineTo(X, Y - uiY);
     ctx.stroke();
-
-    ctx.beginPath()
-    ctx.moveTo(0.00 * X, uiY * .333);
-    ctx.lineTo(1.00 * X, uiY * .333);
-    ctx.stroke();
-
-
-    ctx.beginPath()
-    ctx.moveTo(0.5 * X, uiY * .666);
-    ctx.lineTo(0.75 * X, uiY * .666);
-    ctx.stroke();
-
-    ctx.beginPath()
-    ctx.moveTo(0.25 * X, 0);
-    ctx.lineTo(0.25 * X, uiY);
-    ctx.stroke();
-    ctx.beginPath()
-    ctx.moveTo(0.5 * X, 0);
-    ctx.lineTo(0.5 * X, uiY);
-    ctx.stroke();
-    ctx.beginPath()
-    ctx.moveTo(0.75 * X, 0);
-    ctx.lineTo(0.75 * X, uiY);
-    ctx.stroke();
-
 
     ctx.beginPath()
     ctx.moveTo(0.25 * X, Y);
@@ -629,63 +550,12 @@ function drawUI() {
     ctx.lineTo(0.75 * X, Y - uiY);
     ctx.stroke();
 
-    ctx.fillStyle = uiTextColor;
-
-    ctx.fillText('Share', (0.25 - 0.125) * X, uiY * .333 * .5)
-    ctx.fillText('Hide', (0.25 - 0.125) * X, uiY * .333 + .666 * uiY * .5)
-
-    ctx.fillText('Clear All', (0.50 - 0.125) * X, uiY * .333 * .5)
-    ctx.fillText('Clear', (0.50 - 0.125) * X, uiY * .333 + .666 * uiY * .5)
-
-
-    ctx.fillText('Reset', (0.75 - 0.125) * X, uiY * 0 + uiY / 6)
-    ctx.fillText('Nudge +', (0.75 - 0.125) * X, uiY * .333 + uiY / 6)
-    ctx.fillText('Nudge -', (0.75 - 0.125) * X, uiY * .666 + uiY / 6)
-
-    ctx.fillText('Invert', (1 - 0.125) * X, uiY * 0 + uiY / 6)
-    ctx.fillText('Trace', (1 - 0.125) * X, uiY * .333 + .666 * uiY * .5)
-
     ctx.fillText('Radius', (0.25 - 0.125) * X, Y - uiY / 2)
     ctx.fillText('Moving Disc', (0.50 - 0.125) * X, Y - uiY / 2)
     ctx.fillText('Fixed Disc', (0.75 - 0.125) * X, Y - uiY / 2)
     ctx.fillText('Colour', (1 - 0.125) * X, Y - uiY / 2)
-
 }
-function anim() {
-    requestAnimationFrame(anim);
-    // setScale(pair)
-    ctx.fillStyle = bgFillStyle;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    if (pair.auto & !showColInfo & !showInfo & !showRadInfo) {
-        pair.update();
-    }
-    pair.drawTraces(ctx);
 
-    if (showWheels | showWheelsOverride) {
-        pair.fixed.draw();
-        pair.moving.draw();
-    }
-    if (showUI) {
-        drawUI();
-    }
-    if (showInfo) {
-        pair.drawInfo();
-    }
-    if (showRadInfo) {
-        pair.drawRadInfo();
-    }
-    if (showColInfo) {
-        pair.drawColInfo();
-    }
-    if (showShare) {
-        drawShareMenu();
-    }
-    if (showWait) {
-        drawWait();
-    }
-
-
-}
 function drawSquareFullImage(n = 500) {
     pair.penUp();
     let tracesBounds = pair.getTracesBounds();
@@ -828,7 +698,6 @@ class Button {
 
 }
 
-
 function drawWait() {
 
     // ctx.fillStyle = bgFillStyleAlpha;
@@ -859,14 +728,55 @@ function drawWait() {
 
 }
 
+
+function anim() {
+    requestAnimationFrame(anim);
+    // setScale(pair)
+    ctx.fillStyle = bgFillStyle;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (pair.auto & !showColInfo & !showInfo & !showRadInfo) {
+        pair.update();
+    }
+    pair.drawTraces(ctx);
+
+    if (showWheels | showWheelsOverride) {
+        pair.fixed.draw();
+        pair.moving.draw();
+    }
+    if (showUI) {
+        drawUI();
+    }
+    panel.draw();
+
+    if (showInfo) {
+        pair.drawInfo();
+    }
+    if (showRadInfo) {
+        pair.drawRadInfo();
+    }
+    if (showColInfo) {
+        pair.drawColInfo();
+    }
+    if (showShare) {
+        drawShareMenu();
+    }
+    if (showWait) {
+        drawWait();
+    }
+
+}
+
+
 class PButton {
-    constructor(x, y, w, h, txt, fun) {
-        this.x = x;
-        this.y = y;
-        this.w = X;
-        this.h = h;
+    constructor(panel, x, y, w, h, txt, fun, argObj) {
+        this.x = panel.x + x * panel.w;
+        this.y = panel.y + y * panel.h;
+        this.w = w * panel.w;
+        this.h = h * panel.h;
         this.txt = txt;
         this.fun = fun;
+        this.argObj = argObj;
+        this.depressed = false;
     }
     draw() {
         ctx.beginPath();
@@ -876,6 +786,12 @@ class PButton {
         ctx.lineTo(this.x, this.y + this.h);
         ctx.lineTo(this.x, this.y);
         ctx.stroke();
+
+        if (this.depressed) {
+            ctx.fillStyle = pair.color;
+            ctx.fillRect(this.x, this.y, this.w, this.h)
+        }
+
         ctx.fillStyle = uiTextColor;
         ctx.textAlign = "center";
         ctx.font = txtSize / 4 + 'px sans-serif';
@@ -886,29 +802,124 @@ class PButton {
     contains(x, y) {
         return (x > this.x & x < (this.x + this.w) & y > this.y & y < (this.y + this.h));
     }
+    action() {
+        this.fun(this.argObj);
+    }
+    pointerDown(x, y) {
+        if (this.contains(x, y)) {
+            this.depressed = true;
+        }
+    }
+    pointerUp(x, y) {
+        if (this.depressed & this.contains(x, y)) {
+            this.action();
+        }
+        this.depressed = false;
+    }
+    pointerMove(x, y) {
+        if (!this.contains(x, y)) {
+            this.depressed = false;
+        }
+    }
 }
 
 class Panel {
-    constructor() {
+    constructor(x, y, w, h) {
         this.active = true;
-        this.x = 0;
-        this.y = 0;
-        this.w = X;
-        this.h = uiY;
+        this.x = x;
+        this.y = y;
+        this.w = w;
+        this.h = h;
         this.buttonArray = [];
+    }
+    draw() {
+        if (this.active){
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y);
+        ctx.lineTo(this.x + this.w, this.y);
+        ctx.lineTo(this.x + this.w, this.y + this.h);
+        ctx.lineTo(this.x, this.y + this.h);
+        ctx.lineTo(this.x, this.y);
+        ctx.stroke();
+
+        this.buttonArray.forEach(button => button.draw());
+        }
+    }
+    pointerDown(x, y) {
+        if (this.active) {
+            this.buttonArray.forEach(button => button.pointerDown(x, y))
+        }
+        this.active=true;
+    }
+    pointerUp(x, y) {
+        if (this.active) {
+            this.buttonArray.forEach(button => button.pointerUp(x, y))
+        }
+    }
+    pointerMove(x, y) {
+        if (this.active) {
+            this.buttonArray.forEach(button => button.pointerMove(x, y))
+        }
     }
 
 }
 
-function createPanel(){
-    
+function createPanel() {
+    let uiBorder = X / 100;
+    panel = new Panel(0 + uiBorder, +uiBorder, X - 2*uiBorder, uiY);
+
+    panel.buttonArray.push(
+        new PButton(panel, 0.0, 0, 0.25, 0.333, "Share", 
+        function () { showShare = true; })
+    );
+    panel.buttonArray.push(
+        new PButton(panel, 0.0, .333, 0.25, 0.666, "Hide", 
+        function () {
+            showUI = !showUI;
+            showWheels = !showWheels;
+            panel.active=false;
+        })
+    );
+
+    panel.buttonArray.push(
+        new PButton(panel, 0.25, .0, 0.25, 0.333, "Clear All",
+            function () { pair.clearAll() })
+    );
+    panel.buttonArray.push(
+        new PButton(panel, 0.25, .333, 0.25, 0.666, "Clear", 
+        function () { pair.clear(); })
+    );
+
+
+
+    panel.buttonArray.push(
+        new PButton(panel, 0.5, 0, 0.25, 0.333, "Reset", 
+        function () { return pair.reset(); })
+    );
+    panel.buttonArray.push(
+        new PButton(panel, 0.5, .333, 0.25, 0.333, "Nudge +", 
+        function () { return pair.nudge(1); })
+    );
+    panel.buttonArray.push(
+        new PButton(panel, 0.5, .666, 0.25, 0.333, "Nudge -", 
+        function () { return pair.nudge(-1); })
+    );
+
+    panel.buttonArray.push(
+        new PButton(panel, 0.75, 0, 0.25, 0.333, "Invert",
+            function () { pair.inOut(); })
+    );
+    panel.buttonArray.push(
+        new PButton(panel, 0.75, .333, 0.25, 0.666, "Trace",
+            function () { pair.fullTrace() })
+    );
+
+    return (panel)
 }
 
-function buttonTest(txt) {
-    console.log("Button test:", txt);
+function buttonTest(obj) {
+    console.log("Button test:", obj.txt);
 }
-
-
 
 const canvas = document.getElementById("cw");
 const ctx = canvas.getContext("2d");
@@ -973,4 +984,5 @@ let movingDisc = new MovingDisc(discSizes.random(), Math.random() / 2 + 0.5);
 let pair = new Pair(fixedDisc, movingDisc)
 // setScale(pair);
 
+panel=createPanel();
 anim();
