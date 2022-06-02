@@ -590,6 +590,7 @@ class Panel {
         if (this.active) {
             if (this.overlay) {
                 ctx.beginPath();
+                ctx.lineWidth=baseLW*1;
                 ctx.fillStyle = bgFillStyleAlpha;
                 ctx.fillRect(0, 0, X, Y);
                 ctx.fillStyle = bgFillStyle;
@@ -597,8 +598,10 @@ class Panel {
             }
             ctx.beginPath();
             ctx.strokeStyle=pair.color;
+            ctx.lineWidth = baseLW * 2;
             ctx.rect(this.x, this.y, this.w, this.h)
             ctx.stroke();
+            ctx.lineWidth = baseLW * 1;
             if (!this.wait) {
                 this.buttonArray.forEach(button => button.draw());
             }
@@ -657,12 +660,13 @@ function createTopPanel() {
     let uiBorder = X / 100;
     let panel = new Panel(0 + uiBorder, 0 + uiBorder, X - 2 * uiBorder, uiY);
     panel.anyClickActivates = true;
+    
     panel.buttonArray.push(
-        new PButton(panel, 0.0, 0, 0.25, 0.333, "Share",
+        new PButton(panel, 0.0, 0.0, 0.25, 0.333, "Share",
             function () { sharePanel.active = true; })
     );
     panel.buttonArray.push(
-        new PButton(panel, 0.0, .333, 0.25, 0.666, "Hide",
+        new PButton(panel, 0.0, 0.333, 0.25, 0.666, "Hide",
             function () {
                 showUI = !showUI;
                 showWheels = false;
