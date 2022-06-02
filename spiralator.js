@@ -49,6 +49,12 @@ class MovingDisc extends Disc {
             3 * baseLW, 0, PI2);
         ctx.fill();
     }
+    setRat(r) {
+        this.rat = r;
+    }
+    getRat() {
+        return (this.rat);
+    }
 }
 class Point {
     constructor(x, y) {
@@ -128,7 +134,7 @@ class Pair {
         ctx.font = txtSize + 'px sans-serif';
         ctx.textBaseline = "middle";
         ctx.fillText(Math.round(this.hue), X / 2 - txtSize, Y / 2);
-        ctx.fillText(Math.round(this.lightness), X / 2 + txtSize, Y / 2);
+        ctx.fillText(Math.round(this.lightness - 50), X / 2 + txtSize, Y / 2);
     }
     drawInfo() {
         ctx.strokeStyle = this.fixed.color;
@@ -327,11 +333,10 @@ addEventListener("touchend", e => {
 );
 
 function pointerDownHandler(x, y) {
-    
-    panel.pointerDown(x, y);
+    panelArray.forEach(panel => panel.pointerDown(x, y))
 
-    showUI = true;
     showWheels = true;
+    showUI = true;
     let now = new Date().getTime();
     let timeSince = now - lastTouch;
     if (timeSince < 300) {
@@ -341,41 +346,13 @@ function pointerDownHandler(x, y) {
     lastTouch = now;
     cursor.x = x;
     cursor.y = y;
-    if (showShare & x > Xshare0 & x < (Xshare0 + Xshare) & y > Yshare0 & y < (Yshare0 + Yshare * 0.1)) {
-        showShare = false;
-    }
-    else if (showShare & shareButton.contains(x, y)) {
-        console.log("Share!")
-        clickCase = null;
-        if (timeSince > 500) {
-            shareImage();
-        }
-    }
-    else if (showShare & uploadButton.contains(x, y)) {
-        clickCase = null;
-        if (timeSince > 500) {
-            console.log("Upload!")
-            uploadImage();
-        }
-    }
-    else if (showShare & galleryButton.contains(x, y)) {
-        clickCase = null;
-        if (timeSince > 500) {
-            console.log("Gallery")
-            window.location.href = 'gallery.html'
-        }
-    }
 
-    else if (showShare & x > Xshare0 & x < (Xshare0 + Xshare) & y > Yshare0 & y < (Yshare0 + Yshare)) {
-        clickCase = null;
-    }
-    else if (y > .5 * Y & y < (Y - uiY)) {
+    if (y > .5 * Y & y < (Y - uiY)) {
         clickCase = "autoCW";
     }
     else if (y > uiY & y < 0.5 * Y) {
         clickCase = "autoCCW";
     }
-
     else {
         clickCase = null;
     }
@@ -407,99 +384,26 @@ function pointerDownHandler(x, y) {
 
     else if ((x - (pair.moving.x + X / 2)) ** 2 + (y - (pair.moving.y + Y / 2)) ** 2 < pair.moving.rad ** 2) {
         mselect = "moving";
-        showInfo = false;
+        // showInfo = false;
     }
     else {
         mselect = null;
-        showInfo = false;
+        // showInfo = false;
 
     }
     mouseDown = true;
     thDragSt = Math.atan2(y - Y / 2, x - X / 2);
 }
 function pointerMoveHandler(x, y) {
-    panel.pointerMove(x, y);
-    if (mouseDown & mselect == "moving" & !pair.auto) {
-        dthDrag = Math.atan2(y - Y / 2, x - X / 2) - thDragSt;
-        if (dthDrag < Math.PI) {
-            dthDrag += PI2;
-        }
-        if (dthDrag > Math.PI) {
-            dthDrag -= PI2;
-        }
-        pair.roll(pair.th + dthDrag);
-        thDragSt = Math.atan2(y - Y / 2, x - X / 2);
-    }
-    if (mouseDown & mselect == "rat") {
-        showWheelsOverride = true;
-        pair.penUp();
-        pair.moving.rat = Math.min(maxDrawRadiusRatio, Math.max(rat0 - (y - cursor.y) * 0.002, 0))
-        pair.penDown();
-
-    }
-    if (mouseDown & mselect == "movTeeth") {
-        showWheelsOverride = true;
-        pair.penUp();
-        pair.moving.teeth = Math.round(Math.min(maxWheelSize, Math.max(movTeeth0 - (y - cursor.y) / 10, minWheelSize)));
-        if (pair.moving.teeth == pair.fixed.teeth) {
-            pair.moving.teeth--;
-        }
-        pair.moving.circ = pair.moving.teeth * pixPertooth;
-        pair.moving.rad = pair.moving.circ / PI2;
-        pair.move(pair.th);
-        pair.penDown();
-    }
-
-    if (mouseDown & mselect == "fixedTeeth") {
-        showWheelsOverride = true;
-        pair.penUp();
-        pair.fixed.teeth = Math.round(Math.min(maxWheelSize, Math.max(movTeeth0 - (y - cursor.y) / 10, minWheelSize)));
-        if (pair.moving.teeth == pair.fixed.teeth) {
-            pair.fixed.teeth--;
-        }
-        pair.fixed.circ = pair.fixed.teeth * pixPertooth;
-        pair.fixed.rad = pair.fixed.circ / PI2;
-
-        pair.fixed.outerTeeth = pair.fixed.teeth + pair.fixed.thickness;
-        pair.fixed.outerCirc = pair.fixed.outerTeeth * pixPertooth;
-        pair.fixed.outerRad = pair.fixed.outerCirc / PI2;
-
-        pair.move(pair.th);
-        pair.penDown();
-    }
-    if (mouseDown & mselect == "color") {
-        // showWheelsOverride = true;
-        pair.move(pair.th);
-        pair.penUpCont();
-
-        pair.hue = hue0 - (y - cursor.y) / 2;
-        if (pair.hue > 360) {
-            pair.hue -= 360;
-        }
-        if (pair.hue < 0) {
-            pair.hue += 360;
-        }
-
-        pair.lightness = Math.max(00, Math.min(100, lightness0 + (x - cursor.x) / 4));
-        pair.setColor();
-        pair.fixed.color = pair.color;
-        pair.moving.color = pair.color;
-        uiColor = pair.color;
-        pair.move(pair.th);
-        pair.penDown();
-    }
+    panelArray.forEach(panel => panel.pointerMove(x, y))
 }
 function pointerUpHandler(x, y) {
     mouseDown = false;
     showWheelsOverride = false;
-    showInfo = false;
-    showRadInfo = false;
-    showColInfo = false;
     pair.fixed.color = wheelColor;
     pair.moving.color = wheelColor;
 
-    panel.pointerUp(x, y);
-
+    panelArray.forEach(panel => panel.pointerUp(x, y))
 }
 function doubleClickHandler(clickCase) {
     console.log(clickCase)
@@ -512,7 +416,7 @@ function doubleClickHandler(clickCase) {
     else if (clickCase == "autoCW") {
         pair.auto = 1;
     }
-    }
+}
 
 function calcLCM(a, b) { //lowest common multiple
     let min = (a > b) ? a : b;
@@ -523,39 +427,6 @@ function calcLCM(a, b) { //lowest common multiple
         min++;
     }
 }
-function drawUI() {
-
-    ctx.textAlign = "center";
-    ctx.font = txtSize / 4 + 'px sans-serif';
-    ctx.textBaseline = "middle";
-    ctx.lineWidth = baseLW;
-    ctx.strokeStyle = pair.color;
-    ctx.beginPath()
-
-    ctx.beginPath()
-    ctx.moveTo(0, Y - uiY);
-    ctx.lineTo(X, Y - uiY);
-    ctx.stroke();
-
-    ctx.beginPath()
-    ctx.moveTo(0.25 * X, Y);
-    ctx.lineTo(0.25 * X, Y - uiY);
-    ctx.stroke();
-    ctx.beginPath()
-    ctx.moveTo(0.5 * X, Y);
-    ctx.lineTo(0.5 * X, Y - uiY);
-    ctx.stroke();
-    ctx.beginPath()
-    ctx.moveTo(0.75 * X, Y);
-    ctx.lineTo(0.75 * X, Y - uiY);
-    ctx.stroke();
-
-    ctx.fillText('Radius', (0.25 - 0.125) * X, Y - uiY / 2)
-    ctx.fillText('Moving Disc', (0.50 - 0.125) * X, Y - uiY / 2)
-    ctx.fillText('Fixed Disc', (0.75 - 0.125) * X, Y - uiY / 2)
-    ctx.fillText('Colour', (1 - 0.125) * X, Y - uiY / 2)
-}
-
 function drawSquareFullImage(n = 500) {
     pair.penUp();
     let tracesBounds = pair.getTracesBounds();
@@ -579,7 +450,7 @@ function drawSquareFullImage(n = 500) {
 }
 function shareImage() {
     if (pair.traces.length > 0) {
-        showWait = true;
+        sharePanel.wait = true;
         canvasSq = drawSquareFullImage(1200);
         canvasSq.toBlob(function (blob) {
             const filesArray = [
@@ -596,13 +467,13 @@ function shareImage() {
                 files: filesArray,
             };
             navigator.share(shareData)
-            showWait = false;
+            sharePanel.wait = false;
         })
     }
 }
 function uploadImage() {
     if (pair.traces.length > 0) {
-        showWait = true;
+        sharePanel.wait = true;
         canvasSq = drawSquareFullImage(800);
         canvasSq.toBlob(function (blob) {
             imgFile = new File(
@@ -627,7 +498,7 @@ function uploadImage() {
             }).then(response => response.json())
                 .then(data => {
                     console.log(data);
-                    showWait = false;
+                    sharePanel.wait = false;
                 });
         })
     }
@@ -637,97 +508,6 @@ function uploadImage() {
 //     let maxRad=Math.max(pair.fixed.teeth,pair.moving.teeth);
 //     pixPertooth=20*minSpace/maxRad;
 // }
-function drawShareMenu() {
-    ctx.beginPath();
-    ctx.fillStyle = bgFillStyleAlpha;
-    ctx.fillRect(0, 0, X, Y);
-
-    ctx.strokeStyle = pair.color;
-    ctx.rect(Xshare0, Yshare0, Xshare, Yshare);
-
-    ctx.fillStyle = bgFillStyle;
-    ctx.fillRect(Xshare0, Yshare0, Xshare, Yshare);
-
-    ctx.strokeStyle = pair.color;
-    ctx.rect(Xshare0, Yshare0, Xshare, Yshare);
-    ctx.stroke();
-
-    ctx.moveTo(Xshare0, Yshare0 + Yshare * .10);
-    ctx.lineTo(Xshare0 + Xshare, Yshare0 + Yshare * .10);
-    ctx.stroke();
-
-    ctx.moveTo(Xshare0 + Xshare * 0.46, Yshare0 + Yshare * 0.025);
-    ctx.lineTo(Xshare0 + Xshare * 0.54, Yshare0 + Yshare * 0.075);
-    ctx.stroke();
-    ctx.moveTo(Xshare0 + Xshare * 0.54, Yshare0 + Yshare * 0.025);
-    ctx.lineTo(Xshare0 + Xshare * 0.46, Yshare0 + Yshare * 0.075);
-    ctx.stroke();
-
-    shareButton.draw();
-    uploadButton.draw();
-    galleryButton.draw();
-
-}
-
-class Button {
-    constructor(y0, txt) {
-        this.x = Xshare0 + Xshare * 0.1
-        this.y = Yshare0 + Yshare * y0;
-        this.h = 0.1 * Yshare;
-        this.w = 0.8 * Xshare;
-        this.txt = txt
-    }
-    draw() {
-        ctx.beginPath();
-        ctx.moveTo(this.x, this.y);
-        ctx.lineTo(this.x + this.w, this.y);
-        ctx.lineTo(this.x + this.w, this.y + this.h);
-        ctx.lineTo(this.x, this.y + this.h);
-        ctx.lineTo(this.x, this.y);
-        ctx.stroke();
-        ctx.fillStyle = uiTextColor;
-        ctx.textAlign = "center";
-        ctx.font = txtSize / 4 + 'px sans-serif';
-        ctx.textBaseline = "middle";
-        ctx.lineWidth = baseLW;
-        ctx.fillText(this.txt, this.x + this.w / 2, this.y + this.h / 2);
-    }
-    contains(x, y) {
-        return (x > this.x & x < (this.x + this.w) & y > this.y & y < (this.y + this.h));
-    }
-
-}
-
-function drawWait() {
-
-    // ctx.fillStyle = bgFillStyleAlpha;
-    // ctx.fillRect(0, 0, X, Y);
-
-    // ctx.strokeStyle = pair.color;
-    // ctx.rect(Xshare0, Yshare0, Xshare, Yshare);
-    ctx.beginPath();
-    ctx.fillStyle = bgFillStyle;
-    ctx.fillRect(Xshare0, Yshare0, Xshare, Yshare);
-
-    ctx.strokeStyle = pair.color;
-    ctx.rect(Xshare0, Yshare0, Xshare, Yshare);
-    ctx.stroke();
-
-    // ctx.moveTo(Xshare0, Yshare0 + Yshare * .10);
-    // ctx.lineTo(Xshare0 + Xshare, Yshare0 + Yshare * .10);
-    // ctx.stroke();
-
-    ctx.fillStyle = uiTextColor;
-    ctx.textAlign = "center";
-    ctx.font = txtSize / 4 + 'px sans-serif';
-    ctx.textBaseline = "middle";
-    ctx.lineWidth = baseLW;
-    ctx.fillText('Please wait...', Xshare0 + Xshare / 2, Yshare0 + Yshare / 2);
-
-
-
-}
-
 
 function anim() {
     requestAnimationFrame(anim);
@@ -743,10 +523,8 @@ function anim() {
         pair.fixed.draw();
         pair.moving.draw();
     }
-    if (showUI) {
-        drawUI();
-    }
-    panel.draw();
+
+    panelArray.forEach(panel => panel.draw())
 
     if (showInfo) {
         pair.drawInfo();
@@ -757,18 +535,13 @@ function anim() {
     if (showColInfo) {
         pair.drawColInfo();
     }
-    if (showShare) {
-        drawShareMenu();
-    }
-    if (showWait) {
-        drawWait();
-    }
+
 
 }
 
 
 class PButton {
-    constructor(panel, x, y, w, h, txt, fun, argObj) {
+    constructor(panel, x, y, w, h, txt, fun, argObj, getXdragVar, getYdragVar, isDepressedFun) {
         this.x = panel.x + x * panel.w;
         this.y = panel.y + y * panel.h;
         this.w = w * panel.w;
@@ -777,14 +550,19 @@ class PButton {
         this.fun = fun;
         this.argObj = argObj;
         this.depressed = false;
+        this.xDrag = false;
+        this.yDrag = false;
+        this.y0;
+        this.x0;
+        this.xVar0;
+        this.yVar0;
+        this.getYdragVar = getYdragVar;
+        this.getXdragVar = getXdragVar;
+        this.isDepressedFun = isDepressedFun;
     }
     draw() {
         ctx.beginPath();
-        ctx.moveTo(this.x, this.y);
-        ctx.lineTo(this.x + this.w, this.y);
-        ctx.lineTo(this.x + this.w, this.y + this.h);
-        ctx.lineTo(this.x, this.y + this.h);
-        ctx.lineTo(this.x, this.y);
+        ctx.rect(this.x,this.y,this.w,this.h);
         ctx.stroke();
 
         if (this.depressed) {
@@ -808,21 +586,42 @@ class PButton {
     pointerDown(x, y) {
         if (this.contains(x, y)) {
             this.depressed = true;
+            this.x0 = x;
+            this.y0 = y;
+            if (this.yDrag) {
+                this.yVar0 = this.getYdragVar();
+                this.isDepressedFun(true);
+            }
+            if (this.xDrag) {
+                this.xVar0 = this.getXdragVar();
+                this.isDepressedFun(true);
+            }
         }
     }
     pointerUp(x, y) {
-        if (this.depressed & this.contains(x, y)) {
+        if (!this.xDrag & !this.yDrag & this.depressed & this.contains(x, y)) {
             this.action();
         }
         this.depressed = false;
+        if (this.isDepressedFun) {
+            this.isDepressedFun(false);
+        }
     }
     pointerMove(x, y) {
-        if (!this.contains(x, y)) {
+        if (!this.contains(x, y) & !this.yDrag & !this.xDrag) {
             this.depressed = false;
+        }
+        if (this.xDrag & this.yDrag & this.depressed){
+            this.fun(y - this.y0, this.yVar0, x - this.x0, this.xVar0);
+        }
+        else if (this.yDrag & this.depressed) {
+            this.fun(y - this.y0, this.yVar0);
+        }
+        else if (this.xDrag & this.depressed) {
+            this.fun(x - this.x0, this.xVar0);
         }
     }
 }
-
 class Panel {
     constructor(x, y, w, h) {
         this.active = true;
@@ -830,26 +629,40 @@ class Panel {
         this.y = y;
         this.w = w;
         this.h = h;
+        this.anyClickActivates = false;
+        this.overlay = false;
         this.buttonArray = [];
+        this.wait = false;
     }
     draw() {
-        if (this.active){
-        ctx.beginPath();
-        ctx.moveTo(this.x, this.y);
-        ctx.lineTo(this.x + this.w, this.y);
-        ctx.lineTo(this.x + this.w, this.y + this.h);
-        ctx.lineTo(this.x, this.y + this.h);
-        ctx.lineTo(this.x, this.y);
-        ctx.stroke();
-
-        this.buttonArray.forEach(button => button.draw());
+        if (this.active) {
+            if (this.overlay) {
+                ctx.beginPath();
+                ctx.fillStyle = bgFillStyleAlpha;
+                ctx.fillRect(0, 0, X, Y);
+                ctx.fillStyle = bgFillStyle;
+                ctx.fillRect(this.x, this.y, this.w, this.h)
+            }
+            ctx.beginPath();
+            ctx.strokeStyle=pair.color;
+            ctx.rect(this.x, this.y, this.w, this.h)
+            ctx.stroke();
+            if (!this.wait) {
+                this.buttonArray.forEach(button => button.draw());
+            }
+            else {
+                ctx.fillStyle = uiTextColor;
+                ctx.fillText('Please wait...', this.x + this.w / 2, this.y + this.h / 2);
+            }
         }
     }
     pointerDown(x, y) {
         if (this.active) {
             this.buttonArray.forEach(button => button.pointerDown(x, y))
         }
-        this.active=true;
+        if (this.anyClickActivates) {
+            this.active = true;
+        }
     }
     pointerUp(x, y) {
         if (this.active) {
@@ -863,22 +676,46 @@ class Panel {
     }
 
 }
-
-function createPanel() {
-    let uiBorder = X / 100;
-    panel = new Panel(0 + uiBorder, +uiBorder, X - 2*uiBorder, uiY);
-
+function createSharePanel() {
+    let panel = new Panel((X - 200 * window.devicePixelRatio) / 2, (Y - 400 * window.devicePixelRatio) / 2, 200 * window.devicePixelRatio, 400 * window.devicePixelRatio);
+    panel.overlay = true;
+    // panel.wait=true;
+    panel.active = false;
     panel.buttonArray.push(
-        new PButton(panel, 0.0, 0, 0.25, 0.333, "Share", 
-        function () { showShare = true; })
+        new PButton(panel, 0.0, 0, 1, 0.1, "Close",
+            function () { panel.active = false; })
     );
     panel.buttonArray.push(
-        new PButton(panel, 0.0, .333, 0.25, 0.666, "Hide", 
-        function () {
-            showUI = !showUI;
-            showWheels = !showWheels;
-            panel.active=false;
-        })
+        new PButton(panel, 0.1, .2, .8, 0.1, "Share Image",
+            function () { shareImage(); })
+    );
+    panel.buttonArray.push(
+        new PButton(panel, 0.1, .5, .8, 0.1, "Upload to Gallery",
+            function () { uploadImage(); })
+    );
+    panel.buttonArray.push(
+        new PButton(panel, 0.1, .8, .8, 0.1, "View Gallery",
+            function () { window.location.href = 'gallery.html' })
+    );
+
+    return (panel);
+
+}
+function createTopPanel() {
+    let uiBorder = X / 100;
+    let panel = new Panel(0 + uiBorder, 0 + uiBorder, X - 2 * uiBorder, uiY);
+    panel.anyClickActivates = true;
+    panel.buttonArray.push(
+        new PButton(panel, 0.0, 0, 0.25, 0.333, "Share",
+            function () { sharePanel.active = true; })
+    );
+    panel.buttonArray.push(
+        new PButton(panel, 0.0, .333, 0.25, 0.666, "Hide",
+            function () {
+                showUI = !showUI;
+                showWheels = false;
+                panelArray.forEach(panel => panel.active = false)
+            })
     );
 
     panel.buttonArray.push(
@@ -886,23 +723,23 @@ function createPanel() {
             function () { pair.clearAll() })
     );
     panel.buttonArray.push(
-        new PButton(panel, 0.25, .333, 0.25, 0.666, "Clear", 
-        function () { pair.clear(); })
+        new PButton(panel, 0.25, .333, 0.25, 0.666, "Clear",
+            function () { pair.clear(); })
     );
 
 
 
     panel.buttonArray.push(
-        new PButton(panel, 0.5, 0, 0.25, 0.333, "Reset", 
-        function () { return pair.reset(); })
+        new PButton(panel, 0.5, 0, 0.25, 0.333, "Reset",
+            function () { return pair.reset(); })
     );
     panel.buttonArray.push(
-        new PButton(panel, 0.5, .333, 0.25, 0.333, "Nudge +", 
-        function () { return pair.nudge(1); })
+        new PButton(panel, 0.5, .333, 0.25, 0.333, "Nudge +",
+            function () { return pair.nudge(1); })
     );
     panel.buttonArray.push(
-        new PButton(panel, 0.5, .666, 0.25, 0.333, "Nudge -", 
-        function () { return pair.nudge(-1); })
+        new PButton(panel, 0.5, .666, 0.25, 0.333, "Nudge -",
+            function () { return pair.nudge(-1); })
     );
 
     panel.buttonArray.push(
@@ -916,9 +753,113 @@ function createPanel() {
 
     return (panel)
 }
+function createBottomPanel() {
+    let uiBorder = X / 100;
+    let panel = new Panel(0 + uiBorder, Y-uiY-2*uiBorder + uiBorder, X - 2 * uiBorder, uiY);
+    panel.anyClickActivates = true;
 
-function buttonTest(obj) {
-    console.log("Button test:", obj.txt);
+    let ratButton = new PButton(panel, 0.0, 0, 0.25, 1, "Radius",
+        function (dy, yDragVar0) {
+            showWheelsOverride = true;
+            pair.penUp();
+            pair.moving.rat = Math.min(maxDrawRadiusRatio, Math.max(-0.001 * dy + yDragVar0, 0))
+            pair.penDown();
+
+        }, [], [],
+        function () {
+            return pair.moving.rat;
+        },
+        function (isDepressed) {
+            showRadInfo = isDepressed;
+        },
+    )
+    ratButton.yDrag = true;
+    panel.buttonArray.push(ratButton)
+
+    let movRadButton = new PButton(panel, 0.25, 0, 0.25, 1, "Moving Disc",
+        function (dy, yDragVar0) {
+
+            showWheelsOverride = true;
+            pair.penUp();
+            pair.moving.teeth = Math.round(Math.min(maxWheelSize, Math.max(-0.1 * dy + yDragVar0, minWheelSize)));
+            if (pair.moving.teeth == pair.fixed.teeth) {
+                pair.moving.teeth--;
+            }
+            pair.moving.circ = pair.moving.teeth * pixPertooth;
+            pair.moving.rad = pair.moving.circ / PI2
+            pair.move(pair.th);
+            pair.penDown();
+        }, [], [],
+        function () {
+            return pair.moving.teeth;
+        },
+        function (isDepressed) {
+            showInfo = isDepressed;
+        }
+    )
+    movRadButton.yDrag = true;
+    panel.buttonArray.push(movRadButton)
+
+    let fixRadButton = new PButton(panel, 0.50, 0, 0.25, 1, "Fixed Disc",
+        function (dy, yDragVar0) {
+            showWheelsOverride = true;
+            pair.penUp();
+            pair.fixed.teeth = Math.round(Math.min(maxWheelSize, Math.max(-0.1 * dy + yDragVar0, minWheelSize)));
+            if (pair.fixed.teeth == pair.moving.teeth) {
+                pair.fixed.teeth--;
+            }
+            pair.fixed.circ = pair.fixed.teeth * pixPertooth;
+            pair.fixed.rad = pair.fixed.circ / PI2
+            pair.move(pair.th);
+            pair.penDown();
+        }, [], [],
+        function () {
+            return pair.fixed.teeth;
+        },
+        function (isDepressed) {
+            showInfo = isDepressed;
+        }
+    )
+    fixRadButton.yDrag = true;
+    panel.buttonArray.push(fixRadButton)
+
+    let colButton = new PButton(panel, 0.75, 0, 0.25, 1, "Colour",
+        function (dy, yDragVar0,dx,xdragVar0) {
+
+            pair.move(pair.th);
+            pair.penUpCont();
+
+            pair.hue = yDragVar0 - 0.5*dy;
+            if (pair.hue > 360) {
+                pair.hue -= 360;
+            }
+            if (pair.hue < 0) {
+                pair.hue += 360;
+            }
+            // console.log(dy, yDragVar0, dx, xdragVar0)
+            pair.lightness = Math.max(00, Math.min(100, xdragVar0 + dx*0.25));
+            
+            pair.setColor();
+            pair.fixed.color = pair.color;
+            pair.moving.color = pair.color;
+            pair.move(pair.th);
+            pair.penDown();
+
+        }, [], function () {
+            return pair.lightness;
+        },
+        function () {
+            return pair.hue;
+        },
+        function (isDepressed) {
+            showColInfo = isDepressed;
+        }
+    )
+    colButton.yDrag = true;
+    colButton.xDrag = true;
+    panel.buttonArray.push(colButton)
+
+    return panel;
 }
 
 const canvas = document.getElementById("cw");
@@ -932,20 +873,11 @@ const cursor = {
 let clickCase = null;
 let mouseDown = false;
 let lastTouch = new Date().getTime();
-let thDragSt = 0;
-let dthDrag = 0;
 let showWheels = true;
 let showWheelsOverride = false;
-let showUI = true;
-let rat0;
-let hue0;
-let lightness0;
-let movTeeth0;
 let showInfo = false;
 let showRadInfo = false;
 let showColInfo = false;
-let showShare = false;
-let showWait = false;
 
 const shareBorderfrac = 0.15;
 const txtSize = 60 * window.devicePixelRatio;
@@ -956,6 +888,7 @@ const bgFillStyle = "hsl(" + hueInit + ",100%,5%)";
 const bgFillStyleAlpha = "hsla(" + hueInit + ",100%,5%,.80)";
 const wheelColor = "white"
 const uiTextColor = "white"
+
 const maxWheelSize = 150;
 const minWheelSize = 10;
 const maxDrawRadiusRatio = 2;
@@ -966,23 +899,22 @@ canvas.width = innerWidth;
 let X = canvas.width;
 let Y = canvas.height;
 const uiY = 0.2 * Y;
-let Xshare = 200 * window.devicePixelRatio;
-let Yshare = 400 * window.devicePixelRatio;
-let Xshare0 = (X - Xshare) / 2;
-let Yshare0 = (Y - Yshare) / 2;
-
-shareButton = new Button(0.2, "Share Image");
-uploadButton = new Button(0.5, "Upload to Gallery");
-galleryButton = new Button(0.8, "View Gallery");
 
 ringSizes = [96, 105]//,144,150]
 discSizes = [24, 30, 32, 40, 42, 45, 48, 52, 56, 60, 63, 72, 75, 80, 84]
 
-// console.log(Math.random())
+
 let fixedDisc = new Disc(ringSizes.random())
 let movingDisc = new MovingDisc(discSizes.random(), Math.random() / 2 + 0.5);
 let pair = new Pair(fixedDisc, movingDisc)
 // setScale(pair);
 
-panel=createPanel();
+topPanel = createTopPanel();
+sharePanel = createSharePanel();
+bottomPanel = createBottomPanel();
+panelArray = [topPanel, bottomPanel, sharePanel];
+//wake gallery server
+fetch(galleryAPIurl)
+    .then(response => response.text())
+    .then(data => console.log(data));
 anim();
