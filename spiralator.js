@@ -299,66 +299,76 @@ class Pair {
     }
 }
 
-addEventListener("mousedown", e => {
-    // e.preventDefault();
-    // pointerDownHandler(e.offsetX, e.offsetY);
-    pointerDownHandler(e.clientX, e.clientY)
-},
-    // { passive: false }
-);
-addEventListener('mousemove', e => {
-    if (mouseDown) {
-        pointerMoveHandler(e.clientX, e.clientY)
-    }
-});
-addEventListener('mouseup', e => {
-    pointerUpHandler(e.clientX, e.clientY);
-});
-addEventListener("touchstart", e => {
-    e.preventDefault();
-    pointerDownHandler(e.touches[0].clientX, e.touches[0].clientY);
-},
-    { passive: false }
-);
-addEventListener("touchmove", e => {
-    e.preventDefault();
-    pointerMoveHandler(e.touches[0].clientX, e.touches[0].clientY)
-},
-    { passive: false }
-);
-addEventListener("touchend", e => {
-    e.preventDefault();
-    pointerUpHandler(e.changedTouches[0].pageX, e.changedTouches[0].pageY);
-},
-    { passive: false }
-);
-
-function pointerDownHandler(x, y) {
-
-    if(!showgalleryForm){
-    panelArray.forEach(panel => panel.pointerDown(x, y))
-
-    showWheels = true;
-    showUI = true;
-    let now = new Date().getTime();
-    let timeSince = now - lastTouch;
-    if (timeSince < 300) {
-        //double touch
-        doubleClickHandler(clickCase);
-    }
-    lastTouch = now;
-    cursor.x = x;
-    cursor.y = y;
-
-    if (y > .5 * Y & y < (Y - uiY)) {
-        clickCase = "autoCW";
-    }
-    else if (y > uiY & y < 0.5 * Y) {
-        clickCase = "autoCCW";
+function isTouchDevice() {
+    return (('ontouchstart' in window) ||
+        (navigator.maxTouchPoints > 0) ||
+        (navigator.msMaxTouchPoints > 0));
+}
+function addPointerListeners() {
+    if (isTouchDevice()) {
+        canvas.addEventListener("touchstart", e => {
+            e.preventDefault();
+            pointerDownHandler(e.touches[0].clientX, e.touches[0].clientY);
+        },
+            { passive: false }
+        );
+        canvas.addEventListener("touchmove", e => {
+            e.preventDefault();
+            pointerMoveHandler(e.touches[0].clientX, e.touches[0].clientY)
+        },
+            { passive: false }
+        );
+        canvas.addEventListener("touchend", e => {
+            e.preventDefault();
+            pointerUpHandler(e.changedTouches[0].pageX, e.changedTouches[0].pageY);
+        },
+            { passive: false }
+        );
     }
     else {
-        clickCase = null;
+        addEventListener("mousedown", e => {
+            // e.preventDefault();
+            // pointerDownHandler(e.offsetX, e.offsetY);
+            pointerDownHandler(e.clientX, e.clientY)
+        },
+            // { passive: false }
+        );
+        addEventListener('mousemove', e => {
+            if (mouseDown) {
+                pointerMoveHandler(e.clientX, e.clientY)
+            }
+        });
+        addEventListener('mouseup', e => {
+            pointerUpHandler(e.clientX, e.clientY);
+        });
     }
+}
+function pointerDownHandler(x, y) {
+
+    if (!showgalleryForm) {
+        panelArray.forEach(panel => panel.pointerDown(x, y))
+
+        showWheels = true;
+        showUI = true;
+        let now = new Date().getTime();
+        let timeSince = now - lastTouch;
+        if (timeSince < 300) {
+            //double touch
+            doubleClickHandler(clickCase);
+        }
+        lastTouch = now;
+        cursor.x = x;
+        cursor.y = y;
+
+        if (y > .5 * Y & y < (Y - uiY)) {
+            clickCase = "autoCW";
+        }
+        else if (y > uiY & y < 0.5 * Y) {
+            clickCase = "autoCCW";
+        }
+        else {
+            clickCase = null;
+        }
     }
 
 
@@ -827,12 +837,12 @@ function submitToGallery() {
     let comment = document.getElementById('comment').value;
     console.log("Subbed", name, comment);
     toggleGalleryForm();
-    uploadImage(name,comment);
+    uploadImage(name, comment);
 }
 
 function toggleGalleryForm() {
     form = document.getElementById("galleryForm").style;
-    console.log(form.visibility)
+    // console.log(form.visibility)
     if (!(form.visibility == "visible")) {
         form.visibility = "visible"
         showgalleryForm = true;
@@ -891,7 +901,7 @@ let showWheelsOverride = false;
 let showInfo = false;
 let showRadInfo = false;
 let showColInfo = false;
-let showgalleryForm=false;
+let showgalleryForm = false;
 
 const shareBorderfrac = 0.15;
 const txtSize = 60 * window.devicePixelRatio;
@@ -933,11 +943,13 @@ fetch(galleryAPIurl)
     .then(response => response.text())
     .then(data => console.log(data));
 
+console.log(window.devicePixelRatio)
 
 document.querySelector(':root').style.setProperty('--bgColor', bgFillStyle)
 document.querySelector(':root').style.setProperty('--fgColor', pair.color)
-document.querySelector(':root').style.setProperty('--textSize', txtSize/4+'px')
+document.querySelector(':root').style.setProperty('--textSize', txtSize / 4 + 'px')
 document.getElementById("submit").addEventListener("click", submitToGallery, { passive: true })
 document.getElementById("close").addEventListener("click", toggleGalleryForm, { passive: true })
 
+addPointerListeners();
 anim();
