@@ -301,17 +301,18 @@ class Pair {
 
 addEventListener("mousedown", e => {
     // e.preventDefault();
-    pointerDownHandler(e.offsetX, e.offsetY);
+    // pointerDownHandler(e.offsetX, e.offsetY);
+    pointerDownHandler(e.clientX, e.clientY)
 },
     // { passive: false }
 );
 addEventListener('mousemove', e => {
     if (mouseDown) {
-        pointerMoveHandler(e.offsetX, e.offsetY)
+        pointerMoveHandler(e.clientX, e.clientY)
     }
 });
 addEventListener('mouseup', e => {
-    pointerUpHandler(e.offsetX, e.offsetY);
+    pointerUpHandler(e.clientX, e.clientY);
 });
 addEventListener("touchstart", e => {
     e.preventDefault();
@@ -333,6 +334,8 @@ addEventListener("touchend", e => {
 );
 
 function pointerDownHandler(x, y) {
+
+    if(!showgalleryForm){
     panelArray.forEach(panel => panel.pointerDown(x, y))
 
     showWheels = true;
@@ -356,7 +359,7 @@ function pointerDownHandler(x, y) {
     else {
         clickCase = null;
     }
-
+    }
 
 
     if ((x - (pair.moving.x + X / 2)) ** 2 + (y - (pair.moving.y + Y / 2)) ** 2 < pair.moving.rad ** 2) {
@@ -460,10 +463,10 @@ function shareImage() {
         })
     }
 }
-function uploadImage() {
+function uploadImage(name, comment) {
     if (pair.traces.length > 0) {
         sharePanel.wait = true;
-        canvasSq = drawSquareFullImage(800);
+        canvasSq = drawSquareFullImage(1080);
         canvasSq.toBlob(function (blob) {
             imgFile = new File(
                 [blob],
@@ -474,8 +477,8 @@ function uploadImage() {
                 }
             )
             let formData = new FormData();
-            formData.append('name', 'JStest');
-            formData.append('comment', 'JStest comment');
+            formData.append('name', name);
+            formData.append('comment', comment);
             formData.append('file', imgFile, "upload.png");
             console.log(formData)
 
@@ -514,7 +517,7 @@ class PButton {
     }
     draw() {
         ctx.beginPath();
-        ctx.rect(this.x,this.y,this.w,this.h);
+        ctx.rect(this.x, this.y, this.w, this.h);
         ctx.stroke();
 
         if (this.depressed) {
@@ -563,7 +566,7 @@ class PButton {
         if (!this.contains(x, y) & !this.yDrag & !this.xDrag) {
             this.depressed = false;
         }
-        if (this.xDrag & this.yDrag & this.depressed){
+        if (this.xDrag & this.yDrag & this.depressed) {
             this.fun(y - this.y0, this.yVar0, x - this.x0, this.xVar0);
         }
         else if (this.yDrag & this.depressed) {
@@ -590,14 +593,14 @@ class Panel {
         if (this.active) {
             if (this.overlay) {
                 ctx.beginPath();
-                ctx.lineWidth=baseLW*1;
+                ctx.lineWidth = baseLW * 1;
                 ctx.fillStyle = bgFillStyleAlpha;
                 ctx.fillRect(0, 0, X, Y);
                 ctx.fillStyle = bgFillStyle;
                 ctx.fillRect(this.x, this.y, this.w, this.h)
             }
             ctx.beginPath();
-            ctx.strokeStyle=pair.color;
+            ctx.strokeStyle = pair.color;
             ctx.lineWidth = baseLW * 2;
             ctx.rect(this.x, this.y, this.w, this.h)
             ctx.stroke();
@@ -646,7 +649,7 @@ function createSharePanel() {
     );
     panel.buttonArray.push(
         new PButton(panel, 0.1, .5, .8, 0.1, "Upload to Gallery",
-            function () { uploadImage(); })
+            function () { toggleGalleryForm() })
     );
     panel.buttonArray.push(
         new PButton(panel, 0.1, .8, .8, 0.1, "View Gallery",
@@ -660,7 +663,7 @@ function createTopPanel() {
     let uiBorder = X / 100;
     let panel = new Panel(0 + uiBorder, 0 + uiBorder, X - 2 * uiBorder, uiY);
     panel.anyClickActivates = true;
-    
+
     panel.buttonArray.push(
         new PButton(panel, 0.0, 0.0, 0.25, 0.333, "Share",
             function () { sharePanel.active = true; })
@@ -711,7 +714,7 @@ function createTopPanel() {
 }
 function createBottomPanel() {
     let uiBorder = X / 100;
-    let panel = new Panel(0 + uiBorder, Y-uiY-2*uiBorder + uiBorder, X - 2 * uiBorder, uiY);
+    let panel = new Panel(0 + uiBorder, Y - uiY - 2 * uiBorder + uiBorder, X - 2 * uiBorder, uiY);
     panel.anyClickActivates = true;
 
     let ratButton = new PButton(panel, 0.0, 0, 0.25, 1, "Radius",
@@ -780,12 +783,12 @@ function createBottomPanel() {
     panel.buttonArray.push(fixRadButton)
 
     let colButton = new PButton(panel, 0.75, 0, 0.25, 1, "Colour",
-        function (dy, yDragVar0,dx,xdragVar0) {
+        function (dy, yDragVar0, dx, xdragVar0) {
 
             pair.move(pair.th);
             pair.penUpCont();
 
-            pair.hue = yDragVar0 - 0.5*dy;
+            pair.hue = yDragVar0 - 0.5 * dy;
             if (pair.hue > 360) {
                 pair.hue -= 360;
             }
@@ -793,11 +796,12 @@ function createBottomPanel() {
                 pair.hue += 360;
             }
             // console.log(dy, yDragVar0, dx, xdragVar0)
-            pair.lightness = Math.max(00, Math.min(100, xdragVar0 + dx*0.25));
-            
+            pair.lightness = Math.max(00, Math.min(100, xdragVar0 + dx * 0.25));
+
             pair.setColor();
             pair.fixed.color = pair.color;
             pair.moving.color = pair.color;
+            document.querySelector(':root').style.setProperty('--fgColor', pair.color)
             pair.move(pair.th);
             pair.penDown();
 
@@ -817,8 +821,33 @@ function createBottomPanel() {
 
     return panel;
 }
+
+function submitToGallery() {
+    let name = document.getElementById('name').value;
+    let comment = document.getElementById('comment').value;
+    console.log("Subbed", name, comment);
+    toggleGalleryForm();
+    uploadImage(name,comment);
+}
+
+function toggleGalleryForm() {
+    form = document.getElementById("galleryForm").style;
+    console.log(form.visibility)
+    if (!(form.visibility == "visible")) {
+        form.visibility = "visible"
+        showgalleryForm = true;
+    }
+    else {
+        form.visibility = "hidden"
+        showgalleryForm = false;
+    }
+}
+
+
+
 function anim() {
     requestAnimationFrame(anim);
+
     ctx.fillStyle = bgFillStyle;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     if (pair.auto & !showColInfo & !showInfo & !showRadInfo) {
@@ -862,6 +891,7 @@ let showWheelsOverride = false;
 let showInfo = false;
 let showRadInfo = false;
 let showColInfo = false;
+let showgalleryForm=false;
 
 const shareBorderfrac = 0.15;
 const txtSize = 60 * window.devicePixelRatio;
@@ -902,5 +932,12 @@ panelArray = [topPanel, bottomPanel, sharePanel];
 fetch(galleryAPIurl)
     .then(response => response.text())
     .then(data => console.log(data));
+
+
+document.querySelector(':root').style.setProperty('--bgColor', bgFillStyle)
+document.querySelector(':root').style.setProperty('--fgColor', pair.color)
+document.querySelector(':root').style.setProperty('--textSize', txtSize/4+'px')
+document.getElementById("submit").addEventListener("click", submitToGallery, { passive: true })
+document.getElementById("close").addEventListener("click", toggleGalleryForm, { passive: true })
 
 anim();
