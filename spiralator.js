@@ -834,6 +834,7 @@ function createBottomPanel() {
 
 function submitToGallery() {
     let name = document.getElementById('name').value;
+    localStorage.setItem('name', name);
     let comment = document.getElementById('comment').value;
     console.log("Subbed", name, comment);
     toggleGalleryForm();
@@ -852,7 +853,6 @@ function toggleGalleryForm() {
         showgalleryForm = false;
     }
 }
-
 
 
 function anim() {
@@ -943,13 +943,16 @@ fetch(galleryAPIurl)
     .then(response => response.text())
     .then(data => console.log(data));
 
-console.log(window.devicePixelRatio)
+// console.log(window.devicePixelRatio)
 
 document.querySelector(':root').style.setProperty('--bgColor', bgFillStyle)
 document.querySelector(':root').style.setProperty('--fgColor', pair.color)
 document.querySelector(':root').style.setProperty('--textSize', txtSize / 4 + 'px')
 document.getElementById("submit").addEventListener("click", submitToGallery, { passive: true })
 document.getElementById("close").addEventListener("click", toggleGalleryForm, { passive: true })
+
+document.getElementById('name').value = localStorage.getItem('name');
+
 
 addPointerListeners();
 anim();

@@ -1,24 +1,41 @@
-/* body {
-    background-color: rgb(48, 48, 48);
-}
+ :root {
+   /* --bgColor: #0055aa; */
+   /* --fgColor: #e40000; */
+   --nameSize: 10px;
+   --commentSize: 10px;
+ }
 
-canvas {
-    border: 1px solid rgb(62, 50, 126);
-} */
+ #cw {
+   position: fixed;
+   z-index: -1;
+   cursor: crosshair;
+ }
 
-#cw {
-  position: fixed;
-  z-index: -1;
-  cursor: crosshair;
-}
+ body {
+   margin: 0;
+   padding: 0;
+   background-color: rgb(0, 0, 0);
+   color: white;
+   font-size: var(--textSize);
+   font-family: sans-serif;
+ }
 
-body {
-  margin: 0;
-  padding: 0;
-  background-color: rgb(0, 0, 0);
-}
+ div {
+   margin-bottom: 00px;
+ }
 
-div {
-  margin-top: 40px;
-  margin-bottom: 00px;
-}
+ .name {
+   text-align: left;
+   margin: 0 0 0 0;
+   margin-bottom: 5%;
+   padding-left: 1%;
+   font-size: var(--nameSize);
+ }
+
+ .comment {
+   text-align: left;
+   margin: 0 0 0 0;
+   padding-left: 1%;
+   margin-bottom: 5%;
+   font-size: var(--commentSize);
+ }
