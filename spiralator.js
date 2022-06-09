@@ -72,7 +72,7 @@ class Trace {
         if (this.points.length > 0) {
             ctx.beginPath();
             ctx.strokeStyle = this.color;
-            ctx.lineWidth = baseLW*1;
+            ctx.lineWidth = baseLW * 1;
             ctx.moveTo(scl * this.points[0].x + xoff, scl * this.points[0].y + yoff);
             this.points.forEach(point => {
                 ctx.lineTo(scl * point.x + xoff, scl * point.y + yoff);
@@ -433,8 +433,8 @@ function calcLCM(a, b) { //lowest common multiple
 }
 function drawSquareFullImage(n = 500) {
     pair.penUp();
-    let baseLWtemp=baseLW;
-    baseLW=galleryLW*n/1080;
+    let baseLWtemp = baseLW;
+    baseLW = galleryLW * n / 1080;
     let tracesBounds = pair.getTracesBounds();
     let size = (shareBorderfrac + 1) * Math.max(
         tracesBounds.xmax - tracesBounds.xmin,
@@ -452,7 +452,7 @@ function drawSquareFullImage(n = 500) {
     ctxSh.fillStyle = bgFillStyle;
     ctxSh.fillRect(0, 0, canvasSh.width, canvasSh.height);
     pair.drawTraces(ctxSh, xoff, yoff, scl);
-    baseLW=baseLWtemp;
+    baseLW = baseLWtemp;
     return (canvasSh)
 }
 function shareImage() {
@@ -502,9 +502,14 @@ function uploadImage(name, comment) {
                 // WARNING!!!! DO NOT set Content Type!
                 // headers: { 'Content-Type': 'multipart/form-data' },
                 body: formData,
-            }).then(response => response.json())
+            })
+                .then(response => response.json())
                 .then(data => {
                     console.log(data);
+                    sharePanel.wait = false;
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
                     sharePanel.wait = false;
                 });
         })
@@ -922,7 +927,7 @@ const maxWheelSize = 150;
 const minWheelSize = 10;
 const maxDrawRadiusRatio = 2;
 
-const galleryLW = 2.75*1080/800;
+const galleryLW = 2.75 * 1080 / 800;
 const gallerySize = 1080;
 
 const dth = PI2 / 100;
