@@ -432,7 +432,7 @@ function calcLCM(a, b) { //lowest common multiple
 function drawSquareFullImage(n = 500) {
     pair.penUp();
     let baseLWtemp=baseLW;
-    baseLW=galleryLW;
+    baseLW=galleryLW*n/1080;
     let tracesBounds = pair.getTracesBounds();
     let size = (shareBorderfrac + 1) * Math.max(
         tracesBounds.xmax - tracesBounds.xmin,
@@ -934,9 +934,26 @@ ringSizes = [96, 105]//,144,150]
 discSizes = [24, 30, 32, 40, 42, 45, 48, 52, 56, 60, 63, 72, 75, 80, 84]
 
 
-let fixedDisc = new Disc(ringSizes.random())
-let movingDisc = new MovingDisc(discSizes.random(), Math.random() / 2 + 0.5);
+// let fixedDisc = new Disc(ringSizes.random())
+// let movingDisc = new MovingDisc(discSizes.random(), Math.random() / 2 + 0.5);
+// let pair = new Pair(fixedDisc, movingDisc)
+
+//test trace
+let fixedDisc = new Disc(180)
+let movingDisc = new MovingDisc(120, .1);
 let pair = new Pair(fixedDisc, movingDisc)
+pair.penUp();
+pair.move(0.2);
+pair.fullTrace();
+pair.penUp();
+pair.move(1.0);
+
+
+
+
+
+
+
 // setScale(pair);
 
 topPanel = createTopPanel();
