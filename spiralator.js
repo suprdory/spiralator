@@ -953,11 +953,6 @@ let pair = new Pair(fixedDisc, movingDisc)
 // pair.move(1.15);
 
 
-
-
-
-
-
 // setScale(pair);
 
 topPanel = createTopPanel();
