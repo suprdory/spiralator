@@ -231,7 +231,7 @@ class Pair {
             // console.log(n);
 
             if (n > 0) {
-                for (let i = 1; i < (n+1); i++) {
+                for (let i = 1; i < (n); i++) {
                     this.move(this.th + dth);
                 }
                 this.move(this.th + (n - Math.floor(n)) * dth);
@@ -249,8 +249,8 @@ class Pair {
         this.penDown();
         let startTh = this.th;
         this.roll(this.th + PI2 * calcLCM(this.fixed.teeth, this.moving.teeth) / this.fixed.teeth);
+        this.move(startTh + PI2 * calcLCM(this.fixed.teeth, this.moving.teeth) / this.fixed.teeth)
         this.penUp();
-        this.move(startTh)
         this.penDown();
     }
     tracePoint() {
@@ -922,7 +922,7 @@ const maxWheelSize = 150;
 const minWheelSize = 10;
 const maxDrawRadiusRatio = 2;
 
-const galleryLW = 2.75;
+const galleryLW = 2.75*1080/800;
 const gallerySize = 1080;
 
 const dth = PI2 / 100;
@@ -940,15 +940,15 @@ let fixedDisc = new Disc(ringSizes.random())
 let movingDisc = new MovingDisc(discSizes.random(), Math.random() / 2 + 0.5);
 let pair = new Pair(fixedDisc, movingDisc)
 
-// //test trace
+//test trace
 // pixPertooth = 20 * window.devicePixelRatio;
 // let fixedDisc = new Disc(96)
 // let movingDisc = new MovingDisc(63, .81);
 // let pair = new Pair(fixedDisc, movingDisc)
 // pair.penUp();
-// pair.move(0.60);
+// pair.move(1.60);
 // pair.fullTrace();
-
+// pair.move(1.60);
 // pair.penUp();
 // pair.move(1.15);
 
