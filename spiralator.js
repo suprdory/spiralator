@@ -231,13 +231,13 @@ class Pair {
             // console.log(n);
 
             if (n > 0) {
-                for (let i = 1; i < n; i++) {
+                for (let i = 1; i < (n+1); i++) {
                     this.move(this.th + dth);
                 }
                 this.move(this.th + (n - Math.floor(n)) * dth);
             }
             else {
-                for (let i = 1; i < -n; i++) {
+                for (let i = 1; i < -(n); i++) {
                     this.move(this.th - dth);
                 }
                 this.move(this.th - (Math.ceil(n) - n) * dth);
@@ -247,8 +247,10 @@ class Pair {
     fullTrace() {
         this.penUp();
         this.penDown();
+        let startTh = this.th;
         this.roll(this.th + PI2 * calcLCM(this.fixed.teeth, this.moving.teeth) / this.fixed.teeth);
         this.penUp();
+        this.move(startTh)
         this.penDown();
     }
     tracePoint() {
@@ -909,7 +911,7 @@ let showgalleryForm = false;
 const shareBorderfrac = 0.15;
 const txtSize = 60 * window.devicePixelRatio;
 let baseLW = 1 * window.devicePixelRatio;
-const pixPertooth = 9 * window.devicePixelRatio;
+let pixPertooth = 9 * window.devicePixelRatio;
 const hueInit = Math.random() * 360
 const bgFillStyle = "hsl(" + hueInit + ",100%,5%)";
 const bgFillStyleAlpha = "hsla(" + hueInit + ",100%,5%,.80)";
@@ -934,19 +936,21 @@ ringSizes = [96, 105]//,144,150]
 discSizes = [24, 30, 32, 40, 42, 45, 48, 52, 56, 60, 63, 72, 75, 80, 84]
 
 
-// let fixedDisc = new Disc(ringSizes.random())
-// let movingDisc = new MovingDisc(discSizes.random(), Math.random() / 2 + 0.5);
-// let pair = new Pair(fixedDisc, movingDisc)
-
-//test trace
-let fixedDisc = new Disc(180)
-let movingDisc = new MovingDisc(120, .1);
+let fixedDisc = new Disc(ringSizes.random())
+let movingDisc = new MovingDisc(discSizes.random(), Math.random() / 2 + 0.5);
 let pair = new Pair(fixedDisc, movingDisc)
-pair.penUp();
-pair.move(0.2);
-pair.fullTrace();
-pair.penUp();
-pair.move(1.0);
+
+// //test trace
+// pixPertooth = 20 * window.devicePixelRatio;
+// let fixedDisc = new Disc(96)
+// let movingDisc = new MovingDisc(63, .81);
+// let pair = new Pair(fixedDisc, movingDisc)
+// pair.penUp();
+// pair.move(0.60);
+// pair.fullTrace();
+
+// pair.penUp();
+// pair.move(1.15);
 
 
 
