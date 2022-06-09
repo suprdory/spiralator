@@ -11,6 +11,7 @@ function add_image(n) {
     image.loading = "lazy"
     image.src = galleryAPIurl + '/get_image?n=' + n;
     image.width = imageWidth
+    image.height = imageWidth
     // image.style.maxWidth="100%";
     // image.style.cssText =
     //     'margin-left: auto; margin-right: auto;';
@@ -24,11 +25,16 @@ function add_image(n) {
     elemComment.innerText = "Comment";
     elemComment.classList.add("comment")
 
+    let elemID = document.createElement('p');
+    elemID.innerText = "ID";
+    elemID.classList.add("name")
+
     fetch(galleryAPIurl + '/get_meta?n=' + n)
         .then(response => response.json())
         .then(data => {
             elemName.innerText = data.name;
             elemComment.innerText = data.comment;
+            elemID.innerText=data.id;
             if (elemComment.innerText != '') {
                 console.log(elemComment.innerText)
                 elemDiv.appendChild(elemComment);
@@ -36,6 +42,9 @@ function add_image(n) {
             if (elemName.innerText != '') {
                 elemDiv.appendChild(elemName);
             }
+            // if (elemID.innerText != '') {
+            //     elemDiv.appendChild(elemID);
+            // }
 
             // console.log(data)
         });
@@ -47,7 +56,7 @@ let imageWidth = Math.min(window.innerWidth, 1080)
 document.querySelector(':root').style.setProperty('--nameSize', 10 + 'pt')
 document.querySelector(':root').style.setProperty('--commentSize', 10 + 'pt')
 
-for (let i = 0; i < 40; i++) {
+for (let i = 0; i < 50; i++) {
     add_image(i);
 }
 
