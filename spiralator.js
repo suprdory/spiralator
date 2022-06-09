@@ -66,13 +66,13 @@ class Trace {
     constructor(pair) {
         this.points = [];
         this.color = "hsl(" + pair.hue + "," + pair.saturation + "%," + pair.lightness + "%)";
-        this.thickness = baseLW;
+        // this.thickness = baseLW;
     }
     draw(ctx, xoff = X / 2, yoff = Y / 2, scl = 1) {
         if (this.points.length > 0) {
             ctx.beginPath();
             ctx.strokeStyle = this.color;
-            ctx.lineWidth = this.thickness;
+            ctx.lineWidth = baseLW*1;
             ctx.moveTo(scl * this.points[0].x + xoff, scl * this.points[0].y + yoff);
             this.points.forEach(point => {
                 ctx.lineTo(scl * point.x + xoff, scl * point.y + yoff);
@@ -431,6 +431,8 @@ function calcLCM(a, b) { //lowest common multiple
 }
 function drawSquareFullImage(n = 500) {
     pair.penUp();
+    let baseLWtemp=baseLW;
+    baseLW=galleryLW;
     let tracesBounds = pair.getTracesBounds();
     let size = (shareBorderfrac + 1) * Math.max(
         tracesBounds.xmax - tracesBounds.xmin,
@@ -448,6 +450,7 @@ function drawSquareFullImage(n = 500) {
     ctxSh.fillStyle = bgFillStyle;
     ctxSh.fillRect(0, 0, canvasSh.width, canvasSh.height);
     pair.drawTraces(ctxSh, xoff, yoff, scl);
+    baseLW=baseLWtemp;
     return (canvasSh)
 }
 function shareImage() {
@@ -476,7 +479,7 @@ function shareImage() {
 function uploadImage(name, comment) {
     if (pair.traces.length > 0) {
         sharePanel.wait = true;
-        canvasSq = drawSquareFullImage(1080);
+        canvasSq = drawSquareFullImage(gallerySize);
         canvasSq.toBlob(function (blob) {
             imgFile = new File(
                 [blob],
@@ -905,7 +908,7 @@ let showgalleryForm = false;
 
 const shareBorderfrac = 0.15;
 const txtSize = 60 * window.devicePixelRatio;
-const baseLW = 1 * window.devicePixelRatio;
+let baseLW = 1 * window.devicePixelRatio;
 const pixPertooth = 9 * window.devicePixelRatio;
 const hueInit = Math.random() * 360
 const bgFillStyle = "hsl(" + hueInit + ",100%,5%)";
@@ -916,6 +919,9 @@ const uiTextColor = "white"
 const maxWheelSize = 150;
 const minWheelSize = 10;
 const maxDrawRadiusRatio = 2;
+
+const galleryLW = 2.75;
+const gallerySize = 1080;
 
 const dth = PI2 / 100;
 canvas.height = innerHeight;
@@ -943,7 +949,7 @@ fetch(galleryAPIurl)
     .then(response => response.text())
     .then(data => console.log(data));
 
-// console.log(window.devicePixelRatio)
+console.log(window.devicePixelRatio)
 
 document.querySelector(':root').style.setProperty('--bgColor', bgFillStyle)
 document.querySelector(':root').style.setProperty('--fgColor', pair.color)
