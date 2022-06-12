@@ -919,10 +919,23 @@ let showRadInfo = false;
 let showColInfo = false;
 let showgalleryForm = false;
 
+canvas.height = window.innerHeight;
+canvas.width = window.innerWidth;
+let X = canvas.width;
+let Y = canvas.height;
+
+let pixRat = window.devicePixelRatio * 1;
+if (window.orientation == 90 || window.orientation==270){
+    //dodgy fix for "incorrect" window size reported in landscape, 
+    //meaning pixel ratio is inappropriate scaling measure
+    //only reported on modile device so no problem on desktop
+    pixRat=pixRat*(Y/X)
+}
+const txtSize = 60 * pixRat;
+let baseLW = 1 * pixRat;
+let pixPertooth = 9 * pixRat;
+
 const shareBorderfrac = 0.15;
-const txtSize = 60 * window.devicePixelRatio;
-let baseLW = 1 * window.devicePixelRatio;
-let pixPertooth = 9 * window.devicePixelRatio;
 const hueInit = Math.random() * 360
 const bgFillStyle = "hsl(" + hueInit + ",100%,5%)";
 const bgFillStyleAlpha = "hsla(" + hueInit + ",100%,5%,.80)";
@@ -937,10 +950,7 @@ const galleryLW = 2.75 * 1080 / 800;
 const gallerySize = 1080;
 
 const dth = PI2 / 100;
-canvas.height = innerHeight;
-canvas.width = innerWidth;
-let X = canvas.width;
-let Y = canvas.height;
+
 if (X > Y) {
     isLandscape=true;
 }
@@ -974,7 +984,16 @@ fetch(galleryAPIurl)
     .then(response => response.text())
     .then(data => console.log(data));
 
-console.log(window.devicePixelRatio)
+console.log(window.devicePixelRatio,pixRat)
+console.log('x',window.innerWidth,'y',window.innerHeight)
+console.log('sx',screen.width,'sy',screen.height)
+console.log('window/screen x', window.innerWidth / screen.width)
+console.log('window/screen y', window.innerHeight / screen.height)
+console.log('vVx', window.visualViewport.width, 'vVy', window.visualViewport.height)
+console.log('window/vV x', window.innerWidth / window.visualViewport.width)
+console.log('window/vV y', window.innerHeight / window.visualViewport.height)
+console.log(document.documentElement.clientWidth)
+console.log(window.orientation)
 
 document.querySelector(':root').style.setProperty('--bgColor', bgFillStyle)
 document.querySelector(':root').style.setProperty('--fgColor', pair.color)
@@ -982,6 +1001,6 @@ document.querySelector(':root').style.setProperty('--textSize', txtSize / 4 + 'p
 document.getElementById("submit").addEventListener("click", submitToGallery, { passive: true })
 document.getElementById("close").addEventListener("click", toggleGalleryForm, { passive: true })
 document.getElementById('name').value = localStorage.getItem('name');
-addPointerListeners();
 
+addPointerListeners();
 anim();
