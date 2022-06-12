@@ -34,7 +34,7 @@ class MovingDisc extends Disc {
         this.lw = baseLW * 2;
     }
     draw(xoff = X / 2, yoff = Y / 2, scl = 1) {
-        super.draw(xoff = X / 2, yoff = Y / 2, scl = 1);
+        super.draw(xoff, yoff, scl);
         ctx.beginPath();
         ctx.moveTo((scl * this.x) + xoff, yoff + (scl * this.y));
         ctx.lineTo(
@@ -362,10 +362,14 @@ function pointerDownHandler(x, y) {
         cursor.x = x;
         cursor.y = y;
 
-        if (y > .5 * Y & y < (Y - uiY)) {
+
+        if (((y > .5 * Y & y < (Y - uiY)) & !isLandscape) ||
+            ((y > .5 * Y & y < Y & x > uiX) & isLandscape)) {
             clickCase = "autoCW";
         }
-        else if (y > uiY & y < 0.5 * Y) {
+
+        else if (((y < .5 * Y & y > (uiY)) & !isLandscape) ||
+            ((y < .5 * Y & y > 0 & x > uiX) & isLandscape)) {
             clickCase = "autoCCW";
         }
         else {
@@ -374,7 +378,7 @@ function pointerDownHandler(x, y) {
     }
 
 
-    if ((x - (pair.moving.x + X / 2)) ** 2 + (y - (pair.moving.y + Y / 2)) ** 2 < pair.moving.rad ** 2) {
+    if ((x - (pair.moving.x + xOff)) ** 2 + (y - (pair.moving.y + Y / 2)) ** 2 < pair.moving.rad ** 2) {
         mselect = "moving";
         // showInfo = false;
     }
@@ -680,8 +684,12 @@ function createSharePanel() {
 
 }
 function createTopPanel() {
+
+
+
+
     let uiBorder = X / 100;
-    let panel = new Panel(0 + uiBorder, 0 + uiBorder, X - 2 * uiBorder, uiY);
+    let panel = new Panel(0 + uiBorder, 0 + uiBorder, uiX - 2 * uiBorder, uiY);
     panel.anyClickActivates = true;
 
     panel.buttonArray.push(
@@ -733,8 +741,9 @@ function createTopPanel() {
     return (panel)
 }
 function createBottomPanel() {
+
     let uiBorder = X / 100;
-    let panel = new Panel(0 + uiBorder, Y - uiY - 2 * uiBorder + uiBorder, X - 2 * uiBorder, uiY);
+    let panel = new Panel(0 + uiBorder, Y - uiY - 2 * uiBorder + uiBorder, uiX - 2 * uiBorder, uiY);
     panel.anyClickActivates = true;
 
     let ratButton = new PButton(panel, 0.0, 0, 0.25, 1, "Radius",
@@ -850,7 +859,6 @@ function submitToGallery() {
     toggleGalleryForm();
     uploadImage(name, comment);
 }
-
 function toggleGalleryForm() {
     form = document.getElementById("galleryForm").style;
     // console.log(form.visibility)
@@ -863,8 +871,6 @@ function toggleGalleryForm() {
         showgalleryForm = false;
     }
 }
-
-
 function anim() {
     requestAnimationFrame(anim);
 
@@ -873,11 +879,11 @@ function anim() {
     if (pair.auto & !showColInfo & !showInfo & !showRadInfo) {
         pair.update();
     }
-    pair.drawTraces(ctx);
+    pair.drawTraces(ctx,xOff);
 
     if (showWheels | showWheelsOverride) {
-        pair.fixed.draw();
-        pair.moving.draw();
+        pair.fixed.draw(xOff)
+        pair.moving.draw(xOff);
     }
 
     panelArray.forEach(panel => panel.draw())
@@ -935,7 +941,20 @@ canvas.height = innerHeight;
 canvas.width = innerWidth;
 let X = canvas.width;
 let Y = canvas.height;
-const uiY = 0.2 * Y;
+if (X > Y) {
+    isLandscape=true;
+}
+else {
+    isLandscape=false;
+}
+let uiY = 0.2 * Y;
+let uiX = X;
+let xOff=X/2;
+if (isLandscape) {
+    uiY = 0.4 * Y;
+    uiX = 0.333 * X;
+    xOff=2*X/3;
+}
 
 ringSizes = [96, 105]//,144,150]
 discSizes = [24, 30, 32, 40, 42, 45, 48, 52, 56, 60, 63, 72, 75, 80, 84]
@@ -944,21 +963,6 @@ discSizes = [24, 30, 32, 40, 42, 45, 48, 52, 56, 60, 63, 72, 75, 80, 84]
 let fixedDisc = new Disc(ringSizes.random())
 let movingDisc = new MovingDisc(discSizes.random(), Math.random() / 2 + 0.5);
 let pair = new Pair(fixedDisc, movingDisc)
-
-//test trace
-// pixPertooth = 20 * window.devicePixelRatio;
-// let fixedDisc = new Disc(96)
-// let movingDisc = new MovingDisc(63, .81);
-// let pair = new Pair(fixedDisc, movingDisc)
-// pair.penUp();
-// pair.move(1.60);
-// pair.fullTrace();
-// pair.move(1.60);
-// pair.penUp();
-// pair.move(1.15);
-
-
-// setScale(pair);
 
 topPanel = createTopPanel();
 sharePanel = createSharePanel();
@@ -977,9 +981,7 @@ document.querySelector(':root').style.setProperty('--fgColor', pair.color)
 document.querySelector(':root').style.setProperty('--textSize', txtSize / 4 + 'px')
 document.getElementById("submit").addEventListener("click", submitToGallery, { passive: true })
 document.getElementById("close").addEventListener("click", toggleGalleryForm, { passive: true })
-
 document.getElementById('name').value = localStorage.getItem('name');
-
-
 addPointerListeners();
+
 anim();
