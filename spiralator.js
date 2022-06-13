@@ -951,7 +951,7 @@ const gallerySize = 1080;
 
 const dth = PI2 / 100;
 
-if (X > Y) {
+if (X > 1.4*Y) {
     isLandscape=true;
 }
 else {
