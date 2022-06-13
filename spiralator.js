@@ -310,17 +310,17 @@ function addPointerListeners() {
     if (isTouchDevice()) {
         canvas.addEventListener("touchstart", e => {
             e.preventDefault();
-            pointerDownHandler(e.touches[0].clientX, e.touches[0].clientY);
-            // This event is cached to support 2-finger gestures
             evCache.push(e);
             console.log("pointerDown", e);
+            pointerDownHandler(e.touches[0].clientX, e.touches[0].clientY);
+            // This event is cached to support 2-finger gestures
+
         },
             { passive: false }
         );
         canvas.addEventListener("touchmove", e => {
             e.preventDefault();
             
-
             // If two pointers are down, check for pinch gestures
             if (evCache.length ==1){
                 pointerMoveHandler(e.touches[0].clientX, e.touches[0].clientY)
@@ -329,15 +329,15 @@ function addPointerListeners() {
                 console.log("Double touch")
                 // Calculate the distance between the two pointers
                 curDiff = Math.abs(evCache[0].clientX - evCache[1].clientX);
-                dDist=curDiff-prevDiff;
+                dDiff=curDiff-prevDiff;
                 if (prevDiff > 0) {
-                    if (dDist>0) {
+                    if (dDiff>0) {
                         // The distance between the two pointers has increased
                         console.log("Pinch moving OUT -> Zoom in", ev);
                         // ev.target.style.background = "pink";
                         scl = Math.min(10, Math.max(scl - 0.0005 * dDist, 0.05));
                     }
-                    if (dDist<0) {
+                    if (dDiff<0) {
                         // The distance between the two pointers has decreased
                         console.log("Pinch moving IN -> Zoom out", ev);
                         // ev.target.style.background = "lightblue";
@@ -959,7 +959,8 @@ function anim() {
     }
 
     ctx.fillText(evCache.length,20,uiY+20)
-
+    ctx.fillText(prevDiff, 20, uiY + 50)
+    ctx.fillText(dDiff, 20, uiY + 80)
 
 }
 
@@ -1022,7 +1023,7 @@ const dth = PI2 / 100;
 var evCache = new Array();
 var prevDiff = -1;
 var curDiff = 0;
-var prevDiff=0;
+var dDiff=0;
 
 if (X > 1.4 * Y) {
     isLandscape = true;
