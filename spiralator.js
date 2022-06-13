@@ -943,7 +943,7 @@ function anim() {
         pair.fixed.draw(0, 0, scl)
         pair.moving.draw(0, 0, scl);
     }
-    ctx.setTransform(1, 0, 0, 1, 0, 0)
+    ctx.setTransform(scl0, 0, 0, scl0, 0, 0)
     panelArray.forEach(panel => panel.draw())
 
     if (showInfo) {
@@ -977,8 +977,12 @@ let showRadInfo = false;
 let showColInfo = false;
 let showgalleryForm = false;
 
-canvas.height = window.innerHeight * window.devicePixelRatio;
-canvas.width = window.innerWidth * window.devicePixelRatio;
+// canvas.height = window.innerHeight * window.devicePixelRatio;
+// canvas.width = window.innerWidth * window.devicePixelRatio;
+canvas.height = window.innerHeight ;
+canvas.width = window.innerWidth ;
+// let scl0 = 1 / window.devicePixelRatio;
+let scl0=1
 let X = canvas.width;
 let Y = canvas.height;
 
@@ -1048,19 +1052,18 @@ fetch(galleryAPIurl)
     .then(response => response.text())
     .then(data => console.log(data));
 
-// console.log(window.devicePixelRatio, pixRat,
-//     'x', window.innerWidth, 'y', window.innerHeight,
-//     'sx', screen.width, 'sy', screen.height,
-//     'window/screen x', window.innerWidth / screen.width,
-//     'window/screen y', window.innerHeight / screen.height,
-//     'vVx', window.visualViewport.width, 'vVy', window.visualViewport.height,
-//     'window/vV x', window.innerWidth / window.visualViewport.width,
-//     'window/vV y', window.innerHeight / window.visualViewport.height,
-//     document.documentElement.clientWidth,
-//     window.orientation,
-//     'transform', ctx.getTransform(),
-//     'canvas offset', canvas.offsetLeft,
-// )
+console.log('devicePixelRatio',window.devicePixelRatio, 
+    'pixRat',pixRat,
+    'innerWidth', window.innerWidth, 'innerHeight', window.innerHeight,
+    'sx', screen.width, 'sy', screen.height,
+    'window/screen x', window.innerWidth / screen.width,
+    'window/screen y', window.innerHeight / screen.height,
+    'vVx', window.visualViewport.width, 'vVy', window.visualViewport.height,
+    'window/vV x', window.innerWidth / window.visualViewport.width,
+    'window/vV y', window.innerHeight / window.visualViewport.height,
+    'orientation',window.orientation,
+
+)
 
 
 document.querySelector(':root').style.setProperty('--bgColor', bgFillStyle)
