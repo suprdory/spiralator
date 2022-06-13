@@ -327,14 +327,16 @@ function addPointerListeners() {
             if (e.touches.length == 2) {
                 console.log("two touch")
                 // Calculate the distance between the two pointers
+
+                curDiff = Math.abs(e.touches[0].clientX - e.touches[1].clientX) +
+                    Math.abs(e.touches[0].clientY - e.touches[1].clientY);
                 if (prevDiff > 0) {
-                    curDiff = Math.abs(e.touches[0].clientX - e.touches[1].clientX) +
-                        Math.abs(e.touches[0].clientY - e.touches[1].clientY);
                     dDiff = curDiff - prevDiff;
                     // console.log("Pinch moving OUT -> Zoom in", ev);
                     scl = Math.min(Math.max(scl + 0.005 * dDiff, 0.05), 10);
-                    prevDiff = curDiff;
+
                 }
+                prevDiff = curDiff;
 
             }
 
@@ -935,7 +937,7 @@ function anim() {
     ctx.fillText(Math.round(curDiff), 20, uiY + 80)
     ctx.fillText(Math.round(dDiff), 20, uiY + 110)
     ctx.fillText(Math.round(scl * 10000) / 10000, 20, uiY + 140)
-    ctx.fillText('v5', 20, uiY + 170)
+    ctx.fillText('v6', 20, uiY + 170)
 
 }
 
