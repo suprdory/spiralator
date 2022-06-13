@@ -312,7 +312,7 @@ function addPointerListeners() {
             e.preventDefault();
             // This event is cached to support 2-finger gestures
             console.log("pointerDown", e);
-            pointerDownHandler(e.touches[0].clientX, e.touches[0].clientY,e.touches.length);
+            pointerDownHandler(e.touches[0].clientX, e.touches[0].clientY, e.touches.length);
 
         },
             { passive: false }
@@ -327,11 +327,15 @@ function addPointerListeners() {
             if (e.touches.length == 2) {
                 console.log("two touch")
                 // Calculate the distance between the two pointers
-                curDiff = Math.abs(e.touches[0].clientX - e.touches[1].clientX);
-                dDiff = curDiff - prevDiff;
-                // console.log("Pinch moving OUT -> Zoom in", ev);
-                scl = Math.min(10, Math.max(scl + 0.005 * dDiff, 0.05));
-                prevDiff = curDiff;
+                if (prevDiff > 0) {
+                    curDiff = Math.abs(e.touches[0].clientX - e.touches[1].clientX) +
+                        Math.abs(e.touches[0].clientY - e.touches[1].clientY);
+                    dDiff = curDiff - prevDiff;
+                    // console.log("Pinch moving OUT -> Zoom in", ev);
+                    scl = Math.min(Math.max(scl + 0.005 * dDiff, 0.05), 10);
+                    prevDiff = curDiff;
+                }
+
             }
 
 
@@ -340,6 +344,7 @@ function addPointerListeners() {
         );
         canvas.addEventListener("touchend", e => {
             e.preventDefault();
+            prevDiff = -1;
             pointerUpHandler(e.changedTouches[0].pageX, e.changedTouches[0].pageY);
         },
             { passive: false }
@@ -368,7 +373,7 @@ function addPointerListeners() {
 function wheelHandler(event) {
     scl = Math.min(10, Math.max(scl - 0.0005 * event.deltaY, 0.05));
 }
-function pointerDownHandler(x, y, n=1) {
+function pointerDownHandler(x, y, n = 1) {
 
     if (!showgalleryForm) {
         panelArray.forEach(panel => panel.pointerDown(x, y))
