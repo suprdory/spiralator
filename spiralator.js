@@ -388,12 +388,12 @@ function pointerDownHandler(x, y) {
 
     }
     mouseDown = true;
-    thDragSt = Math.atan2(y - Y / 2, x - X / 2);
+    thDragSt = Math.atan2(y - Y / 2, x - xOff);
 }
 function pointerMoveHandler(x, y) {
     panelArray.forEach(panel => panel.pointerMove(x, y));
     if (mouseDown & mselect == "moving" & !pair.auto) {
-        dthDrag = Math.atan2(y - Y / 2, x - X / 2) - thDragSt;
+        dthDrag = Math.atan2(y - Y / 2, x - xOff) - thDragSt;
         if (dthDrag < Math.PI) {
             dthDrag += PI2;
         }
@@ -401,7 +401,7 @@ function pointerMoveHandler(x, y) {
             dthDrag -= PI2;
         }
         pair.roll(pair.th + dthDrag);
-        thDragSt = Math.atan2(y - Y / 2, x - X / 2);
+        thDragSt = Math.atan2(y - Y / 2, x - xOff);
     }
 
 
