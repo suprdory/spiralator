@@ -926,11 +926,11 @@ function anim() {
     if (pair.auto & !showColInfo & !showInfo & !showRadInfo) {
         pair.update();
     }
-    pair.drawTraces(ctx, 0, 0, scl);
+    pair.drawTraces(ctx, 0, 0, 1);
 
     if (showWheels | showWheelsOverride) {
-        pair.fixed.draw(0, 0, scl)
-        pair.moving.draw(0, 0, scl);
+        pair.fixed.draw(0, 0, 1)
+        pair.moving.draw(0, 0, 1);
     }
     ctx.setTransform(scl0, 0, 0, scl0, 0, 0)
     panelArray.forEach(panel => panel.draw())
@@ -950,7 +950,7 @@ function anim() {
     // ctx.fillText(Math.round(curDiff), 20, uiY + 80)
     // ctx.fillText(Math.round(dDiff), 20, uiY + 110)
     // ctx.fillText(Math.round(scl * 10000) / 10000, 20, uiY + 140)
-    ctx.fillText('v9', 20, uiY + 20)
+    ctx.fillText('v10', 20, uiY + 20)
 
 }
 
