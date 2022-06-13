@@ -335,13 +335,13 @@ function addPointerListeners() {
                         // The distance between the two pointers has increased
                         console.log("Pinch moving OUT -> Zoom in", ev);
                         // ev.target.style.background = "pink";
-                        scl = Math.min(10, Math.max(scl - 0.005 * dDist, 0.05));
+                        scl = Math.min(10, Math.max(scl - 0.005 * dDiff, 0.05));
                     }
                     if (dDiff<0) {
                         // The distance between the two pointers has decreased
                         console.log("Pinch moving IN -> Zoom out", ev);
                         // ev.target.style.background = "lightblue";
-                        scl = Math.min(10, Math.max(scl - 0.005 * dDist, 0.05));
+                        scl = Math.min(10, Math.max(scl - 0.005 * dDiff, 0.05));
                     }
                 }
 
