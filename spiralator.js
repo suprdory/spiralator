@@ -333,7 +333,7 @@ function addPointerListeners() {
                 if (prevDiff > 0) {
                     dDiff = curDiff - prevDiff;
                     // console.log("Pinch moving OUT -> Zoom in", ev);
-                    scl = Math.min(Math.max(scl + 0.005 * dDiff, 0.05), 10);
+                    scl = Math.min(Math.max(scl *(1+ 0.005 * dDiff), 0.05), 10);
 
                 }
                 prevDiff = curDiff;
@@ -373,7 +373,7 @@ function addPointerListeners() {
 }
 
 function wheelHandler(event) {
-    scl = Math.min(10, Math.max(scl - 0.0005 * event.deltaY, 0.05));
+    scl = Math.min(10, Math.max(scl * (1+0.0005 * event.deltaY), 0.05));
 }
 function pointerDownHandler(x, y, n = 1) {
 
@@ -937,7 +937,7 @@ function anim() {
     ctx.fillText(Math.round(curDiff), 20, uiY + 80)
     ctx.fillText(Math.round(dDiff), 20, uiY + 110)
     ctx.fillText(Math.round(scl * 10000) / 10000, 20, uiY + 140)
-    ctx.fillText('v6', 20, uiY + 170)
+    ctx.fillText('v7', 20, uiY + 170)
 
 }
 
