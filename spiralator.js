@@ -956,6 +956,8 @@ function anim() {
         pair.drawColInfo();
     }
 
+    ctx.fillText(evCache.length,20,uiY+20)
+
 
 }
 
