@@ -320,34 +320,34 @@ function addPointerListeners() {
         );
         canvas.addEventListener("touchmove", e => {
             e.preventDefault();
-            
+
             // If two pointers are down, check for pinch gestures
-            if (evCache.length ==1){
+            if (evCache.length == 1) {
                 pointerMoveHandler(e.touches[0].clientX, e.touches[0].clientY)
             }
             if (evCache.length == 2) {
                 console.log("Double touch")
                 // Calculate the distance between the two pointers
                 curDiff = Math.abs(e.touches[0].clientX - e.touches[1].clientX);
-                dDiff=curDiff-prevDiff;
-                if (prevDiff > 0) {
-                    if (dDiff>0) {
-                        // The distance between the two pointers has increased
-                        console.log("Pinch moving OUT -> Zoom in", ev);
-                        // ev.target.style.background = "pink";
-                        scl = Math.min(10, Math.max(scl - 0.005 * dDiff, 0.05));
-                    }
-                    if (dDiff<0) {
-                        // The distance between the two pointers has decreased
-                        console.log("Pinch moving IN -> Zoom out", ev);
-                        // ev.target.style.background = "lightblue";
-                        scl = Math.min(10, Math.max(scl - 0.005 * dDiff, 0.05));
-                    }
-                }
+                dDiff = curDiff - prevDiff;
+                // if (prevDiff > 0) {
+                // if (dDiff>0) {
+                // The distance between the two pointers has increased
+                console.log("Pinch moving OUT -> Zoom in", ev);
+                // ev.target.style.background = "pink";
+                scl = Math.min(10, Math.max(scl - 0.005 * dDiff, 0.05));
+                // }
+                // if (dDiff<0) {
+                // The distance between the two pointers has decreased
+                // console.log("Pinch moving IN -> Zoom out", ev);
+                // ev.target.style.background = "lightblue";
+                // scl = Math.min(10, Math.max(scl - 0.005 * dDiff, 0.05));
+                // }
+                // }
 
                 // Cache the distance for the next move event
                 prevDiff = curDiff;
-            } 
+            }
 
 
         },
@@ -356,7 +356,7 @@ function addPointerListeners() {
         canvas.addEventListener("touchend", e => {
             e.preventDefault();
             pointerUpHandler(e.changedTouches[0].pageX, e.changedTouches[0].pageY);
-            
+
             // Remove this pointer from the cache
             remove_event(e);
             // If the number of pointers down is less than two then reset diff tracker
@@ -384,7 +384,7 @@ function addPointerListeners() {
         addEventListener('mouseup', e => {
             pointerUpHandler(e.clientX, e.clientY);
         });
-        addEventListener('wheel',wheelHandler)
+        addEventListener('wheel', wheelHandler)
     }
 }
 function remove_event(ev) {
@@ -396,8 +396,8 @@ function remove_event(ev) {
         }
     }
 }
-function wheelHandler(event){
-    scl=Math.min(10,Math.max(scl-0.0005*event.deltaY,0.05));
+function wheelHandler(event) {
+    scl = Math.min(10, Math.max(scl - 0.0005 * event.deltaY, 0.05));
 }
 function pointerDownHandler(x, y) {
 
@@ -408,7 +408,7 @@ function pointerDownHandler(x, y) {
         showUI = true;
         let now = new Date().getTime();
         let timeSince = now - lastTouch;
-        if (timeSince < 300 & evCache.length<2) {
+        if (timeSince < 300 & evCache.length < 2) {
             //double touch
             doubleClickHandler(clickCase);
         }
@@ -444,7 +444,7 @@ function pointerDownHandler(x, y) {
 
     }
     mouseDown = true;
-    thDragSt = Math.atan2(yt-pair.fixed.y, xt-pair.fixed.x);
+    thDragSt = Math.atan2(yt - pair.fixed.y, xt - pair.fixed.x);
 }
 function pointerMoveHandler(x, y) {
     xt = (x - xOff) / scl
@@ -717,7 +717,7 @@ class Panel {
 
 }
 function createSharePanel() {
-    let panel = new Panel((X - 200 ) / 2, (Y - 400 ) / 2, 200, 400 );
+    let panel = new Panel((X - 200) / 2, (Y - 400) / 2, 200, 400);
     panel.overlay = true;
     // panel.wait=true;
     panel.active = false;
@@ -958,10 +958,11 @@ function anim() {
         pair.drawColInfo();
     }
 
-    ctx.fillText(evCache.length,20,uiY+20)
+    ctx.fillText(evCache.length, 20, uiY + 20)
     ctx.fillText(Math.round(prevDiff), 20, uiY + 50)
     ctx.fillText(Math.round(dDiff), 20, uiY + 80)
     ctx.fillText(Math.round(scl * 10000) / 10000, 20, uiY + 110)
+    ctx.fillText('v1', 20, uiY + 140)
 
 }
 
@@ -985,15 +986,15 @@ let showgalleryForm = false;
 
 // canvas.height = window.innerHeight * window.devicePixelRatio;
 // canvas.width = window.innerWidth * window.devicePixelRatio;
-canvas.height = window.innerHeight ;
-canvas.width = window.innerWidth ;
+canvas.height = window.innerHeight;
+canvas.width = window.innerWidth;
 // let scl0 = 1 / window.devicePixelRatio;
-let scl0=1
+let scl0 = 1
 let X = canvas.width;
 let Y = canvas.height;
 
 // let pixRat = window.devicePixelRatio * 1.0;
-let pixRat =  1.0;
+let pixRat = 1.0;
 if (window.orientation == 90 || window.orientation == 270) {
     //dodgy fix for "incorrect" window size reported in landscape, 
     //meaning pixel ratio is inappropriate scaling measure
@@ -1024,7 +1025,7 @@ const dth = PI2 / 100;
 var evCache = new Array();
 var prevDiff = -1;
 var curDiff = 0;
-var dDiff=0;
+var dDiff = 0;
 
 if (X > 1.4 * Y) {
     isLandscape = true;
@@ -1060,8 +1061,8 @@ fetch(galleryAPIurl)
     .then(response => response.text())
     .then(data => console.log(data));
 
-console.log('devicePixelRatio',window.devicePixelRatio, 
-    'pixRat',pixRat,
+console.log('devicePixelRatio', window.devicePixelRatio,
+    'pixRat', pixRat,
     'innerWidth', window.innerWidth, 'innerHeight', window.innerHeight,
     'sx', screen.width, 'sy', screen.height,
     'window/screen x', window.innerWidth / screen.width,
@@ -1069,7 +1070,7 @@ console.log('devicePixelRatio',window.devicePixelRatio,
     'vVx', window.visualViewport.width, 'vVy', window.visualViewport.height,
     'window/vV x', window.innerWidth / window.visualViewport.width,
     'window/vV y', window.innerHeight / window.visualViewport.height,
-    'orientation',window.orientation,
+    'orientation', window.orientation,
 
 )
 
