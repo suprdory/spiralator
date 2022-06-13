@@ -378,9 +378,8 @@ function pointerDownHandler(x, y, n = 1) {
 
     if (!showgalleryForm) {
         panelArray.forEach(panel => panel.pointerDown(x, y))
+        // showWheels = true;
 
-        showWheels = true;
-        showUI = true;
         let now = new Date().getTime();
         let timeSince = now - lastTouch;
         if (timeSince < 300 & n < 2) {
@@ -419,7 +418,7 @@ function pointerDownHandler(x, y, n = 1) {
         x0=x;
         xOff0=xOff;
         yOff0=yOff;
-        console.log("Pan")
+        // console.log("Pan")
     }
     else{
         mselect = null;
@@ -464,6 +463,9 @@ function pointerUpHandler(x, y) {
 }
 function doubleClickHandler(clickCase) {
     console.log(clickCase)
+    topPanel.active=true;
+    bottomPanel.active=true;
+    showWheels=true;
     if ((clickCase == "autoCCW" || clickCase == "autoCW") & pair.auto != 0) {
         pair.auto = 0;
     }
@@ -671,6 +673,9 @@ class Panel {
                 ctx.fillStyle = bgFillStyle;
                 ctx.fillRect(this.x, this.y, this.w, this.h)
             }
+            ctx.fillStyle = bgFillStyleAlpha;
+            ctx.fillRect(this.x, this.y, this.w, this.h);
+
             ctx.beginPath();
             ctx.strokeStyle = pair.color;
             ctx.lineWidth = baseLW * 2;
@@ -690,9 +695,9 @@ class Panel {
         if (this.active) {
             this.buttonArray.forEach(button => button.pointerDown(x, y))
         }
-        if (this.anyClickActivates) {
-            this.active = true;
-        }
+        // if (this.anyClickActivates) {
+        //     this.active = true;
+        // }
     }
     pointerUp(x, y) {
         if (this.active) {
@@ -747,7 +752,7 @@ function createTopPanel() {
     panel.buttonArray.push(
         new PButton(panel, 0.0, 0.333, 0.25, 0.666, "Hide",
             function () {
-                showUI = !showUI;
+                // showUI = false;
                 showWheels = false;
                 panelArray.forEach(panel => panel.active = false)
             })
@@ -951,7 +956,7 @@ function anim() {
     // ctx.fillText(Math.round(curDiff), 20, uiY + 80)
     // ctx.fillText(Math.round(dDiff), 20, uiY + 110)
     // ctx.fillText(Math.round(scl * 10000) / 10000, 20, uiY + 140)
-    ctx.fillText('v11', 20, uiY + 20)
+    ctx.fillText('v12', 20, Y - 15)
 
 }
 
