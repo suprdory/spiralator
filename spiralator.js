@@ -38,14 +38,14 @@ class MovingDisc extends Disc {
         ctx.beginPath();
         ctx.moveTo((scl * this.x) + xoff, yoff + (scl * this.y));
         ctx.lineTo(
-            (scl * this.x) + xoff + this.rad * Math.cos(this.th) * this.rat,
-            yoff + (scl * this.y) + this.rad * Math.sin(this.th) * this.rat
+            (scl * this.x) + xoff + scl*this.rad * Math.cos(this.th) * this.rat,
+            yoff + (scl * this.y) + scl*this.rad * Math.sin(this.th) * this.rat
         )
         ctx.stroke();
         ctx.beginPath();
         ctx.arc(
-            (scl * this.x) + xoff + this.rat * this.rad * Math.cos(this.th),
-            yoff + (scl * this.y) + this.rat * this.rad * Math.sin(this.th),
+            (scl * this.x) + xoff + scl*this.rat * this.rad * Math.cos(this.th),
+            yoff + (scl * this.y) + scl*this.rat * this.rad * Math.sin(this.th),
             3 * baseLW, 0, PI2);
         ctx.fill();
     }
@@ -371,9 +371,8 @@ function addPointerListeners() {
         addEventListener('wheel', wheelHandler)
     }
 }
-
 function wheelHandler(event) {
-    scl = Math.min(10, Math.max(scl * (1+0.0005 * event.deltaY), 0.05));
+    scl = Math.min(10, Math.max(scl * (1-0.0005 * event.deltaY), 0.05));
 }
 function pointerDownHandler(x, y, n = 1) {
 
@@ -410,11 +409,19 @@ function pointerDownHandler(x, y, n = 1) {
     xt = (x - xOff) / scl
     yt = (y - yOff) / scl
     // console.log(xt, yt, pair.moving.x, pair.moving.y)
-    if ((xt - (pair.moving.x)) ** 2 + (yt - (pair.moving.y)) ** 2 < pair.moving.rad ** 2) {
+    if ((xt - (pair.moving.x)) ** 2 + (yt - (pair.moving.y)) ** 2 < (pair.moving.rad) ** 2) {
         mselect = "moving";
         // showInfo = false;
     }
-    else {
+    else if(y<(Y-uiY) & y>uiY){
+        mselect="pan";
+        y0=y;
+        x0=x;
+        xOff0=xOff;
+        yOff0=yOff;
+        console.log("Pan")
+    }
+    else{
         mselect = null;
         // showInfo = false;
 
@@ -426,7 +433,7 @@ function pointerMoveHandler(x, y) {
     xt = (x - xOff) / scl
     yt = (y - yOff) / scl
     panelArray.forEach(panel => panel.pointerMove(x, y));
-    if (mouseDown & mselect == "moving" & !pair.auto) {
+    if (mselect == "moving" & !pair.auto) {
         dthDrag = Math.atan2(yt - pair.fixed.y, xt - pair.fixed.x) - thDragSt;
         if (dthDrag < Math.PI) {
             dthDrag += PI2;
@@ -436,6 +443,12 @@ function pointerMoveHandler(x, y) {
         }
         pair.roll(pair.th + dthDrag);
         thDragSt = Math.atan2(yt - pair.fixed.y, xt - pair.fixed.x);
+    }
+    if (mselect == "pan") {
+        xOff=xOff0+(x-x0);
+        yOff = yOff0 + (y - y0);
+        // console.log('xOff',xOff,'x',x,'x0',x0)
+
     }
 
 
@@ -937,7 +950,7 @@ function anim() {
     // ctx.fillText(Math.round(curDiff), 20, uiY + 80)
     // ctx.fillText(Math.round(dDiff), 20, uiY + 110)
     // ctx.fillText(Math.round(scl * 10000) / 10000, 20, uiY + 140)
-    ctx.fillText('v8', 20, uiY + 20)
+    ctx.fillText('v9', 20, uiY + 20)
 
 }
 
