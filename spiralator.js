@@ -328,7 +328,7 @@ function addPointerListeners() {
             if (evCache.length == 2) {
                 console.log("Double touch")
                 // Calculate the distance between the two pointers
-                curDiff = Math.abs(evCache[0].clientX - evCache[1].clientX);
+                curDiff = Math.abs(e.touches[0].clientX - e.touches[1].clientX);
                 dDiff=curDiff-prevDiff;
                 if (prevDiff > 0) {
                     if (dDiff>0) {
