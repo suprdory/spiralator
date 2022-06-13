@@ -311,9 +311,8 @@ function addPointerListeners() {
         canvas.addEventListener("touchstart", e => {
             e.preventDefault();
             // This event is cached to support 2-finger gestures
-            evCache.push(e);
             console.log("pointerDown", e);
-            pointerDownHandler(e.touches[0].clientX, e.touches[0].clientY);
+            pointerDownHandler(e.touches[0].clientX, e.touches[0].clientY,e.touches.length);
 
         },
             { passive: false }
@@ -331,7 +330,7 @@ function addPointerListeners() {
                 curDiff = Math.abs(e.touches[0].clientX - e.touches[1].clientX);
                 dDiff = curDiff - prevDiff;
                 // console.log("Pinch moving OUT -> Zoom in", ev);
-                scl = Math.min(10, Math.max(scl - 0.005 * dDiff, 0.05));
+                scl = Math.min(10, Math.max(scl + 0.005 * dDiff, 0.05));
                 prevDiff = curDiff;
             }
 
@@ -342,14 +341,6 @@ function addPointerListeners() {
         canvas.addEventListener("touchend", e => {
             e.preventDefault();
             pointerUpHandler(e.changedTouches[0].pageX, e.changedTouches[0].pageY);
-
-            // Remove this pointer from the cache
-            remove_event(e);
-            // If the number of pointers down is less than two then reset diff tracker
-            // if (evCache.length < 2) {
-            //     prevDiff = -1;
-            // }
-
         },
             { passive: false }
         );
@@ -373,19 +364,11 @@ function addPointerListeners() {
         addEventListener('wheel', wheelHandler)
     }
 }
-function remove_event(ev) {
-    // Remove this event from the target's cache
-    for (var i = 0; i < evCache.length; i++) {
-        if (evCache[i].pointerId == ev.pointerId) {
-            evCache.splice(i, 1);
-            break;
-        }
-    }
-}
+
 function wheelHandler(event) {
     scl = Math.min(10, Math.max(scl - 0.0005 * event.deltaY, 0.05));
 }
-function pointerDownHandler(x, y) {
+function pointerDownHandler(x, y, n=1) {
 
     if (!showgalleryForm) {
         panelArray.forEach(panel => panel.pointerDown(x, y))
@@ -394,7 +377,7 @@ function pointerDownHandler(x, y) {
         showUI = true;
         let now = new Date().getTime();
         let timeSince = now - lastTouch;
-        if (timeSince < 300 & evCache.length < 2) {
+        if (timeSince < 300 & n < 2) {
             //double touch
             doubleClickHandler(clickCase);
         }
@@ -918,8 +901,6 @@ function toggleGalleryForm() {
 function anim() {
     requestAnimationFrame(anim);
 
-
-    // ctx.fillStyle = bgFillStyle;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.setTransform(scl, 0, 0, scl, xOff, yOff)
     if (pair.auto & !showColInfo & !showInfo & !showRadInfo) {
@@ -944,12 +925,12 @@ function anim() {
         pair.drawColInfo();
     }
 
-    ctx.fillText(evCache.length, 20, uiY + 20)
+
     ctx.fillText(Math.round(prevDiff), 20, uiY + 50)
     ctx.fillText(Math.round(curDiff), 20, uiY + 80)
     ctx.fillText(Math.round(dDiff), 20, uiY + 110)
     ctx.fillText(Math.round(scl * 10000) / 10000, 20, uiY + 140)
-    ctx.fillText('v3', 20, uiY + 170)
+    ctx.fillText('v4', 20, uiY + 170)
 
 }
 
@@ -1008,9 +989,8 @@ const gallerySize = 1080;
 
 const dth = PI2 / 100;
 
-// Global vars to cache  pointer event state for pinch zoom
-var evCache = new Array();
-var prevDiff = -1;
+// Global vars to cache pointer event state for pinch zoom
+var prevDiff = 0;
 var curDiff = 0;
 var dDiff = 0;
 
