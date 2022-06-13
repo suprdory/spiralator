@@ -322,18 +322,16 @@ function addPointerListeners() {
             e.preventDefault();
 
             // If two pointers are down, check for pinch gestures
-            if (evCache.length == 1) {
+            if (e.touches.length == 1) {
                 pointerMoveHandler(e.touches[0].clientX, e.touches[0].clientY)
             }
-            if (evCache.length == 2) {
-                console.log("Double touch")
+            if (e.touches.length == 2) {
+                console.log("two touch")
                 // Calculate the distance between the two pointers
                 curDiff = Math.abs(e.touches[0].clientX - e.touches[1].clientX);
                 dDiff = curDiff - prevDiff;
-
-                console.log("Pinch moving OUT -> Zoom in", ev);
+                // console.log("Pinch moving OUT -> Zoom in", ev);
                 scl = Math.min(10, Math.max(scl - 0.005 * dDiff, 0.05));
-
                 prevDiff = curDiff;
             }
 
@@ -348,9 +346,9 @@ function addPointerListeners() {
             // Remove this pointer from the cache
             remove_event(e);
             // If the number of pointers down is less than two then reset diff tracker
-            if (evCache.length < 2) {
-                prevDiff = -1;
-            }
+            // if (evCache.length < 2) {
+            //     prevDiff = -1;
+            // }
 
         },
             { passive: false }
@@ -951,7 +949,7 @@ function anim() {
     ctx.fillText(Math.round(curDiff), 20, uiY + 80)
     ctx.fillText(Math.round(dDiff), 20, uiY + 110)
     ctx.fillText(Math.round(scl * 10000) / 10000, 20, uiY + 140)
-    ctx.fillText('v2', 20, uiY + 170)
+    ctx.fillText('v3', 20, uiY + 170)
 
 }
 
