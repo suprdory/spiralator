@@ -311,18 +311,57 @@ function addPointerListeners() {
         canvas.addEventListener("touchstart", e => {
             e.preventDefault();
             pointerDownHandler(e.touches[0].clientX, e.touches[0].clientY);
+            
+            // This event is cached to support 2-finger gestures
+            evCache.push(e);
+            console.log("pointerDown", e);
         },
             { passive: false }
         );
         canvas.addEventListener("touchmove", e => {
             e.preventDefault();
             pointerMoveHandler(e.touches[0].clientX, e.touches[0].clientY)
+
+            // If two pointers are down, check for pinch gestures
+            if (evCache.length == 2) {
+                console.log("Double touch")
+                // Calculate the distance between the two pointers
+                var curDiff = Math.abs(evCache[0].clientX - evCache[1].clientX);
+                dDist=curDiff-prevDiff;
+                if (prevDiff > 0) {
+                    if (dDist>0) {
+                        // The distance between the two pointers has increased
+                        console.log("Pinch moving OUT -> Zoom in", ev);
+                        // ev.target.style.background = "pink";
+                        scl = Math.min(10, Math.max(scl - 0.0005 * dDist, 0.05));
+                    }
+                    if (dDist<0) {
+                        // The distance between the two pointers has decreased
+                        console.log("Pinch moving IN -> Zoom out", ev);
+                        // ev.target.style.background = "lightblue";
+                        scl = Math.min(10, Math.max(scl - 0.0005 * dDist, 0.05));
+                    }
+                }
+
+                // Cache the distance for the next move event
+                prevDiff = curDiff;
+            }
+
+
         },
             { passive: false }
         );
         canvas.addEventListener("touchend", e => {
             e.preventDefault();
             pointerUpHandler(e.changedTouches[0].pageX, e.changedTouches[0].pageY);
+            
+            // Remove this pointer from the cache
+            remove_event(e);
+            // If the number of pointers down is less than two then reset diff tracker
+            if (evCache.length < 2) {
+                prevDiff = -1;
+            }
+
         },
             { passive: false }
         );
@@ -343,7 +382,20 @@ function addPointerListeners() {
         addEventListener('mouseup', e => {
             pointerUpHandler(e.clientX, e.clientY);
         });
+        addEventListener('wheel',wheelHandler)
     }
+}
+function remove_event(ev) {
+    // Remove this event from the target's cache
+    for (var i = 0; i < evCache.length; i++) {
+        if (evCache[i].pointerId == ev.pointerId) {
+            evCache.splice(i, 1);
+            break;
+        }
+    }
+}
+function wheelHandler(event){
+    scl=Math.min(10,Math.max(scl-0.0005*event.deltaY,0.05));
 }
 function pointerDownHandler(x, y) {
 
@@ -377,8 +429,10 @@ function pointerDownHandler(x, y) {
         }
     }
 
-
-    if ((x - (pair.moving.x + xOff)) ** 2 + (y - (pair.moving.y + Y / 2)) ** 2 < pair.moving.rad ** 2) {
+    xt = (x - xOff) / scl
+    yt = (y - yOff) / scl
+    // console.log(xt, yt, pair.moving.x, pair.moving.y)
+    if ((xt - (pair.moving.x)) ** 2 + (yt - (pair.moving.y)) ** 2 < pair.moving.rad ** 2) {
         mselect = "moving";
         // showInfo = false;
     }
@@ -388,12 +442,14 @@ function pointerDownHandler(x, y) {
 
     }
     mouseDown = true;
-    thDragSt = Math.atan2(y - Y / 2, x - xOff);
+    thDragSt = Math.atan2(yt-pair.fixed.y, xt-pair.fixed.x);
 }
 function pointerMoveHandler(x, y) {
+    xt = (x - xOff) / scl
+    yt = (y - yOff) / scl
     panelArray.forEach(panel => panel.pointerMove(x, y));
     if (mouseDown & mselect == "moving" & !pair.auto) {
-        dthDrag = Math.atan2(y - Y / 2, x - xOff) - thDragSt;
+        dthDrag = Math.atan2(yt - pair.fixed.y, xt - pair.fixed.x) - thDragSt;
         if (dthDrag < Math.PI) {
             dthDrag += PI2;
         }
@@ -401,7 +457,7 @@ function pointerMoveHandler(x, y) {
             dthDrag -= PI2;
         }
         pair.roll(pair.th + dthDrag);
-        thDragSt = Math.atan2(y - Y / 2, x - xOff);
+        thDragSt = Math.atan2(yt - pair.fixed.y, xt - pair.fixed.x);
     }
 
 
@@ -444,18 +500,18 @@ function drawSquareFullImage(n = 500) {
         tracesBounds.xmax - tracesBounds.xmin,
         tracesBounds.ymax - tracesBounds.ymin
     )
-    scl = n / size;
-    let xoff = scl * (-tracesBounds.xmin + (size - (tracesBounds.xmax - tracesBounds.xmin)) / 2);
-    let yoff = scl * (- tracesBounds.ymin + (size - (tracesBounds.ymax - tracesBounds.ymin)) / 2);
+    let imscl = n / size;
+    let xoff = imscl * (-tracesBounds.xmin + (size - (tracesBounds.xmax - tracesBounds.xmin)) / 2);
+    let yoff = imscl * (- tracesBounds.ymin + (size - (tracesBounds.ymax - tracesBounds.ymin)) / 2);
 
-    console.log(size, xoff, yoff, scl);
+    console.log(size, xoff, yoff, imscl);
     var canvasSh = document.createElement('canvas');
     canvasSh.width = n;
     canvasSh.height = n;
     var ctxSh = canvasSh.getContext('2d');
     ctxSh.fillStyle = bgFillStyle;
     ctxSh.fillRect(0, 0, canvasSh.width, canvasSh.height);
-    pair.drawTraces(ctxSh, xoff, yoff, scl);
+    pair.drawTraces(ctxSh, xoff, yoff, imscl);
     baseLW = baseLWtemp;
     return (canvasSh)
 }
@@ -659,7 +715,7 @@ class Panel {
 
 }
 function createSharePanel() {
-    let panel = new Panel((X - 200 * window.devicePixelRatio) / 2, (Y - 400 * window.devicePixelRatio) / 2, 200 * window.devicePixelRatio, 400 * window.devicePixelRatio);
+    let panel = new Panel((X - 200 ) / 2, (Y - 400 ) / 2, 200, 400 );
     panel.overlay = true;
     // panel.wait=true;
     panel.active = false;
@@ -874,18 +930,20 @@ function toggleGalleryForm() {
 function anim() {
     requestAnimationFrame(anim);
 
-    ctx.fillStyle = bgFillStyle;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // ctx.fillStyle = bgFillStyle;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.setTransform(scl, 0, 0, scl, xOff, yOff)
     if (pair.auto & !showColInfo & !showInfo & !showRadInfo) {
         pair.update();
     }
-    pair.drawTraces(ctx,xOff);
+    pair.drawTraces(ctx, 0, 0, scl);
 
     if (showWheels | showWheelsOverride) {
-        pair.fixed.draw(xOff)
-        pair.moving.draw(xOff);
+        pair.fixed.draw(0, 0, scl)
+        pair.moving.draw(0, 0, scl);
     }
-
+    ctx.setTransform(1, 0, 0, 1, 0, 0)
     panelArray.forEach(panel => panel.draw())
 
     if (showInfo) {
@@ -924,12 +982,13 @@ canvas.width = window.innerWidth;
 let X = canvas.width;
 let Y = canvas.height;
 
-let pixRat = window.devicePixelRatio * 1;
-if (window.orientation == 90 || window.orientation==270){
+// let pixRat = window.devicePixelRatio * 1.0;
+let pixRat =  1.0;
+if (window.orientation == 90 || window.orientation == 270) {
     //dodgy fix for "incorrect" window size reported in landscape, 
     //meaning pixel ratio is inappropriate scaling measure
     //only reported on modile device so no problem on desktop
-    pixRat=pixRat*(Y/X)
+    pixRat = pixRat * (Y / X)
 }
 const txtSize = 60 * pixRat;
 let baseLW = 1 * pixRat;
@@ -951,19 +1010,24 @@ const gallerySize = 1080;
 
 const dth = PI2 / 100;
 
-if (X > 1.4*Y) {
-    isLandscape=true;
+// Global vars to cache  pointer event state for pinch zoom
+var evCache = new Array();
+var prevDiff = -1;
+
+if (X > 1.4 * Y) {
+    isLandscape = true;
 }
 else {
-    isLandscape=false;
+    isLandscape = false;
 }
 let uiY = 0.2 * Y;
 let uiX = X;
-let xOff=X/2;
+let xOff = X / 2;
+let yOff = Y / 2;
 if (isLandscape) {
     uiY = 0.4 * Y;
     uiX = 0.333 * X;
-    xOff=2*X/3;
+    xOff = 2 * X / 3;
 }
 
 ringSizes = [96, 105]//,144,150]
@@ -984,16 +1048,20 @@ fetch(galleryAPIurl)
     .then(response => response.text())
     .then(data => console.log(data));
 
-console.log(window.devicePixelRatio,pixRat)
-console.log('x',window.innerWidth,'y',window.innerHeight)
-console.log('sx',screen.width,'sy',screen.height)
-console.log('window/screen x', window.innerWidth / screen.width)
-console.log('window/screen y', window.innerHeight / screen.height)
-console.log('vVx', window.visualViewport.width, 'vVy', window.visualViewport.height)
-console.log('window/vV x', window.innerWidth / window.visualViewport.width)
-console.log('window/vV y', window.innerHeight / window.visualViewport.height)
-console.log(document.documentElement.clientWidth)
-console.log(window.orientation)
+// console.log(window.devicePixelRatio, pixRat,
+//     'x', window.innerWidth, 'y', window.innerHeight,
+//     'sx', screen.width, 'sy', screen.height,
+//     'window/screen x', window.innerWidth / screen.width,
+//     'window/screen y', window.innerHeight / screen.height,
+//     'vVx', window.visualViewport.width, 'vVy', window.visualViewport.height,
+//     'window/vV x', window.innerWidth / window.visualViewport.width,
+//     'window/vV y', window.innerHeight / window.visualViewport.height,
+//     document.documentElement.clientWidth,
+//     window.orientation,
+//     'transform', ctx.getTransform(),
+//     'canvas offset', canvas.offsetLeft,
+// )
+
 
 document.querySelector(':root').style.setProperty('--bgColor', bgFillStyle)
 document.querySelector(':root').style.setProperty('--fgColor', pair.color)
@@ -1003,4 +1071,10 @@ document.getElementById("close").addEventListener("click", toggleGalleryForm, { 
 document.getElementById('name').value = localStorage.getItem('name');
 
 addPointerListeners();
+
+let scl = 1.0
+// let xOff
+canvas.style.backgroundColor = bgFillStyle
+// ctx.setTransform(scl,0,0,scl,0,0)
+
 anim();
