@@ -38,14 +38,14 @@ class MovingDisc extends Disc {
         ctx.beginPath();
         ctx.moveTo((scl * this.x) + xoff, yoff + (scl * this.y));
         ctx.lineTo(
-            (scl * this.x) + xoff + scl*this.rad * Math.cos(this.th) * this.rat,
-            yoff + (scl * this.y) + scl*this.rad * Math.sin(this.th) * this.rat
+            (scl * this.x) + xoff + scl * this.rad * Math.cos(this.th) * this.rat,
+            yoff + (scl * this.y) + scl * this.rad * Math.sin(this.th) * this.rat
         )
         ctx.stroke();
         ctx.beginPath();
         ctx.arc(
-            (scl * this.x) + xoff + scl*this.rat * this.rad * Math.cos(this.th),
-            yoff + (scl * this.y) + scl*this.rat * this.rad * Math.sin(this.th),
+            (scl * this.x) + xoff + scl * this.rat * this.rad * Math.cos(this.th),
+            yoff + (scl * this.y) + scl * this.rat * this.rad * Math.sin(this.th),
             3 * baseLW, 0, PI2);
         ctx.fill();
     }
@@ -333,7 +333,7 @@ function addPointerListeners() {
                 if (prevDiff > 0) {
                     dDiff = curDiff - prevDiff;
                     // console.log("Pinch moving OUT -> Zoom in", ev);
-                    scl = Math.min(Math.max(scl *(1+ 0.0025 * dDiff), 0.05), 10);
+                    scl = Math.min(Math.max(scl * (1 + 0.0025 * dDiff), 0.05), 10);
 
                 }
                 prevDiff = curDiff;
@@ -372,7 +372,7 @@ function addPointerListeners() {
     }
 }
 function wheelHandler(event) {
-    scl = Math.min(10, Math.max(scl * (1-0.0005 * event.deltaY), 0.05));
+    scl = Math.min(10, Math.max(scl * (1 - 0.0005 * event.deltaY), 0.05));
 }
 function pointerDownHandler(x, y, n = 1) {
 
@@ -412,15 +412,15 @@ function pointerDownHandler(x, y, n = 1) {
         mselect = "moving";
         // showInfo = false;
     }
-    else if(y<(Y-uiY) & y>uiY){
-        mselect="pan";
-        y0=y;
-        x0=x;
-        xOff0=xOff;
-        yOff0=yOff;
+    else if (y < (Y - uiY) & y > uiY) {
+        mselect = "pan";
+        y0 = y;
+        x0 = x;
+        xOff0 = xOff;
+        yOff0 = yOff;
         // console.log("Pan")
     }
-    else{
+    else {
         mselect = null;
         // showInfo = false;
 
@@ -444,7 +444,7 @@ function pointerMoveHandler(x, y) {
         thDragSt = Math.atan2(yt - pair.fixed.y, xt - pair.fixed.x);
     }
     if (mselect == "pan") {
-        xOff=xOff0+(x-x0);
+        xOff = xOff0 + (x - x0);
         yOff = yOff0 + (y - y0);
         // console.log('xOff',xOff,'x',x,'x0',x0)
 
@@ -457,24 +457,27 @@ function pointerUpHandler(x, y) {
     showWheelsOverride = false;
     pair.fixed.color = wheelColor;
     pair.moving.color = wheelColor;
-    mselect=null;
+    mselect = null;
 
     panelArray.forEach(panel => panel.pointerUp(x, y))
 }
 function doubleClickHandler(clickCase) {
+    if (showWheels) {
+        if ((clickCase == "autoCCW" || clickCase == "autoCW") & pair.auto != 0) {
+            pair.auto = 0;
+        }
+        else if (clickCase == "autoCCW") {
+            pair.auto = -1;
+        }
+        else if (clickCase == "autoCW") {
+            pair.auto = 1;
+        }
+    }
+
     console.log(clickCase)
-    topPanel.active=true;
-    bottomPanel.active=true;
-    showWheels=true;
-    if ((clickCase == "autoCCW" || clickCase == "autoCW") & pair.auto != 0) {
-        pair.auto = 0;
-    }
-    else if (clickCase == "autoCCW") {
-        pair.auto = -1;
-    }
-    else if (clickCase == "autoCW") {
-        pair.auto = 1;
-    }
+    topPanel.active = true;
+    bottomPanel.active = true;
+    showWheels = true;
 }
 function calcLCM(a, b) { //lowest common multiple
     let min = (a > b) ? a : b;
@@ -956,7 +959,7 @@ function anim() {
     // ctx.fillText(Math.round(curDiff), 20, uiY + 80)
     // ctx.fillText(Math.round(dDiff), 20, uiY + 110)
     // ctx.fillText(Math.round(scl * 10000) / 10000, 20, uiY + 140)
-    ctx.fillText('v12', 20, Y - 15)
+    // ctx.fillText('v12', 20, Y - 15)
 
 }
 
