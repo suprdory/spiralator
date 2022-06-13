@@ -935,7 +935,7 @@ function anim() {
     ctx.fillText(Math.round(curDiff), 20, uiY + 80)
     ctx.fillText(Math.round(dDiff), 20, uiY + 110)
     ctx.fillText(Math.round(scl * 10000) / 10000, 20, uiY + 140)
-    ctx.fillText('v4', 20, uiY + 170)
+    ctx.fillText('v5', 20, uiY + 170)
 
 }
 
