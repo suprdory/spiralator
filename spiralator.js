@@ -311,7 +311,6 @@ function addPointerListeners() {
         canvas.addEventListener("touchstart", e => {
             e.preventDefault();
             pointerDownHandler(e.touches[0].clientX, e.touches[0].clientY);
-            
             // This event is cached to support 2-finger gestures
             evCache.push(e);
             console.log("pointerDown", e);
@@ -320,13 +319,16 @@ function addPointerListeners() {
         );
         canvas.addEventListener("touchmove", e => {
             e.preventDefault();
-            pointerMoveHandler(e.touches[0].clientX, e.touches[0].clientY)
+            
 
             // If two pointers are down, check for pinch gestures
+            if (evCache.length ==1){
+                pointerMoveHandler(e.touches[0].clientX, e.touches[0].clientY)
+            }
             if (evCache.length == 2) {
                 console.log("Double touch")
                 // Calculate the distance between the two pointers
-                var curDiff = Math.abs(evCache[0].clientX - evCache[1].clientX);
+                curDiff = Math.abs(evCache[0].clientX - evCache[1].clientX);
                 dDist=curDiff-prevDiff;
                 if (prevDiff > 0) {
                     if (dDist>0) {
@@ -345,7 +347,7 @@ function addPointerListeners() {
 
                 // Cache the distance for the next move event
                 prevDiff = curDiff;
-            }
+            } 
 
 
         },
@@ -406,7 +408,7 @@ function pointerDownHandler(x, y) {
         showUI = true;
         let now = new Date().getTime();
         let timeSince = now - lastTouch;
-        if (timeSince < 300) {
+        if (timeSince < 300 & evCache.length<2) {
             //double touch
             doubleClickHandler(clickCase);
         }
@@ -1019,6 +1021,8 @@ const dth = PI2 / 100;
 // Global vars to cache  pointer event state for pinch zoom
 var evCache = new Array();
 var prevDiff = -1;
+var curDiff = 0;
+var prevDiff=0;
 
 if (X > 1.4 * Y) {
     isLandscape = true;
