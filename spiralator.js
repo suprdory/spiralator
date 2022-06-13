@@ -977,8 +977,8 @@ let showRadInfo = false;
 let showColInfo = false;
 let showgalleryForm = false;
 
-canvas.height = window.innerHeight;
-canvas.width = window.innerWidth;
+canvas.height = window.innerHeight * window.devicePixelRatio;
+canvas.width = window.innerWidth * window.devicePixelRatio;
 let X = canvas.width;
 let Y = canvas.height;
 
