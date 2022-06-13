@@ -458,6 +458,7 @@ function pointerUpHandler(x, y) {
     showWheelsOverride = false;
     pair.fixed.color = wheelColor;
     pair.moving.color = wheelColor;
+    mselect=null;
 
     panelArray.forEach(panel => panel.pointerUp(x, y))
 }
@@ -950,7 +951,7 @@ function anim() {
     // ctx.fillText(Math.round(curDiff), 20, uiY + 80)
     // ctx.fillText(Math.round(dDiff), 20, uiY + 110)
     // ctx.fillText(Math.round(scl * 10000) / 10000, 20, uiY + 140)
-    ctx.fillText('v10', 20, uiY + 20)
+    ctx.fillText('v11', 20, uiY + 20)
 
 }
 
