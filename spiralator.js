@@ -330,22 +330,10 @@ function addPointerListeners() {
                 // Calculate the distance between the two pointers
                 curDiff = Math.abs(e.touches[0].clientX - e.touches[1].clientX);
                 dDiff = curDiff - prevDiff;
-                // if (prevDiff > 0) {
-                // if (dDiff>0) {
-                // The distance between the two pointers has increased
-                console.log("Pinch moving OUT -> Zoom in", ev);
-                // ev.target.style.background = "pink";
-                scl = Math.min(10, Math.max(scl - 0.005 * dDiff, 0.05));
-                // }
-                // if (dDiff<0) {
-                // The distance between the two pointers has decreased
-                // console.log("Pinch moving IN -> Zoom out", ev);
-                // ev.target.style.background = "lightblue";
-                // scl = Math.min(10, Math.max(scl - 0.005 * dDiff, 0.05));
-                // }
-                // }
 
-                // Cache the distance for the next move event
+                console.log("Pinch moving OUT -> Zoom in", ev);
+                scl = Math.min(10, Math.max(scl - 0.005 * dDiff, 0.05));
+
                 prevDiff = curDiff;
             }
 
@@ -960,9 +948,10 @@ function anim() {
 
     ctx.fillText(evCache.length, 20, uiY + 20)
     ctx.fillText(Math.round(prevDiff), 20, uiY + 50)
-    ctx.fillText(Math.round(dDiff), 20, uiY + 80)
-    ctx.fillText(Math.round(scl * 10000) / 10000, 20, uiY + 110)
-    ctx.fillText('v1', 20, uiY + 140)
+    ctx.fillText(Math.round(curDiff), 20, uiY + 80)
+    ctx.fillText(Math.round(dDiff), 20, uiY + 110)
+    ctx.fillText(Math.round(scl * 10000) / 10000, 20, uiY + 140)
+    ctx.fillText('v2', 20, uiY + 170)
 
 }
 
