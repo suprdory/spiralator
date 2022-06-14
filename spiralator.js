@@ -449,7 +449,7 @@ function pointerMoveHandler(x, y) {
     xt = (x - xOff) / scl
     yt = (y - yOff) / scl
     panelArray.forEach(panel => panel.pointerMove(x, y));
-    if (mselect == "moving" & !pair.auto) {
+    if (mselect == "moving" & !pair.auto & showWheels) {
         dthDrag = Math.atan2(yt - pair.fixed.y, xt - pair.fixed.x) - thDragSt;
         if (dthDrag < Math.PI) {
             dthDrag += PI2;
