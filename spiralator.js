@@ -976,7 +976,12 @@ function anim() {
     if (pair.auto & !showColInfo & !showInfo & !showRadInfo) {
         pair.update();
     }
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // ctx.setTransform(1, 0, 0, 1, 0, 0)
+    ctx.setTransform(scl, 0, 0, scl, xOff, yOff)
     pair.drawTraces(ctx, 0, 0, 1);
+
 
     if (showWheels | showWheelsOverride) {
         pair.fixed.draw(0, 0, 1)
