@@ -300,296 +300,6 @@ class Pair {
 
     }
 }
-
-function isTouchDevice() {
-    return (('ontouchstart' in window) ||
-        (navigator.maxTouchPoints > 0) ||
-        (navigator.msMaxTouchPoints > 0));
-}
-function addPointerListeners() {
-    if (isTouchDevice()) {
-        canvas.addEventListener("touchstart", e => {
-            e.preventDefault();
-            // This event is cached to support 2-finger gestures
-            console.log("pointerDown", e);
-            pointerDownHandler(e.touches[0].clientX, e.touches[0].clientY, e.touches.length);
-
-        },
-            { passive: false }
-        );
-        canvas.addEventListener("touchmove", e => {
-            e.preventDefault();
-
-
-            if (e.touches.length == 1) {
-                pointerMoveHandler(e.touches[0].clientX, e.touches[0].clientY)
-            }
-            // If two pointers are down, check for pinch gestures
-            if (e.touches.length == 2) {
-                curDiff = Math.abs(e.touches[0].clientX - e.touches[1].clientX) +
-                    Math.abs(e.touches[0].clientY - e.touches[1].clientY);
-                if (prevDiff > 0) {
-                    dDiff = curDiff - prevDiff;
-                    zoomHandler(
-                        0.0025 * dDiff,
-                        (e.touches[0].clientX + e.touches[1].clientX)/2,
-                        (e.touches[0].clientY + e.touches[1].clientY)/2)
-                }
-                prevDiff = curDiff;
-            }
-
-        },
-            { passive: false }
-        );
-        canvas.addEventListener("touchend", e => {
-            e.preventDefault();
-            prevDiff = -1;
-            pointerUpHandler(e.changedTouches[0].pageX, e.changedTouches[0].pageY);
-        },
-            { passive: false }
-        );
-    }
-    else {
-        addEventListener("mousedown", e => {
-            // e.preventDefault();
-            // pointerDownHandler(e.offsetX, e.offsetY);
-            pointerDownHandler(e.clientX, e.clientY)
-        },
-            // { passive: false }
-        );
-        addEventListener('mousemove', e => {
-            if (mouseDown) {
-                pointerMoveHandler(e.clientX, e.clientY)
-            }
-        });
-        addEventListener('mouseup', e => {
-            pointerUpHandler(e.clientX, e.clientY);
-        });
-        addEventListener('wheel', e => {
-            // console.log(e)
-            zoomHandler(-0.0005*e.deltaY,e.clientX,e.clientY);
-        })
-    }
-}
-function zoomHandler(dW,x,y) {
-
-    xt = (x - xOff) / scl
-    yt = (y - yOff) / scl
-
-    // console.log(
-    //     'dW',dw,
-    //     'x',x,
-    //     'xt',xt,
-    //     'y',y,
-    //     'yt',yt,  
-    // )
-    scl = Math.min(10, Math.max(scl *(1+dW), 0.05));
-    xOff=x-xt*scl
-    yOff=y-yt*scl
-    // console.log(xOff)
-
-}
-function pointerDownHandler(x, y, n = 1) {
-
-    if (!showgalleryForm) {
-        panelArray.forEach(panel => panel.pointerDown(x, y))
-        // showWheels = true;
-
-        let now = new Date().getTime();
-        let timeSince = now - lastTouch;
-        if (timeSince < 300 & n < 2) {
-            //double touch
-            doubleClickHandler(clickCase);
-        }
-        lastTouch = now;
-        cursor.x = x;
-        cursor.y = y;
-
-
-        if (((y > .5 * Y & y < (Y - uiY)) & !isLandscape) ||
-            ((y > .5 * Y & y < Y & x > uiX) & isLandscape)) {
-            clickCase = "autoCW";
-        }
-
-        else if (((y < .5 * Y & y > (uiY)) & !isLandscape) ||
-            ((y < .5 * Y & y > 0 & x > uiX) & isLandscape)) {
-            clickCase = "autoCCW";
-        }
-        else {
-            clickCase = null;
-        }
-    }
-
-    xt = (x - xOff) / scl
-    yt = (y - yOff) / scl
-    // console.log(xt, yt, pair.moving.x, pair.moving.y)
-    if (!pair.auto & showWheels & ((xt - (pair.moving.x)) ** 2 + (yt - (pair.moving.y)) ** 2 < (pair.moving.rad) ** 2)) {
-        mselect = "moving";
-        // showInfo = false;
-    }
-    else if (
-        topPanel.active &( y < (Y - uiY) & y > uiY) ||
-        !topPanel.active
-    ) {
-        mselect = "pan";
-        y0 = y;
-        x0 = x;
-        xOff0 = xOff;
-        yOff0 = yOff;
-        // console.log("Pan")
-    }
-    else {
-        mselect = null;
-        // showInfo = false;
-
-    }
-    mouseDown = true;
-    thDragSt = Math.atan2(yt - pair.fixed.y, xt - pair.fixed.x);
-}
-function pointerMoveHandler(x, y) {
-    xt = (x - xOff) / scl
-    yt = (y - yOff) / scl
-    panelArray.forEach(panel => panel.pointerMove(x, y));
-    if (mselect == "moving") {
-        dthDrag = Math.atan2(yt - pair.fixed.y, xt - pair.fixed.x) - thDragSt;
-        if (dthDrag < Math.PI) {
-            dthDrag += PI2;
-        }
-        if (dthDrag > Math.PI) {
-            dthDrag -= PI2;
-        }
-        pair.roll(pair.th + dthDrag);
-        thDragSt = Math.atan2(yt - pair.fixed.y, xt - pair.fixed.x);
-    }
-    if (mselect == "pan") {
-        xOff = xOff0 + (x - x0);
-        yOff = yOff0 + (y - y0);
-        // console.log('xOff',xOff,'x',x,'x0',x0)
-
-    }
-
-
-}
-function pointerUpHandler(x, y) {
-    mouseDown = false;
-    showWheelsOverride = false;
-    pair.fixed.color = wheelColor;
-    pair.moving.color = wheelColor;
-    mselect = null;
-
-    panelArray.forEach(panel => panel.pointerUp(x, y))
-}
-function doubleClickHandler(clickCase) {
-    if (showWheels) {
-        if ((clickCase == "autoCCW" || clickCase == "autoCW") & pair.auto != 0) {
-            pair.auto = 0;
-        }
-        else if (clickCase == "autoCCW") {
-            pair.auto = -1;
-        }
-        else if (clickCase == "autoCW") {
-            pair.auto = 1;
-        }
-    }
-
-    // console.log(clickCase)
-    topPanel.active = true;
-    bottomPanel.active = true;
-    showWheels = true;
-}
-function calcLCM(a, b) { //lowest common multiple
-    let min = (a > b) ? a : b;
-    while (min < 1000000) {
-        if (min % a == 0 && min % b == 0) {
-            return (min);
-        }
-        min++;
-    }
-}
-function drawSquareFullImage(n = 500) {
-    pair.penUp();
-    let baseLWtemp = baseLW;
-    baseLW = galleryLW * n / 1080;
-    let tracesBounds = pair.getTracesBounds();
-    let size = (shareBorderfrac + 1) * Math.max(
-        tracesBounds.xmax - tracesBounds.xmin,
-        tracesBounds.ymax - tracesBounds.ymin
-    )
-    let imscl = n / size;
-    let xoff = imscl * (-tracesBounds.xmin + (size - (tracesBounds.xmax - tracesBounds.xmin)) / 2);
-    let yoff = imscl * (- tracesBounds.ymin + (size - (tracesBounds.ymax - tracesBounds.ymin)) / 2);
-
-    console.log(size, xoff, yoff, imscl);
-    var canvasSh = document.createElement('canvas');
-    canvasSh.width = n;
-    canvasSh.height = n;
-    var ctxSh = canvasSh.getContext('2d');
-    ctxSh.fillStyle = bgFillStyle;
-    ctxSh.fillRect(0, 0, canvasSh.width, canvasSh.height);
-    pair.drawTraces(ctxSh, xoff, yoff, imscl);
-    baseLW = baseLWtemp;
-    return (canvasSh)
-}
-function shareImage() {
-    if (pair.traces.length > 0) {
-        sharePanel.wait = true;
-        canvasSq = drawSquareFullImage(1200);
-        canvasSq.toBlob(function (blob) {
-            const filesArray = [
-                new File(
-                    [blob],
-                    "canvas.png",
-                    {
-                        type: "image/png",
-                        lastModified: new Date().getTime()
-                    }
-                )
-            ];
-            const shareData = {
-                files: filesArray,
-            };
-            navigator.share(shareData)
-            sharePanel.wait = false;
-        })
-    }
-}
-function uploadImage(name, comment) {
-    if (pair.traces.length > 0) {
-        sharePanel.wait = true;
-        canvasSq = drawSquareFullImage(gallerySize);
-        canvasSq.toBlob(function (blob) {
-            imgFile = new File(
-                [blob],
-                "canvas.png",
-                {
-                    type: "image/png",
-                    lastModified: new Date().getTime()
-                }
-            )
-            let formData = new FormData();
-            formData.append('name', name);
-            formData.append('comment', comment);
-            formData.append('file', imgFile, "upload.png");
-            console.log(formData)
-
-            fetch(galleryAPIurl + '/upload_image', {
-                method: 'POST',
-                // WARNING!!!! DO NOT set Content Type!
-                // headers: { 'Content-Type': 'multipart/form-data' },
-                body: formData,
-            })
-                .then(response => response.json())
-                .then(data => {
-                    console.log(data);
-                    sharePanel.wait = false;
-                })
-                .catch((error) => {
-                    console.error('Error:', error);
-                    sharePanel.wait = false;
-                });
-        })
-    }
-}
 class PButton {
     constructor(panel, x, y, w, h, txt, fun, argObj, getXdragVar, getYdragVar, isDepressedFun) {
         this.x = panel.x + x * panel.w;
@@ -732,8 +442,301 @@ class Panel {
     }
 
 }
+
+function isTouchDevice() {
+    return (('ontouchstart' in window) ||
+        (navigator.maxTouchPoints > 0) ||
+        (navigator.msMaxTouchPoints > 0));
+}
+function addPointerListeners() {
+    if (isTouchDevice()) {
+        canvas.addEventListener("touchstart", e => {
+            e.preventDefault();
+            // This event is cached to support 2-finger gestures
+            // console.log("pointerDown", e);
+            pointerDownHandler(e.touches[0].clientX, e.touches[0].clientY, e.touches.length);
+
+        },
+            { passive: false }
+        );
+        canvas.addEventListener("touchmove", e => {
+            e.preventDefault();
+            if (e.touches.length == 1) {
+                pointerMoveHandler(e.touches[0].clientX, e.touches[0].clientY)
+            }
+            // If two pointers are down, check for pinch gestures
+            if (e.touches.length == 2) {
+                curDiff = Math.abs(e.touches[0].clientX - e.touches[1].clientX) +
+                    Math.abs(e.touches[0].clientY - e.touches[1].clientY);
+                if (prevDiff > 0) {
+                    dDiff = curDiff - prevDiff;
+                    zoomHandler(
+                        0.0025 * dDiff,
+                        (e.touches[0].clientX + e.touches[1].clientX) / 2,
+                        (e.touches[0].clientY + e.touches[1].clientY) / 2)
+                }
+                prevDiff = curDiff;
+            }
+
+        },
+            { passive: false }
+        );
+        canvas.addEventListener("touchend", e => {
+            e.preventDefault();
+            prevDiff = -1;
+            pointerUpHandler(e.changedTouches[0].pageX, e.changedTouches[0].pageY);
+        },
+            { passive: false }
+        );
+    }
+    else {
+        addEventListener("mousedown", e => {
+            // e.preventDefault();
+            // pointerDownHandler(e.offsetX, e.offsetY);
+            pointerDownHandler(e.clientX, e.clientY)
+        },
+            // { passive: false }
+        );
+        addEventListener('mousemove', e => {
+            if (mouseDown) {
+                pointerMoveHandler(e.clientX, e.clientY)
+            }
+        });
+        addEventListener('mouseup', e => {
+            pointerUpHandler(e.clientX, e.clientY);
+        });
+        addEventListener('wheel', e => {
+            // console.log(e)
+            zoomHandler(-0.0005 * e.deltaY, e.clientX, e.clientY);
+        })
+    }
+}
+function zoomHandler(dW, x, y) {
+    x = x / scl0;
+    y = y / scl0;
+    xt = (x - xOff) / scl
+    yt = (y - yOff) / scl
+
+    // console.log(
+    //     'dW',dw,
+    //     'x',x,
+    //     'xt',xt,
+    //     'y',y,
+    //     'yt',yt,  
+    // )
+    scl = Math.min(10, Math.max(scl * (1 + dW), 0.05));
+    xOff = x - xt * scl
+    yOff = y - yt * scl
+    // console.log(xOff)
+
+}
+function pointerDownHandler(x, y, n = 1) {
+    // console.log(x,y)
+    if (!showgalleryForm) {
+        panelArray.forEach(panel => panel.pointerDown(x / scl0, y / scl0))
+        // showWheels = true;
+
+        let now = new Date().getTime();
+        let timeSince = now - lastTouch;
+        if (timeSince < 300 & n < 2) {
+            //double touch
+            doubleClickHandler(clickCase);
+        }
+        lastTouch = now;
+
+        if (((y / scl0 > .5 * Y & y / scl0 < (Y - uiY)) & !isLandscape) ||
+            ((y / scl0 > .5 * Y & y / scl0 < Y & x / scl0 > uiX) & isLandscape)) {
+            clickCase = "autoCW";
+        }
+
+        else if (((y / scl0 < .5 * Y & y / scl0 > (uiY)) & !isLandscape) ||
+            ((y / scl0 < .5 * Y & y / scl0 > 0 & x / scl0 > uiX) & isLandscape)) {
+            clickCase = "autoCCW";
+        }
+        else {
+            clickCase = null;
+        }
+    }
+
+    xt = (x - xOff) / (scl)
+    yt = (y - yOff) / (scl)
+
+    // console.log(xt, yt, pair.moving.x, pair.moving.y)
+    if (!pair.auto & showWheels & ((xt - (pair.moving.x)) ** 2 + (yt - (pair.moving.y)) ** 2 < (pair.moving.rad) ** 2)) {
+        mselect = "moving";
+        // showInfo = false;
+        // console.log("moving")
+    }
+    else if (
+        !isLandscape & topPanel.active & (y / scl0 < (Y - uiY) & y / scl0 > uiY) ||
+        isLandscape & topPanel.active & (x / scl0 > uiX) ||
+
+        !topPanel.active
+    ) {
+        mselect = "pan";
+        y0 = y / scl0;
+        x0 = x / scl0;
+        xOff0 = xOff;
+        yOff0 = yOff;
+        // console.log("Pan")
+    }
+    else {
+        mselect = null;
+        // showInfo = false;
+
+    }
+    mouseDown = true;
+    thDragSt = Math.atan2(yt - pair.fixed.y, xt - pair.fixed.x);
+}
+function pointerMoveHandler(x, y) {
+    xt = (x - xOff) / scl
+    yt = (y - yOff) / scl
+
+    panelArray.forEach(panel => panel.pointerMove(x / scl0, y / scl0));
+    if (mselect == "moving") {
+        dthDrag = Math.atan2(yt - pair.fixed.y, xt - pair.fixed.x) - thDragSt;
+        if (dthDrag < Math.PI) {
+            dthDrag += PI2;
+        }
+        if (dthDrag > Math.PI) {
+            dthDrag -= PI2;
+        }
+        pair.roll(pair.th + dthDrag);
+        thDragSt = Math.atan2(yt - pair.fixed.y, xt - pair.fixed.x);
+    }
+    if (mselect == "pan") {
+        xOff = xOff0 + (x / scl0 - x0) * scl0;
+        yOff = yOff0 + (y / scl0 - y0) * scl0;
+    }
+
+
+}
+function pointerUpHandler(x, y) {
+    x = x / scl0;
+    y = y / scl0;
+    mouseDown = false;
+    showWheelsOverride = false;
+    pair.fixed.color = wheelColor;
+    pair.moving.color = wheelColor;
+    mselect = null;
+
+    panelArray.forEach(panel => panel.pointerUp(x, y))
+}
+function doubleClickHandler(clickCase) {
+    if (showWheels) {
+        if ((clickCase == "autoCCW" || clickCase == "autoCW") & pair.auto != 0) {
+            pair.auto = 0;
+        }
+        else if (clickCase == "autoCCW") {
+            pair.auto = -1;
+        }
+        else if (clickCase == "autoCW") {
+            pair.auto = 1;
+        }
+    }
+
+    // console.log(clickCase)
+    topPanel.active = true;
+    bottomPanel.active = true;
+    showWheels = true;
+}
+function calcLCM(a, b) { //lowest common multiple
+    let min = (a > b) ? a : b;
+    while (min < 1000000) {
+        if (min % a == 0 && min % b == 0) {
+            return (min);
+        }
+        min++;
+    }
+}
+function drawSquareFullImage(n = 500) {
+    pair.penUp();
+    let baseLWtemp = baseLW;
+    baseLW = galleryLW * n / 1080;
+    let tracesBounds = pair.getTracesBounds();
+    let size = (shareBorderfrac + 1) * Math.max(
+        tracesBounds.xmax - tracesBounds.xmin,
+        tracesBounds.ymax - tracesBounds.ymin
+    )
+    let imscl = n / size;
+    let xoff = imscl * (-tracesBounds.xmin + (size - (tracesBounds.xmax - tracesBounds.xmin)) / 2);
+    let yoff = imscl * (- tracesBounds.ymin + (size - (tracesBounds.ymax - tracesBounds.ymin)) / 2);
+
+    console.log(size, xoff, yoff, imscl);
+    var canvasSh = document.createElement('canvas');
+    canvasSh.width = n;
+    canvasSh.height = n;
+    var ctxSh = canvasSh.getContext('2d');
+    ctxSh.fillStyle = bgFillStyle;
+    ctxSh.fillRect(0, 0, canvasSh.width, canvasSh.height);
+    pair.drawTraces(ctxSh, xoff, yoff, imscl);
+    baseLW = baseLWtemp;
+    return (canvasSh)
+}
+function shareImage() {
+    if (pair.traces.length > 0) {
+        sharePanel.wait = true;
+        canvasSq = drawSquareFullImage(1200);
+        canvasSq.toBlob(function (blob) {
+            const filesArray = [
+                new File(
+                    [blob],
+                    "canvas.png",
+                    {
+                        type: "image/png",
+                        lastModified: new Date().getTime()
+                    }
+                )
+            ];
+            const shareData = {
+                files: filesArray,
+            };
+            navigator.share(shareData)
+            sharePanel.wait = false;
+        })
+    }
+}
+function uploadImage(name, comment) {
+    if (pair.traces.length > 0) {
+        sharePanel.wait = true;
+        canvasSq = drawSquareFullImage(gallerySize);
+        canvasSq.toBlob(function (blob) {
+            imgFile = new File(
+                [blob],
+                "canvas.png",
+                {
+                    type: "image/png",
+                    lastModified: new Date().getTime()
+                }
+            )
+            let formData = new FormData();
+            formData.append('name', name);
+            formData.append('comment', comment);
+            formData.append('file', imgFile, "upload.png");
+            console.log(formData)
+
+            fetch(galleryAPIurl + '/upload_image', {
+                method: 'POST',
+                // WARNING!!!! DO NOT set Content Type!
+                // headers: { 'Content-Type': 'multipart/form-data' },
+                body: formData,
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+                    sharePanel.wait = false;
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    sharePanel.wait = false;
+                });
+        })
+    }
+}
 function createSharePanel() {
-    let panel = new Panel((X - 200) / 2, (Y - 400) / 2, 200, 400);
+    xsize = 200 / scl0;
+    ysize = 400 / scl0;
+    let panel = new Panel((X - xsize) / 2, (Y - ysize) / 2, xsize, ysize);
     panel.overlay = true;
     // panel.wait=true;
     panel.active = false;
@@ -758,9 +761,6 @@ function createSharePanel() {
 
 }
 function createTopPanel() {
-
-
-
 
     let uiBorder = X / 100;
     let panel = new Panel(0 + uiBorder, 0 + uiBorder, uiX - 2 * uiBorder, uiY);
@@ -924,7 +924,6 @@ function createBottomPanel() {
 
     return panel;
 }
-
 function submitToGallery() {
     let name = document.getElementById('name').value;
     localStorage.setItem('name', name);
@@ -945,6 +944,20 @@ function toggleGalleryForm() {
         showgalleryForm = false;
     }
 }
+function setGallerySubmitHTML() {
+    document.querySelector(':root').style.setProperty('--bgColor', bgFillStyle)
+    document.querySelector(':root').style.setProperty('--fgColor', pair.color)
+    document.querySelector(':root').style.setProperty('--textSize', 12 + 'pt')
+    document.getElementById("submit").addEventListener("click", submitToGallery, { passive: true })
+    document.getElementById("close").addEventListener("click", toggleGalleryForm, { passive: true })
+    document.getElementById('name').value = localStorage.getItem('name');
+}
+function wakeGalleryServer(){
+    fetch(galleryAPIurl)
+        .then(response => response.text())
+        .then(data => console.log(data));
+    
+    }
 function anim() {
     requestAnimationFrame(anim);
 
@@ -972,21 +985,39 @@ function anim() {
         pair.drawColInfo();
     }
 
-    ctx.textAlign="left"
+    ctx.textAlign = "left"
     // ctx.fillText('yOff='+Math.round(yOff * 10000) / 10000, 20, uiY + 80)
     // ctx.fillText('xOff='+Math.round(xOff * 10000) / 10000, 20, uiY + 110)
     // ctx.fillText('scl='+Math.round(scl * 10000) / 10000, 20, uiY + 140)
-    ctx.fillText('v16', 10, Y - 15)
+    ctx.fillText('v17', 10, Y - 15)
 
 }
+
 
 const canvas = document.getElementById("cw");
 const ctx = canvas.getContext("2d");
 const PI2 = Math.PI * 2;
-const cursor = {
-    x: innerWidth / 2,
-    y: innerHeight / 2,
-};
+
+canvas.height = window.innerHeight * window.devicePixelRatio;
+canvas.width = window.innerWidth * window.devicePixelRatio;
+let X = canvas.width;
+let Y = canvas.height;
+let scl0 = 1 / window.devicePixelRatio;
+let scl = 1.0 * scl0
+
+
+let pixRat = window.devicePixelRatio * 1.0;
+
+// if (window.orientation == 90 || window.orientation == 270) {
+//     //dodgy fix for "incorrect" window size reported in landscape, 
+//     //meaning pixel ratio is inappropriate scaling measure
+//     //only reported on modile device so no problem on desktop
+//     pixRat = pixRat * (Y / X)
+// }
+
+const txtSize = 60 * pixRat;
+let baseLW = 1 * pixRat;
+let pixPertooth = 9 * pixRat;
 
 let clickCase = null;
 let mouseDown = false;
@@ -998,33 +1029,13 @@ let showRadInfo = false;
 let showColInfo = false;
 let showgalleryForm = false;
 
-// canvas.height = window.innerHeight * window.devicePixelRatio;
-// canvas.width = window.innerWidth * window.devicePixelRatio;
-canvas.height = window.innerHeight;
-canvas.width = window.innerWidth;
-// let scl0 = 1 / window.devicePixelRatio;
-let scl0 = 1
-let X = canvas.width;
-let Y = canvas.height;
-
-// let pixRat = window.devicePixelRatio * 1.0;
-let pixRat = 1.0;
-if (window.orientation == 90 || window.orientation == 270) {
-    //dodgy fix for "incorrect" window size reported in landscape, 
-    //meaning pixel ratio is inappropriate scaling measure
-    //only reported on modile device so no problem on desktop
-    pixRat = pixRat * (Y / X)
-}
-const txtSize = 60 * pixRat;
-let baseLW = 1 * pixRat;
-let pixPertooth = 9 * pixRat;
-
 const shareBorderfrac = 0.15;
 const hueInit = Math.random() * 360
 const bgFillStyle = "hsl(" + hueInit + ",100%,5%)";
 const bgFillStyleAlpha = "hsla(" + hueInit + ",100%,5%,.80)";
 const wheelColor = "white"
 const uiTextColor = "white"
+canvas.style.backgroundColor = bgFillStyle
 
 const maxWheelSize = 150;
 const minWheelSize = 10;
@@ -1035,44 +1046,28 @@ const gallerySize = 1080;
 
 const dth = PI2 / 100;
 
-// Global vars to cache pointer event state for pinch zoom
+//vars for pinch zoom handling
 var prevDiff = 0;
 var curDiff = 0;
 var dDiff = 0;
 
+// initial screen centre
+let xOff = X / 2 * scl0;
+let yOff = Y / 2 * scl0;
+
+// ui size
+let uiY = 0.2 * Y;
+let uiX = X;
+
 if (X > 1.4 * Y) {
-    isLandscape = true;
+    isLandscape = true
+    uiY = 0.4 * Y;
+    uiX = 0.333 * X;
+    xOff = 2 * X / 3 *scl0;
 }
 else {
     isLandscape = false;
 }
-let uiY = 0.2 * Y;
-let uiX = X;
-let xOff = X / 2;
-let yOff = Y / 2;
-if (isLandscape) {
-    uiY = 0.4 * Y;
-    uiX = 0.333 * X;
-    xOff = 2 * X / 3;
-}
-
-ringSizes = [96, 105]//,144,150]
-discSizes = [24, 30, 32, 40, 42, 45, 48, 52, 56, 60, 63, 72, 75, 80, 84]
-
-
-let fixedDisc = new Disc(ringSizes.random())
-let movingDisc = new MovingDisc(discSizes.random(), Math.random() / 2 + 0.5);
-let pair = new Pair(fixedDisc, movingDisc)
-
-topPanel = createTopPanel();
-sharePanel = createSharePanel();
-bottomPanel = createBottomPanel();
-panelArray = [topPanel, bottomPanel, sharePanel];
-
-//wake gallery server
-fetch(galleryAPIurl)
-    .then(response => response.text())
-    .then(data => console.log(data));
 
 console.log('devicePixelRatio', window.devicePixelRatio,
     'pixRat', pixRat,
@@ -1088,18 +1083,19 @@ console.log('devicePixelRatio', window.devicePixelRatio,
 )
 
 
-document.querySelector(':root').style.setProperty('--bgColor', bgFillStyle)
-document.querySelector(':root').style.setProperty('--fgColor', pair.color)
-document.querySelector(':root').style.setProperty('--textSize', txtSize / 4 + 'px')
-document.getElementById("submit").addEventListener("click", submitToGallery, { passive: true })
-document.getElementById("close").addEventListener("click", toggleGalleryForm, { passive: true })
-document.getElementById('name').value = localStorage.getItem('name');
+ringSizes = [96, 105]//,144,150]
+discSizes = [24, 30, 32, 40, 42, 45, 48, 52, 56, 60, 63, 72, 75, 80, 84]
 
+let fixedDisc = new Disc(ringSizes.random())
+let movingDisc = new MovingDisc(discSizes.random(), Math.random() / 2 + 0.5);
+let pair = new Pair(fixedDisc, movingDisc)
+
+topPanel = createTopPanel();
+sharePanel = createSharePanel();
+bottomPanel = createBottomPanel();
+panelArray = [topPanel, bottomPanel, sharePanel];
+
+wakeGalleryServer()
+setGallerySubmitHTML();
 addPointerListeners();
-
-let scl = 1.0
-// let xOff
-canvas.style.backgroundColor = bgFillStyle
-// ctx.setTransform(scl,0,0,scl,0,0)
-
 anim();
