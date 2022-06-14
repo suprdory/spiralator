@@ -511,8 +511,10 @@ function addPointerListeners() {
         })
     }
 }
-function zoomHandler(dW, x, y) {
+function zoomHandler(dW, xc, yc) {
 
+    y=yc*pixRat;
+    x=xc*pixRat;
     xt = (x - xOff) / scl
     yt = (y - yOff) / scl
     // x = x / scl0;
@@ -742,8 +744,8 @@ function uploadImage(name, comment) {
     }
 }
 function createSharePanel() {
-    xsize = 200 ;
-    ysize = 400 ;
+    xsize = 200*pixRat ;
+    ysize = 400*pixRat ;
     let panel = new Panel((X - xsize) / 2, (Y - ysize) / 2, xsize, ysize);
     panel.overlay = true;
     // panel.wait=true;
@@ -1005,7 +1007,7 @@ function anim() {
     ctx.fillText(ctx.getTransform()['a'], 20, uiY + 80)
     // ctx.fillText('xOff='+Math.round(xOff * 10000) / 10000, 20, uiY + 110)
     // ctx.fillText('scl='+Math.round(scl * 10000) / 10000, 20, uiY + 140)
-    ctx.fillText('v20', 10, Y - 15)
+    ctx.fillText('v21', 10, Y - 15)
 
 }
 
