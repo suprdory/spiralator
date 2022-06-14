@@ -961,18 +961,21 @@ function wakeGalleryServer(){
     }
 function anim() {
     requestAnimationFrame(anim);
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.setTransform(scl, 0, 0, scl, xOff, yOff)
     if (pair.auto & !showColInfo & !showInfo & !showRadInfo) {
         pair.update();
     }
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // ctx.setTransform(1, 0, 0, 1, 0, 0)
+    ctx.setTransform(scl, 0, 0, scl, xOff, yOff)
     pair.drawTraces(ctx, 0, 0, 1);
+
 
     if (showWheels | showWheelsOverride) {
         pair.fixed.draw(0, 0, 1)
         pair.moving.draw(0, 0, 1);
     }
+        
     ctx.setTransform(scl0, 0, 0, scl0, 0, 0)
     panelArray.forEach(panel => panel.draw())
 
@@ -990,7 +993,7 @@ function anim() {
     // ctx.fillText('yOff='+Math.round(yOff * 10000) / 10000, 20, uiY + 80)
     // ctx.fillText('xOff='+Math.round(xOff * 10000) / 10000, 20, uiY + 110)
     // ctx.fillText('scl='+Math.round(scl * 10000) / 10000, 20, uiY + 140)
-    ctx.fillText('v19', 10, Y - 15)
+    ctx.fillText('v20', 10, Y - 15)
 
 }
 
@@ -999,12 +1002,12 @@ const canvas = document.getElementById("cw");
 const ctx = canvas.getContext("2d");
 const PI2 = Math.PI * 2;
 
-canvas.height = window.innerHeight * window.devicePixelRatio;
-canvas.width = window.innerWidth * window.devicePixelRatio;
+canvas.height = Math.floor(window.innerHeight * window.devicePixelRatio);
+canvas.width = Math.floor(window.innerWidth * window.devicePixelRatio);
 let X = canvas.width;
 let Y = canvas.height;
 let scl0 = 1 / window.devicePixelRatio;
-let scl = 1.0 * scl0
+let scl = 1.0* scl0
 
 
 let pixRat = window.devicePixelRatio * 1.0;
@@ -1073,9 +1076,10 @@ else {
 console.log('devicePixelRatio', window.devicePixelRatio,
     'pixRat', pixRat,
     'innerWidth', window.innerWidth, 'innerHeight', window.innerHeight,
-    'sx', screen.width, 'sy', screen.height,
-    'window/screen x', window.innerWidth / screen.width,
-    'window/screen y', window.innerHeight / screen.height,
+    'canvas.width',canvas.width,'canvas.height',canvas.height,
+    // 'sx', screen.width, 'sy', screen.height,
+    // 'window/screen x', window.innerWidth / screen.width,
+    // 'window/screen y', window.innerHeight / screen.height,
     'vVx', window.visualViewport.width, 'vVy', window.visualViewport.height,
     'window/vV x', window.innerWidth / window.visualViewport.width,
     'window/vV y', window.innerHeight / window.visualViewport.height,
