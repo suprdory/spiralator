@@ -1004,10 +1004,10 @@ function anim() {
     }
 
     ctx.textAlign = "left"
-    ctx.fillText(ctx.getTransform()['a'], 20, uiY + 80)
+    // ctx.fillText(ctx.getTransform()['a'], 20, uiY + 80)
     // ctx.fillText('xOff='+Math.round(xOff * 10000) / 10000, 20, uiY + 110)
     // ctx.fillText('scl='+Math.round(scl * 10000) / 10000, 20, uiY + 140)
-    ctx.fillText('v21', 10, Y - 15)
+    // ctx.fillText('v21', 10, Y - 15)
 
 }
 
