@@ -331,10 +331,9 @@ function addPointerListeners() {
                 if (prevDiff > 0) {
                     dDiff = curDiff - prevDiff;
                     zoomHandler(
-                        -0.0025 * dDiff,
+                        0.0025 * dDiff,
                         (e.touches[0].clientX + e.touches[1].clientX)/2,
                         (e.touches[0].clientY + e.touches[1].clientY)/2)
-                    // scl = Math.min(Math.max(scl * (1 + 0.0025 * dDiff), 0.05), 10);
                 }
                 prevDiff = curDiff;
             }
@@ -428,7 +427,10 @@ function pointerDownHandler(x, y, n = 1) {
         mselect = "moving";
         // showInfo = false;
     }
-    else if (y < (Y - uiY) & y > uiY) {
+    else if (
+        topPanel.active &( y < (Y - uiY) & y > uiY) ||
+        !topPanel.active
+    ) {
         mselect = "pan";
         y0 = y;
         x0 = x;
@@ -970,15 +972,11 @@ function anim() {
         pair.drawColInfo();
     }
 
-
-    // ctx.fillText(Math.round(prevDiff), 20, uiY + 50)
-    // ctx.fillText(Math.round(curDiff), 20, uiY + 80)
-    // ctx.fillText(Math.round(dDiff), 20, uiY + 110)
     ctx.textAlign="left"
-    ctx.fillText('yOff='+Math.round(yOff * 10000) / 10000, 20, uiY + 80)
-    ctx.fillText('xOff='+Math.round(xOff * 10000) / 10000, 20, uiY + 110)
-    ctx.fillText('scl='+Math.round(scl * 10000) / 10000, 20, uiY + 140)
-    ctx.fillText('v15', 10, Y - 15)
+    // ctx.fillText('yOff='+Math.round(yOff * 10000) / 10000, 20, uiY + 80)
+    // ctx.fillText('xOff='+Math.round(xOff * 10000) / 10000, 20, uiY + 110)
+    // ctx.fillText('scl='+Math.round(scl * 10000) / 10000, 20, uiY + 140)
+    ctx.fillText('v16', 10, Y - 15)
 
 }
 
