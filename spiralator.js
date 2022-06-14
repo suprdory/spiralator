@@ -331,14 +331,13 @@ function addPointerListeners() {
                 if (prevDiff > 0) {
                     dDiff = curDiff - prevDiff;
                     zoomHandler(
-                        0.0025 * dDiff,
+                        -0.0025 * dDiff,
                         (e.touches[0].clientX + e.touches[1].clientX)/2,
                         (e.touches[0].clientY + e.touches[1].clientY)/2)
-                    scl = Math.min(Math.max(scl * (1 + 0.0025 * dDiff), 0.05), 10);
+                    // scl = Math.min(Math.max(scl * (1 + 0.0025 * dDiff), 0.05), 10);
                 }
                 prevDiff = curDiff;
             }
-
 
         },
             { passive: false }
@@ -369,7 +368,7 @@ function addPointerListeners() {
         });
         addEventListener('wheel', e => {
             // console.log(e)
-            zoomHandler(e.deltaY,e.clientX,e.clientY);
+            zoomHandler(-0.0005*e.deltaY,e.clientX,e.clientY);
         })
     }
 }
@@ -379,13 +378,13 @@ function zoomHandler(dW,x,y) {
     yt = (y - yOff) / scl
 
     // console.log(
+    //     'dW',dw,
     //     'x',x,
     //     'xt',xt,
     //     'y',y,
     //     'yt',yt,  
     // )
-    zFrac=(0.0005 * -dW)
-    scl = Math.min(10, Math.max(scl *(1+zFrac), 0.05));
+    scl = Math.min(10, Math.max(scl *(1+dW), 0.05));
     xOff=x-xt*scl
     yOff=y-yt*scl
     // console.log(xOff)
@@ -491,7 +490,7 @@ function doubleClickHandler(clickCase) {
         }
     }
 
-    console.log(clickCase)
+    // console.log(clickCase)
     topPanel.active = true;
     bottomPanel.active = true;
     showWheels = true;
@@ -975,8 +974,11 @@ function anim() {
     // ctx.fillText(Math.round(prevDiff), 20, uiY + 50)
     // ctx.fillText(Math.round(curDiff), 20, uiY + 80)
     // ctx.fillText(Math.round(dDiff), 20, uiY + 110)
-    // ctx.fillText(Math.round(scl * 10000) / 10000, 20, uiY + 140)
-    ctx.fillText('v14', 20, Y - 15)
+    ctx.textAlign="left"
+    ctx.fillText('yOff='+Math.round(yOff * 10000) / 10000, 20, uiY + 80)
+    ctx.fillText('xOff='+Math.round(xOff * 10000) / 10000, 20, uiY + 110)
+    ctx.fillText('scl='+Math.round(scl * 10000) / 10000, 20, uiY + 140)
+    ctx.fillText('v15', 10, Y - 15)
 
 }
 
