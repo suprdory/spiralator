@@ -531,10 +531,13 @@ function zoomHandler(dW, x, y) {
     // console.log(xOff)
 
 }
-function pointerDownHandler(x, y, n = 1) {
-    // console.log(x,y)
+function pointerDownHandler(xc, yc, n = 1) {
+    x=xc*pixRat;
+    y=yc*pixRat;
+    console.log(xc,yc)
+    console.log(x,y)
     if (!showgalleryForm) {
-        panelArray.forEach(panel => panel.pointerDown(x / scl0, y / scl0))
+        panelArray.forEach(panel => panel.pointerDown(x, y))
         // showWheels = true;
 
         let now = new Date().getTime();
@@ -589,11 +592,13 @@ function pointerDownHandler(x, y, n = 1) {
     mouseDown = true;
     thDragSt = Math.atan2(yt - pair.fixed.y, xt - pair.fixed.x);
 }
-function pointerMoveHandler(x, y) {
+function pointerMoveHandler(xc, yc) {
+    x=xc*pixRat;
+    y=yc*pixRat;
     xt = (x - xOff) / scl
     yt = (y - yOff) / scl
 
-    panelArray.forEach(panel => panel.pointerMove(x / scl0, y / scl0));
+    panelArray.forEach(panel => panel.pointerMove(x , y));
     if (mselect == "moving") {
         dthDrag = Math.atan2(yt - pair.fixed.y, xt - pair.fixed.x) - thDragSt;
         if (dthDrag < Math.PI) {
@@ -612,9 +617,11 @@ function pointerMoveHandler(x, y) {
 
 
 }
-function pointerUpHandler(x, y) {
-    x = x / scl0;
-    y = y / scl0;
+function pointerUpHandler(xc, yc) {
+    x=xc*pixRat;
+    y=yc*pixRat;
+    // x = x / scl0;
+    // y = y / scl0;
     mouseDown = false;
     showWheelsOverride = false;
     pair.fixed.color = wheelColor;
@@ -735,8 +742,8 @@ function uploadImage(name, comment) {
     }
 }
 function createSharePanel() {
-    xsize = 200 / scl0;
-    ysize = 400 / scl0;
+    xsize = 200 ;
+    ysize = 400 ;
     let panel = new Panel((X - xsize) / 2, (Y - ysize) / 2, xsize, ysize);
     panel.overlay = true;
     // panel.wait=true;
@@ -963,7 +970,9 @@ function anim() {
     requestAnimationFrame(anim);
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // ctx.setTransform(scl, 0, 0, scl, xOff, yOff)
     ctx.setTransform(scl, 0, 0, scl, xOff, yOff)
+
     if (pair.auto & !showColInfo & !showInfo & !showRadInfo) {
         pair.update();
     }
@@ -973,7 +982,8 @@ function anim() {
         pair.fixed.draw(0, 0, 1)
         pair.moving.draw(0, 0, 1);
     }
-    ctx.setTransform(scl0, 0, 0, scl0, 0, 0)
+    // ctx.setTransform(scl0, 0, 0, scl0, 0, 0)
+    ctx.setTransform(1, 0, 0, 1, 0, 0)
     panelArray.forEach(panel => panel.draw())
 
     if (showInfo) {
@@ -987,10 +997,10 @@ function anim() {
     }
 
     ctx.textAlign = "left"
-    // ctx.fillText('yOff='+Math.round(yOff * 10000) / 10000, 20, uiY + 80)
+    ctx.fillText(ctx.getTransform()['a'], 20, uiY + 80)
     // ctx.fillText('xOff='+Math.round(xOff * 10000) / 10000, 20, uiY + 110)
     // ctx.fillText('scl='+Math.round(scl * 10000) / 10000, 20, uiY + 140)
-    ctx.fillText('v19', 10, Y - 15)
+    ctx.fillText('v20', 10, Y - 15)
 
 }
 
@@ -999,22 +1009,25 @@ const canvas = document.getElementById("cw");
 const ctx = canvas.getContext("2d");
 const PI2 = Math.PI * 2;
 
-canvas.height = window.innerHeight * window.devicePixelRatio;
-canvas.width = window.innerWidth * window.devicePixelRatio;
-let X = canvas.width;
-let Y = canvas.height;
-let scl0 = 1 / window.devicePixelRatio;
-let scl = 1.0 * scl0
-
-
 let pixRat = window.devicePixelRatio * 1.0;
-
+// let pixRat=1;
 // if (window.orientation == 90 || window.orientation == 270) {
 //     //dodgy fix for "incorrect" window size reported in landscape, 
 //     //meaning pixel ratio is inappropriate scaling measure
 //     //only reported on modile device so no problem on desktop
 //     pixRat = pixRat * (Y / X)
 // }
+
+canvas.height = window.innerHeight * pixRat;
+canvas.width = window.innerWidth * pixRat;
+canvas.style.width=window.innerWidth+"px";
+canvas.style.height=window.innerHeight+"px";
+let X = canvas.width;
+let Y = canvas.height;
+// let scl0 = pixRat;
+let scl0=1;
+let scl = 1.0;
+
 
 const txtSize = 60 * pixRat;
 let baseLW = 1 * pixRat;
@@ -1053,8 +1066,8 @@ var curDiff = 0;
 var dDiff = 0;
 
 // initial screen centre
-let xOff = X / 2 * scl0;
-let yOff = Y / 2 * scl0;
+let xOff = X / 2;
+let yOff = Y / 2;
 
 // ui size
 let uiY = 0.2 * Y;
@@ -1074,12 +1087,15 @@ console.log('devicePixelRatio', window.devicePixelRatio,
     'pixRat', pixRat,
     'innerWidth', window.innerWidth, 'innerHeight', window.innerHeight,
     'sx', screen.width, 'sy', screen.height,
+    'canvas.height',canvas.height,
+    'canvas.width',canvas.width,
     'window/screen x', window.innerWidth / screen.width,
     'window/screen y', window.innerHeight / screen.height,
     'vVx', window.visualViewport.width, 'vVy', window.visualViewport.height,
     'window/vV x', window.innerWidth / window.visualViewport.width,
     'window/vV y', window.innerHeight / window.visualViewport.height,
     'orientation', window.orientation,
+
 
 )
 
