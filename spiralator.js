@@ -425,7 +425,7 @@ function pointerDownHandler(x, y, n = 1) {
     xt = (x - xOff) / scl
     yt = (y - yOff) / scl
     // console.log(xt, yt, pair.moving.x, pair.moving.y)
-    if ((xt - (pair.moving.x)) ** 2 + (yt - (pair.moving.y)) ** 2 < (pair.moving.rad) ** 2) {
+    if (!pair.auto & showWheels & ((xt - (pair.moving.x)) ** 2 + (yt - (pair.moving.y)) ** 2 < (pair.moving.rad) ** 2)) {
         mselect = "moving";
         // showInfo = false;
     }
@@ -449,7 +449,7 @@ function pointerMoveHandler(x, y) {
     xt = (x - xOff) / scl
     yt = (y - yOff) / scl
     panelArray.forEach(panel => panel.pointerMove(x, y));
-    if (mselect == "moving" & !pair.auto & showWheels) {
+    if (mselect == "moving") {
         dthDrag = Math.atan2(yt - pair.fixed.y, xt - pair.fixed.x) - thDragSt;
         if (dthDrag < Math.PI) {
             dthDrag += PI2;
@@ -976,7 +976,7 @@ function anim() {
     // ctx.fillText(Math.round(curDiff), 20, uiY + 80)
     // ctx.fillText(Math.round(dDiff), 20, uiY + 110)
     // ctx.fillText(Math.round(scl * 10000) / 10000, 20, uiY + 140)
-    ctx.fillText('v13', 20, Y - 15)
+    ctx.fillText('v14', 20, Y - 15)
 
 }
 
