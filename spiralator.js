@@ -320,24 +320,23 @@ function addPointerListeners() {
         canvas.addEventListener("touchmove", e => {
             e.preventDefault();
 
-            // If two pointers are down, check for pinch gestures
+
             if (e.touches.length == 1) {
                 pointerMoveHandler(e.touches[0].clientX, e.touches[0].clientY)
             }
+            // If two pointers are down, check for pinch gestures
             if (e.touches.length == 2) {
-                console.log("two touch")
-                // Calculate the distance between the two pointers
-
                 curDiff = Math.abs(e.touches[0].clientX - e.touches[1].clientX) +
                     Math.abs(e.touches[0].clientY - e.touches[1].clientY);
                 if (prevDiff > 0) {
                     dDiff = curDiff - prevDiff;
-                    // console.log("Pinch moving OUT -> Zoom in", ev);
+                    zoomHandler(
+                        0.0025 * dDiff,
+                        (e.touches[0].clientX + e.touches[1].clientX)/2,
+                        (e.touches[0].clientY + e.touches[1].clientY)/2)
                     scl = Math.min(Math.max(scl * (1 + 0.0025 * dDiff), 0.05), 10);
-
                 }
                 prevDiff = curDiff;
-
             }
 
 
@@ -368,11 +367,29 @@ function addPointerListeners() {
         addEventListener('mouseup', e => {
             pointerUpHandler(e.clientX, e.clientY);
         });
-        addEventListener('wheel', wheelHandler)
+        addEventListener('wheel', e => {
+            // console.log(e)
+            zoomHandler(e.deltaY,e.clientX,e.clientY);
+        })
     }
 }
-function wheelHandler(event) {
-    scl = Math.min(10, Math.max(scl * (1 - 0.0005 * event.deltaY), 0.05));
+function zoomHandler(dW,x,y) {
+
+    xt = (x - xOff) / scl
+    yt = (y - yOff) / scl
+
+    // console.log(
+    //     'x',x,
+    //     'xt',xt,
+    //     'y',y,
+    //     'yt',yt,  
+    // )
+    zFrac=(0.0005 * -dW)
+    scl = Math.min(10, Math.max(scl *(1+zFrac), 0.05));
+    xOff=x-xt*scl
+    yOff=y-yt*scl
+    // console.log(xOff)
+
 }
 function pointerDownHandler(x, y, n = 1) {
 
