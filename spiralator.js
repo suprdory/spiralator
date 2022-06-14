@@ -515,8 +515,8 @@ function zoomHandler(dW, x, y) {
 
     xt = (x - xOff) / scl
     yt = (y - yOff) / scl
-    x = x / scl0;
-    y = y / scl0;
+    // x = x / scl0;
+    // y = y / scl0;
 
     // console.log(
     //     'dW',dw,
@@ -990,7 +990,7 @@ function anim() {
     // ctx.fillText('yOff='+Math.round(yOff * 10000) / 10000, 20, uiY + 80)
     // ctx.fillText('xOff='+Math.round(xOff * 10000) / 10000, 20, uiY + 110)
     // ctx.fillText('scl='+Math.round(scl * 10000) / 10000, 20, uiY + 140)
-    ctx.fillText('v18', 10, Y - 15)
+    ctx.fillText('v19', 10, Y - 15)
 
 }
 
