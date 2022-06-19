@@ -42,9 +42,9 @@ function add_image(n) {
             if (elemName.innerText != '') {
                 elemDiv.appendChild(elemName);
             }
-            if (elemID.innerText != '') {
-                elemDiv.appendChild(elemID);
-            }
+            // if (elemID.innerText != '') {
+            //     elemDiv.appendChild(elemID);
+            // }
 
             // console.log(data)
         });
