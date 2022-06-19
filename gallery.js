@@ -42,15 +42,21 @@ function add_image(n) {
             if (elemName.innerText != '') {
                 elemDiv.appendChild(elemName);
             }
-            // if (elemID.innerText != '') {
-            //     elemDiv.appendChild(elemID);
-            // }
+            if (dispID){
+            if (elemID.innerText != '') {
+                elemDiv.appendChild(elemID);
+            }}
 
             // console.log(data)
         });
 
     document.body.appendChild(elemDiv);
 }
+
+
+const queryString = window.location.search;
+const urlParams = new URLSearchParams(queryString);
+const dispID = urlParams.get('id');
 
 let imageWidth = Math.min(window.innerWidth, 1080)
 document.querySelector(':root').style.setProperty('--nameSize', 10 + 'pt')
