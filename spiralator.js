@@ -4,30 +4,72 @@ Array.prototype.random = function () {
 
 class Disc {
     constructor(
-        teeth = 84,
+        teeth = 84, ring = 0
     ) {
         this.x = 0;
         this.y = 0;
+        this.thickness = 3 * pixPertooth;
         this.teeth = teeth;
         this.circ = teeth * pixPertooth;
         this.rad = this.circ / PI2;
         this.color = 'white';
         this.lw = baseLW * 1;
+        this.out = 1;
+        this.ring = ring;
     }
     draw(xoff = X / 2, yoff = Y / 2, scl = 1) {
-        ctx.fillStyle = this.color;
-        ctx.strokeStyle = this.color;
-        ctx.lineWidth = this.lw;
-        ctx.beginPath();
-        ctx.arc((scl * this.x) + xoff, yoff + (scl * this.y), scl * this.rad, 0, PI2);
-        ctx.stroke();
+
+        if (this.ring == 0) {
+            //stroke and fill disk
+            ctx.fillStyle = this.color;
+            ctx.strokeStyle = this.color;
+            ctx.lineWidth = this.lw;
+            ctx.beginPath();
+            ctx.arc((scl * this.x) + xoff, yoff + (scl * this.y), scl * this.rad, 0, PI2);
+            ctx.stroke();
+            ctx.fillStyle = transCol;
+            ctx.fill();
+            // central point
+            ctx.beginPath();
+            ctx.fillStyle = transCol
+            ctx.arc(
+                (scl * this.x) + xoff, yoff + (scl * this.y),
+                3 * baseLW, 0, PI2);
+            ctx.fill();
+        }
+        else {
+            //stroke ring
+            ctx.strokeStyle = 'rgb(100,100,100,.6)';
+            ctx.lineWidth = this.thickness;
+            ctx.beginPath();
+            ctx.arc((scl * this.x) + xoff, yoff + (scl * this.y), scl * (this.rad + this.ring * this.thickness / 2), 0, PI2);
+            ctx.stroke();
+            //ring edges
+            ctx.lineWidth = this.lw;
+            ctx.strokeStyle = this.color;
+            ctx.beginPath();
+            ctx.arc((scl * this.x) + xoff, yoff + (scl * this.y), scl * (this.rad + this.ring * this.thickness), 0, PI2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc((scl * this.x) + xoff, yoff + (scl * this.y), scl * (this.rad), 0, PI2);
+            ctx.stroke();
+            // central point
+            ctx.beginPath();
+            ctx.fillStyle = transCol
+            ctx.arc(
+                (scl * this.x) + xoff, yoff + (scl * this.y),
+                3 * baseLW, 0, PI2);
+            ctx.fill();
+
+        }
+
     }
 }
 class MovingDisc extends Disc {
     constructor(
-        teeth = 84, rat = 0.7
+        teeth = 84, rat = 0.7, ring = 0
     ) {
-        super(teeth)
+        super(teeth, ring)
         this.rat = rat;
         this.th0 = 0;
         this.th = 0;
@@ -35,14 +77,26 @@ class MovingDisc extends Disc {
     }
     draw(xoff = X / 2, yoff = Y / 2, scl = 1) {
         super.draw(xoff, yoff, scl);
+        // centre to pen
         ctx.beginPath();
+        ctx.strokeStyle = transCol
         ctx.moveTo((scl * this.x) + xoff, yoff + (scl * this.y));
         ctx.lineTo(
             (scl * this.x) + xoff + scl * this.rad * Math.cos(this.th) * this.rat,
             yoff + (scl * this.y) + scl * this.rad * Math.sin(this.th) * this.rat
         )
         ctx.stroke();
+        // central point
         ctx.beginPath();
+        ctx.fillStyle = this.color;
+        ctx.arc(
+            (scl * this.x) + xoff, yoff + (scl * this.y),
+            3 * baseLW, 0, PI2);
+        ctx.fill();
+
+        // pen point
+        ctx.beginPath();
+        ctx.fillStyle = pair.color;
         ctx.arc(
             (scl * this.x) + xoff + scl * this.rat * this.rad * Math.cos(this.th),
             yoff + (scl * this.y) + scl * this.rat * this.rad * Math.sin(this.th),
@@ -215,10 +269,27 @@ class Pair {
     inOut() {
         this.penUp();
         this.out = !pair.out;
+        this.configRings();
+        // this.fixed.out=-this.fixed.out;
         this.moving.th0 += PI2 / 2;
         this.move(pair.th);
         this.penDown();
     }
+    configRings() {
+        if (this.out) {
+            this.fixed.ring = -1;
+            this.moving.ring = 0;
+        }
+        else if (this.moving.teeth > this.fixed.teeth) {
+            this.moving.ring = 1;
+            this.fixed.ring = 0;
+        }
+        else {
+            this.moving.ring = 0;
+            this.fixed.ring = 1;
+        }
+    }
+
     roll(th) {
         this.move(this.th)
         if (Math.abs(th - this.th) < dth) {
@@ -513,8 +584,8 @@ function addPointerListeners() {
 }
 function zoomHandler(dW, xc, yc) {
 
-    y=yc*pixRat;
-    x=xc*pixRat;
+    y = yc * pixRat;
+    x = xc * pixRat;
     xt = (x - xOff) / scl
     yt = (y - yOff) / scl
     // x = x / scl0;
@@ -534,10 +605,10 @@ function zoomHandler(dW, xc, yc) {
 
 }
 function pointerDownHandler(xc, yc, n = 1) {
-    x=xc*pixRat;
-    y=yc*pixRat;
-    console.log(xc,yc)
-    console.log(x,y)
+    x = xc * pixRat;
+    y = yc * pixRat;
+    console.log(xc, yc)
+    console.log(x, y)
     if (!showgalleryForm) {
         panelArray.forEach(panel => panel.pointerDown(x, y))
         // showWheels = true;
@@ -595,12 +666,12 @@ function pointerDownHandler(xc, yc, n = 1) {
     thDragSt = Math.atan2(yt - pair.fixed.y, xt - pair.fixed.x);
 }
 function pointerMoveHandler(xc, yc) {
-    x=xc*pixRat;
-    y=yc*pixRat;
+    x = xc * pixRat;
+    y = yc * pixRat;
     xt = (x - xOff) / scl
     yt = (y - yOff) / scl
 
-    panelArray.forEach(panel => panel.pointerMove(x , y));
+    panelArray.forEach(panel => panel.pointerMove(x, y));
     if (mselect == "moving") {
         dthDrag = Math.atan2(yt - pair.fixed.y, xt - pair.fixed.x) - thDragSt;
         if (dthDrag < Math.PI) {
@@ -620,8 +691,8 @@ function pointerMoveHandler(xc, yc) {
 
 }
 function pointerUpHandler(xc, yc) {
-    x=xc*pixRat;
-    y=yc*pixRat;
+    x = xc * pixRat;
+    y = yc * pixRat;
     // x = x / scl0;
     // y = y / scl0;
     mouseDown = false;
@@ -744,8 +815,8 @@ function uploadImage(name, comment) {
     }
 }
 function createSharePanel() {
-    xsize = 200*pixRat ;
-    ysize = 400*pixRat ;
+    xsize = 200 * pixRat;
+    ysize = 400 * pixRat;
     let panel = new Panel((X - xsize) / 2, (Y - ysize) / 2, xsize, ysize);
     panel.overlay = true;
     // panel.wait=true;
@@ -857,6 +928,8 @@ function createBottomPanel() {
             if (pair.moving.teeth == pair.fixed.teeth) {
                 pair.moving.teeth--;
             }
+            pair.configRings()
+
             pair.moving.circ = pair.moving.teeth * pixPertooth;
             pair.moving.rad = pair.moving.circ / PI2
             pair.move(pair.th);
@@ -880,6 +953,7 @@ function createBottomPanel() {
             if (pair.fixed.teeth == pair.moving.teeth) {
                 pair.fixed.teeth--;
             }
+            pair.configRings()
             pair.fixed.circ = pair.fixed.teeth * pixPertooth;
             pair.fixed.rad = pair.fixed.circ / PI2
             pair.move(pair.th);
@@ -962,12 +1036,12 @@ function setGallerySubmitHTML() {
     document.getElementById("close").addEventListener("click", toggleGalleryForm, { passive: true })
     document.getElementById('name').value = localStorage.getItem('name');
 }
-function wakeGalleryServer(){
+function wakeGalleryServer() {
     fetch(galleryAPIurl)
         .then(response => response.text())
         .then(data => console.log(data));
-    
-    }
+
+}
 function anim() {
     requestAnimationFrame(anim);
 
@@ -1027,12 +1101,12 @@ let pixRat = window.devicePixelRatio * 1.0;
 
 canvas.height = window.innerHeight * pixRat;
 canvas.width = window.innerWidth * pixRat;
-canvas.style.width=window.innerWidth+"px";
-canvas.style.height=window.innerHeight+"px";
+canvas.style.width = window.innerWidth + "px";
+canvas.style.height = window.innerHeight + "px";
 let X = canvas.width;
 let Y = canvas.height;
 // let scl0 = pixRat;
-let scl0=1;
+let scl0 = 1;
 let scl = 1.0;
 
 
@@ -1054,6 +1128,7 @@ const shareBorderfrac = 0.15;
 const hueInit = Math.random() * 360
 const bgFillStyle = "hsl(" + hueInit + ",100%,5%)";
 const bgFillStyleAlpha = "hsla(" + hueInit + ",100%,5%,.80)";
+const transCol = "rgb(100,100,100,0.5)"
 const wheelColor = "white"
 const uiTextColor = "white"
 canvas.style.backgroundColor = bgFillStyle
@@ -1084,7 +1159,7 @@ if (X > 1.4 * Y) {
     isLandscape = true
     uiY = 0.4 * Y;
     uiX = 0.333 * X;
-    xOff = 2 * X / 3 *scl0;
+    xOff = 2 * X / 3 * scl0;
 }
 else {
     isLandscape = false;
@@ -1094,8 +1169,8 @@ console.log('devicePixelRatio', window.devicePixelRatio,
     'pixRat', pixRat,
     'innerWidth', window.innerWidth, 'innerHeight', window.innerHeight,
     'sx', screen.width, 'sy', screen.height,
-    'canvas.height',canvas.height,
-    'canvas.width',canvas.width,
+    'canvas.height', canvas.height,
+    'canvas.width', canvas.width,
     'window/screen x', window.innerWidth / screen.width,
     'window/screen y', window.innerHeight / screen.height,
     'vVx', window.visualViewport.width, 'vVy', window.visualViewport.height,
@@ -1110,8 +1185,8 @@ console.log('devicePixelRatio', window.devicePixelRatio,
 ringSizes = [96, 105]//,144,150]
 discSizes = [24, 30, 32, 40, 42, 45, 48, 52, 56, 60, 63, 72, 75, 80, 84]
 
-let fixedDisc = new Disc(ringSizes.random())
-let movingDisc = new MovingDisc(discSizes.random(), Math.random() / 2 + 0.5);
+let fixedDisc = new Disc(ringSizes.random(), ring = 1)
+let movingDisc = new MovingDisc(discSizes.random(), Math.random() / 2 + 0.5, ring = 0);
 let pair = new Pair(fixedDisc, movingDisc)
 
 topPanel = createTopPanel();
