@@ -127,14 +127,14 @@ class Trace {
         this.color = "hsl(" + pair.hue + "," + pair.saturation + "%," + pair.lightness + "%)";
         // this.thickness = baseLW;
     }
-    draw(ctx, xoff = X / 2, yoff = Y / 2, scl = 1) {
+    draw(ctx) {
         if (this.points.length > 0) {
             ctx.beginPath();
             ctx.strokeStyle = this.color;
             ctx.lineWidth = baseLW * 1;
-            ctx.moveTo(scl * this.points[0].x + xoff, scl * this.points[0].y + yoff);
+            ctx.moveTo(this.points[0].x, this.points[0].y);
             this.points.forEach(point => {
-                ctx.lineTo(scl * point.x + xoff, scl * point.y + yoff);
+                ctx.lineTo(point.x, point.y);
             })
             ctx.stroke();
         }
@@ -352,12 +352,12 @@ class Pair {
         let y = m.y + Math.sin(m.th) * (m.rad * m.rat)
         return (new Point(x, y));
     }
-    drawTraces(ctx, xoff = X / 2, yoff = Y / 2, scl = 1) {
+    drawTraces(ctx) {
         // console.log(xoff,yoff)
         this.traces.forEach(trace => {
-            trace.draw(ctx, xoff, yoff, scl);
+            trace.draw(ctx);
         })
-        this.trace.draw(ctx, xoff, yoff, scl);
+        this.trace.draw(ctx);
     }
     clear() {
         if (this.trace.points.length > 0) {
@@ -764,10 +764,10 @@ function calcLCM(a, b) { //lowest common multiple
         min++;
     }
 }
-function drawSquareFullImage(n = 500) {
+function drawSquareFullImage(n = 1080) {
     pair.penUp();
     let baseLWtemp = baseLW;
-    baseLW = galleryLW * n / 1080;
+    baseLW = galleryLW * baseLW;
     let tracesBounds = pair.getTracesBounds();
     let size = (shareBorderfrac + 1) * Math.max(
         tracesBounds.xmax - tracesBounds.xmin,
@@ -777,21 +777,24 @@ function drawSquareFullImage(n = 500) {
     let xoff = imscl * (-tracesBounds.xmin + (size - (tracesBounds.xmax - tracesBounds.xmin)) / 2);
     let yoff = imscl * (- tracesBounds.ymin + (size - (tracesBounds.ymax - tracesBounds.ymin)) / 2);
 
-    console.log(size, xoff, yoff, imscl);
+    // console.log(size, xoff, yoff, imscl);
     var canvasSh = document.createElement('canvas');
     canvasSh.width = n;
     canvasSh.height = n;
     var ctxSh = canvasSh.getContext('2d');
     ctxSh.fillStyle = bgFillStyle;
+    // canvasSh.style.backgroundColor=bgFillStyle
+    // canvasSh.style.backgroundColor = bgFillStyle
     ctxSh.fillRect(0, 0, canvasSh.width, canvasSh.height);
-    pair.drawTraces(ctxSh, xoff, yoff, imscl);
+    ctxSh.setTransform(imscl, 0, 0, imscl, xoff, yoff)
+    pair.drawTraces(ctxSh);
     baseLW = baseLWtemp;
     return (canvasSh)
 }
 function shareImage() {
     if (pair.traces.length > 0) {
         sharePanel.wait = true;
-        canvasSq = drawSquareFullImage(1200);
+        canvasSq = drawSquareFullImage(1080);
         canvasSq.toBlob(function (blob) {
             const filesArray = [
                 new File(
@@ -1098,7 +1101,7 @@ function anim() {
 
     //scaled stuff
     ctx.setTransform(scl, 0, 0, scl, xOff, yOff)
-    pair.drawTraces(ctx, 0, 0, 1);
+    pair.drawTraces(ctx);
 
 
     if (showWheels | showWheelsOverride) {
@@ -1172,7 +1175,7 @@ const maxWheelSize = 300;
 const minWheelSize = 10;
 const maxDrawRadiusRatio = 2;
 
-const galleryLW = 2.75 * 1080 / 800;
+const galleryLW = 1;
 const gallerySize = 1080;
 
 const dth = PI2 / 100;
