@@ -27,24 +27,21 @@ class Disc {
                 (d2CentreSq - (this.rad + this.thickness * this.ring) ** 2) < 0
         }
     }
-    draw(xoff = 0, yoff = 0, scl = 1) {
-
+    draw() {
         if (this.ring == 0) {
             //stroke and fill disk
             ctx.fillStyle = this.color;
             ctx.strokeStyle = this.color;
             ctx.lineWidth = this.lw;
             ctx.beginPath();
-            ctx.arc((scl * this.x) + xoff, yoff + (scl * this.y), scl * this.rad, 0, PI2);
+            ctx.arc(this.x, this.y, this.rad, 0, PI2);
             ctx.stroke();
             ctx.fillStyle = transCol;
             ctx.fill();
             // central point
             ctx.beginPath();
             ctx.fillStyle = transCol
-            ctx.arc(
-                (scl * this.x) + xoff, yoff + (scl * this.y),
-                3 * baseLW, 0, PI2);
+            ctx.arc(this.x, this.y, 3 * baseLW, 0, PI2);
             ctx.fill();
         }
         else {
@@ -52,23 +49,21 @@ class Disc {
             ctx.strokeStyle = transCol;
             ctx.lineWidth = this.thickness;
             ctx.beginPath();
-            ctx.arc((scl * this.x) + xoff, yoff + (scl * this.y), scl * (this.rad + this.ring * this.thickness / 2), 0, PI2);
+            ctx.arc(this.x, this.y, this.rad + this.ring * this.thickness / 2, 0, PI2);
             ctx.stroke();
             //ring edges
             ctx.lineWidth = this.lw;
             ctx.strokeStyle = this.color;
             ctx.beginPath();
-            ctx.arc((scl * this.x) + xoff, yoff + (scl * this.y), scl * (this.rad + this.ring * this.thickness), 0, PI2);
+            ctx.arc(this.x, this.y, this.rad + this.ring * this.thickness, 0, PI2);
             ctx.stroke();
             ctx.beginPath();
-            ctx.arc((scl * this.x) + xoff, yoff + (scl * this.y), scl * (this.rad), 0, PI2);
+            ctx.arc(this.x, this.y, this.rad, 0, PI2);
             ctx.stroke();
             // central point
             ctx.beginPath();
             ctx.fillStyle = transCol
-            ctx.arc(
-                (scl * this.x) + xoff, yoff + (scl * this.y),
-                3 * baseLW, 0, PI2);
+            ctx.arc(this.x, this.y, 3 * baseLW, 0, PI2);
             ctx.fill();
 
         }
@@ -85,22 +80,22 @@ class MovingDisc extends Disc {
         this.th = 0;
         this.lw = baseLW * 2;
     }
-    draw(xoff = 0, yoff = 0, scl = 1) {
-        super.draw(xoff, yoff, scl);
+    draw() {
+        super.draw();
         // centre to pen
         ctx.beginPath();
         ctx.strokeStyle = transCol
-        ctx.moveTo((scl * this.x) + xoff, yoff + (scl * this.y));
+        ctx.moveTo(this.x, this.y);
         ctx.lineTo(
-            (scl * this.x) + xoff + scl * this.rad * Math.cos(this.th) * this.rat,
-            yoff + (scl * this.y) + scl * this.rad * Math.sin(this.th) * this.rat
+            this.x + this.rad * Math.cos(this.th) * this.rat,
+            this.y + this.rad * Math.sin(this.th) * this.rat
         )
         ctx.stroke();
         // central point
         ctx.beginPath();
         ctx.fillStyle = this.color;
         ctx.arc(
-            (scl * this.x) + xoff, yoff + (scl * this.y),
+            this.x, this.y,
             3 * baseLW, 0, PI2);
         ctx.fill();
 
@@ -108,8 +103,8 @@ class MovingDisc extends Disc {
         ctx.beginPath();
         ctx.fillStyle = pair.color;
         ctx.arc(
-            (scl * this.x) + xoff + scl * this.rat * this.rad * Math.cos(this.th),
-            yoff + (scl * this.y) + scl * this.rat * this.rad * Math.sin(this.th),
+            this.x + this.rat * this.rad * Math.cos(this.th),
+            this.y + this.rat * this.rad * Math.sin(this.th),
             3 * baseLW, 0, PI2);
         ctx.fill();
     }
@@ -188,7 +183,7 @@ class Pair {
     translate(x, y) {
         if (!this.locked) {
             // let auto=this.auto;
-            this.auto=false;
+            this.auto = false;
             pair.penUp()
             this.fixed.x = x;
             this.fixed.y = y;
@@ -705,7 +700,7 @@ function pointerMoveHandler(xc, yc) {
         thDragSt = Math.atan2(yt - pair.fixed.y, xt - pair.fixed.x);
     }
     if (mselect == "fixed") {
-        pair.translate(xfix0 + (x - x0)/scl, yfix0 + (y - y0)/scl)
+        pair.translate(xfix0 + (x - x0) / scl, yfix0 + (y - y0) / scl)
     }
 
 
