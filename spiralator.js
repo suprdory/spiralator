@@ -408,7 +408,7 @@ class PButton {
         this.xDrag = false;
         this.yDrag = false;
         this.toggle = false;
-        this.toggleValFun=toggleValFun;
+        this.toggleValFun = toggleValFun;
         this.y0;
         this.x0;
         this.xVar0;
@@ -615,12 +615,12 @@ function addPointerListeners() {
         addEventListener('wheel', e => {
             // console.log(e)
             pointerWheelHandler(-0.0005 * e.deltaY, e.clientX, e.clientY);
-            
+
         })
     }
 }
-function pointerWheelHandler(dW, xc, yc){
-    zoomHandler(dW, xc, yc);  
+function pointerWheelHandler(dW, xc, yc) {
+    zoomHandler(dW, xc, yc);
     requestAnimationFrame(anim);
 }
 function pointerDownHandler(xc, yc, n = 1) {
@@ -639,13 +639,13 @@ function pointerDownHandler(xc, yc, n = 1) {
         }
         lastTouch = now;
 
-        if (((y  > .5 * Y & y  < (Y - uiY)) & !isLandscape) ||
-            ((y  > .5 * Y & y  < Y & x  > uiX) & isLandscape)) {
+        if (((y > .5 * Y & y < (Y - uiY)) & !isLandscape) ||
+            ((y > .5 * Y & y < Y & x > uiX) & isLandscape)) {
             clickCase = "autoCW";
         }
 
-        else if (((y  < .5 * Y & y  > (uiY)) & !isLandscape) ||
-            ((y  < .5 * Y & y  > 0 & x  > uiX) & isLandscape)) {
+        else if (((y < .5 * Y & y > (uiY)) & !isLandscape) ||
+            ((y < .5 * Y & y > 0 & x > uiX) & isLandscape)) {
             clickCase = "autoCCW";
         }
         else {
@@ -662,19 +662,19 @@ function pointerDownHandler(xc, yc, n = 1) {
     }
     else if (!pair.auto & showWheels & pair.fixed.contains(xt, yt)) {
         mselect = "fixed";
-        y0 = y ;
-        x0 = x ;
+        y0 = y;
+        x0 = x;
         xfix0 = pair.fixed.x;
         yfix0 = pair.fixed.y;
     }
 
     else if (
-        !isLandscape & topPanel.active & (y  < (Y - uiY) & y  > uiY) ||
-        isLandscape & topPanel.active & (x  > uiX) ||
+        !isLandscape & topPanel.active & (y < (Y - uiY) & y > uiY) ||
+        isLandscape & topPanel.active & (x > uiX) ||
         !topPanel.active
     ) {
         mselect = "pan";
-        y0 = y ;
+        y0 = y;
         x0 = x;
         xOff0 = xOff;
         yOff0 = yOff;
@@ -703,13 +703,13 @@ function pointerMoveHandler(xc, yc) {
         thDragSt = Math.atan2(yt - pair.fixed.y, xt - pair.fixed.x);
     }
     if (mselect == "fixed") {
-        pair.translate(xfix0 + (x  - x0) , yfix0 + (y  - y0) )
+        pair.translate(xfix0 + (x - x0), yfix0 + (y - y0))
     }
 
 
     if (mselect == "pan") {
-        xOff = xOff0 + (x  - x0) ;
-        yOff = yOff0 + (y  - y0) ;
+        xOff = xOff0 + (x - x0);
+        yOff = yOff0 + (y - y0);
     }
     requestAnimationFrame(anim);
 
@@ -928,8 +928,8 @@ function createTopPanel() {
     );
 
     let lockButton = new PButton(panel, 0.875, 0, 0.125, 0.333, "Lock",
-        function () { return pair.toggleLock(); }, 
-        [], [], [], null, 
+        function () { return pair.toggleLock(); },
+        [], [], [], null,
         function () { return pair.locked; })
     lockButton.toggle = true;
     panel.buttonArray.push(lockButton);
@@ -1090,7 +1090,9 @@ function wakeGalleryServer() {
 
 }
 function anim() {
-    // requestAnimationFrame(anim);
+    if (pair.auto) {
+        requestAnimationFrame(anim)
+    }
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     // ctx.setTransform(scl, 0, 0, scl, xOff, yOff)
