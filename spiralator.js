@@ -173,12 +173,26 @@ class Pair {
         this.hue = hueInit;
         this.saturation = 100;
         this.lightness = 65;
+        this.locked = true;
 
         this.setColor();
         this.trace = new Trace(this);
         this.traces = [];
         this.tracing = true;
         this.move(this.th);
+    }
+    toggleLock() {
+        this.locked = !this.locked
+    }
+
+    translate(x, y) {
+        if (!this.locked) {
+            pair.penUp()
+            this.fixed.x = x;
+            this.fixed.y = y;
+            pair.move(pair.th)
+            pair.penDown()
+        }
     }
     setColor() {
         this.color = "hsl(" + this.hue + "," + this.saturation + "%," + this.lightness + "%)"
@@ -382,7 +396,7 @@ class Pair {
     }
 }
 class PButton {
-    constructor(panel, x, y, w, h, txt, fun, argObj, getXdragVar, getYdragVar, isDepressedFun) {
+    constructor(panel, x, y, w, h, txt, fun, argObj, getXdragVar, getYdragVar, isDepressedFun, toggleValFun) {
         this.x = panel.x + x * panel.w;
         this.y = panel.y + y * panel.h;
         this.w = w * panel.w;
@@ -393,6 +407,8 @@ class PButton {
         this.depressed = false;
         this.xDrag = false;
         this.yDrag = false;
+        this.toggle = false;
+        this.toggleValFun=toggleValFun;
         this.y0;
         this.x0;
         this.xVar0;
@@ -409,6 +425,12 @@ class PButton {
         if (this.depressed) {
             ctx.fillStyle = pair.color;
             ctx.fillRect(this.x, this.y, this.w, this.h)
+        }
+        if (this.toggle) {
+            if (this.toggleValFun()) {
+                ctx.fillStyle = transCol;
+                ctx.fillRect(this.x, this.y, this.w, this.h)
+            }
         }
 
         ctx.fillStyle = uiTextColor;
@@ -575,7 +597,7 @@ function addPointerListeners() {
             // e.preventDefault();
             // pointerDownHandler(e.offsetX, e.offsetY);
             pointerDownHandler(e.clientX, e.clientY)
-            mouseDown=true
+            mouseDown = true
         },
             // { passive: false }
         );
@@ -585,9 +607,9 @@ function addPointerListeners() {
             }
         });
         addEventListener('mouseup', e => {
-            mouseDown=false
+            mouseDown = false
             pointerUpHandler(e.clientX, e.clientY);
-            
+
         });
         addEventListener('wheel', e => {
             // console.log(e)
@@ -699,11 +721,7 @@ function pointerMoveHandler(xc, yc) {
         thDragSt = Math.atan2(yt - pair.fixed.y, xt - pair.fixed.x);
     }
     if (mselect == "fixed") {
-        pair.penUp()
-        pair.fixed.x = xfix0 + (x / scl0 - x0) * scl0;
-        pair.fixed.y = yfix0 + (y / scl0 - y0) * scl0;
-        pair.move(pair.th)
-        pair.penDown()
+        pair.translate(xfix0 + (x / scl0 - x0) * scl0, yfix0 + (y / scl0 - y0) * scl0)
     }
 
 
@@ -894,9 +912,11 @@ function createTopPanel() {
 
 
 
+
+
     panel.buttonArray.push(
-        new PButton(panel, 0.5, 0, 0.25, 0.333, "Reset",
-            function () { return pair.reset(); })
+        new PButton(panel, 0.5, 0, 0.25, 0.333, "Invert",
+            function () { pair.inOut(); })
     );
     panel.buttonArray.push(
         new PButton(panel, 0.5, .333, 0.25, 0.333, "Nudge +",
@@ -908,9 +928,18 @@ function createTopPanel() {
     );
 
     panel.buttonArray.push(
-        new PButton(panel, 0.75, 0, 0.25, 0.333, "Invert",
-            function () { pair.inOut(); })
+        new PButton(panel, 0.75, 0, 0.125, 0.333, "Reset",
+            function () { return pair.reset(); })
     );
+
+    let lockButton = new PButton(panel, 0.875, 0, 0.125, 0.333, "Lock",
+        function () { return pair.toggleLock(); }, 
+        [], [], [], null, 
+        function () { return pair.locked; })
+    lockButton.toggle = true;
+    panel.buttonArray.push(lockButton);
+
+
     panel.buttonArray.push(
         new PButton(panel, 0.75, .333, 0.25, 0.666, "Trace",
             function () { pair.fullTrace() })
