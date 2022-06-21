@@ -27,7 +27,7 @@ class Disc {
                 (d2CentreSq - (this.rad + this.thickness * this.ring) ** 2) < 0
         }
     }
-    draw(xoff = X / 2, yoff = Y / 2, scl = 1) {
+    draw(xoff = 0, yoff = 0, scl = 1) {
 
         if (this.ring == 0) {
             //stroke and fill disk
@@ -85,7 +85,7 @@ class MovingDisc extends Disc {
         this.th = 0;
         this.lw = baseLW * 2;
     }
-    draw(xoff = X / 2, yoff = Y / 2, scl = 1) {
+    draw(xoff = 0, yoff = 0, scl = 1) {
         super.draw(xoff, yoff, scl);
         // centre to pen
         ctx.beginPath();
@@ -705,7 +705,7 @@ function pointerMoveHandler(xc, yc) {
         thDragSt = Math.atan2(yt - pair.fixed.y, xt - pair.fixed.x);
     }
     if (mselect == "fixed") {
-        pair.translate(xfix0 + (x - x0), yfix0 + (y - y0))
+        pair.translate(xfix0 + (x - x0)/scl, yfix0 + (y - y0)/scl)
     }
 
 
@@ -1098,17 +1098,21 @@ function anim() {
         pair.update();
     }
 
+    // clear screen
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    //scaled stuff
     ctx.setTransform(scl, 0, 0, scl, xOff, yOff)
     pair.drawTraces(ctx, 0, 0, 1);
 
 
     if (showWheels | showWheelsOverride) {
-        pair.fixed.draw(0, 0, 1)
-        pair.moving.draw(0, 0, 1);
+        pair.fixed.draw();
+        pair.moving.draw();
     }
 
+
+    // fixed stuff
     ctx.setTransform(1, 0, 0, 1, 0, 0)
     panelArray.forEach(panel => panel.draw())
 
@@ -1122,8 +1126,8 @@ function anim() {
         pair.drawColInfo();
     }
 
-    ctx.textAlign = "left"
-    ctx.fillText('auto: ' + pair.auto, 20, uiY + 20)
+    // ctx.textAlign = "left"
+    // ctx.fillText('auto: ' + pair.auto, 20, uiY + 20)
     // ctx.fillText('xOff='+Math.round(xOff * 10000) / 10000, 20, uiY + 110)
     // ctx.fillText('scl='+Math.round(scl * 10000) / 10000, 20, uiY + 140)
     // ctx.fillText('v21', 10, Y - 15)
