@@ -579,6 +579,7 @@ function addPointerListeners() {
                         (e.touches[0].clientY + e.touches[1].clientY) / 2)
                 }
                 prevDiff = curDiff;
+                requestAnimationFrame(anim);
             }
 
         },
@@ -619,7 +620,7 @@ function addPointerListeners() {
     }
 }
 function pointerWheelHandler(dW, xc, yc){
-    zoomHandler(dW, xc, yc);
+    zoomHandler(dW, xc, yc);  
     requestAnimationFrame(anim);
 }
 function pointerDownHandler(xc, yc, n = 1) {
@@ -753,6 +754,7 @@ function zoomHandler(dW, xc, yc) {
     scl = Math.min(10, Math.max(scl * (1 + dW), 0.05));
     xOff = x - xt * scl
     yOff = y - yt * scl
+
 
 }
 function calcLCM(a, b) { //lowest common multiple
