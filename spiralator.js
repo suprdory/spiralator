@@ -39,7 +39,7 @@ class Disc {
         }
         else {
             //stroke ring
-            ctx.strokeStyle = 'rgb(100,100,100,.6)';
+            ctx.strokeStyle = transCol;
             ctx.lineWidth = this.thickness;
             ctx.beginPath();
             ctx.arc((scl * this.x) + xoff, yoff + (scl * this.y), scl * (this.rad + this.ring * this.thickness / 2), 0, PI2);
@@ -607,8 +607,8 @@ function zoomHandler(dW, xc, yc) {
 function pointerDownHandler(xc, yc, n = 1) {
     x = xc * pixRat;
     y = yc * pixRat;
-    console.log(xc, yc)
-    console.log(x, y)
+    // console.log(xc, yc)
+    // console.log(x, y)
     if (!showgalleryForm) {
         panelArray.forEach(panel => panel.pointerDown(x, y))
         // showWheels = true;
@@ -638,16 +638,27 @@ function pointerDownHandler(xc, yc, n = 1) {
     xt = (x - xOff) / (scl)
     yt = (y - yOff) / (scl)
 
-    // console.log(xt, yt, pair.moving.x, pair.moving.y)
+    let d2fixedCentreSq = (xt - (pair.fixed.x)) ** 2 + (yt - (pair.fixed.y)) ** 2 
+
+    console.log(d2fixedCentreSq, 
+        d2fixedCentreSq - (pair.fixed.rad) ** 2, 
+        d2fixedCentreSq - (pair.fixed.rad - pair.fixed.thickness * pair.fixed.ring) ** 2)
+    console.log(pair.fixed.thickness , pair.ring)
     if (!pair.auto & showWheels & ((xt - (pair.moving.x)) ** 2 + (yt - (pair.moving.y)) ** 2 < (pair.moving.rad) ** 2)) {
         mselect = "moving";
         // showInfo = false;
         // console.log("moving")
     }
+    else if (!pair.auto & showWheels & 
+        (d2fixedCentreSq - (pair.fixed.rad) ** 2) * (d2fixedCentreSq - (pair.fixed.rad-pair.fixed*pair.ring) ** 2)<0)
+    {
+        console.log("fixed!")
+        mselect = "fixed";
+    }
+
     else if (
         !isLandscape & topPanel.active & (y / scl0 < (Y - uiY) & y / scl0 > uiY) ||
         isLandscape & topPanel.active & (x / scl0 > uiX) ||
-
         !topPanel.active
     ) {
         mselect = "pan";
