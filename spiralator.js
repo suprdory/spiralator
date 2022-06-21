@@ -17,6 +17,16 @@ class Disc {
         this.out = 1;
         this.ring = ring;
     }
+    contains(x, y) {
+        if (this.ring == 0) {
+            return (x - this.x) ** 2 + (y - (this.y)) ** 2 < (this.rad) ** 2
+        }
+        else {
+            let d2CentreSq = (x - this.x) ** 2 + (y - this.y) ** 2
+            return (d2CentreSq - this.rad ** 2) *
+                (d2CentreSq - (this.rad + this.thickness * this.ring) ** 2) < 0
+        }
+    }
     draw(xoff = X / 2, yoff = Y / 2, scl = 1) {
 
         if (this.ring == 0) {
@@ -565,6 +575,7 @@ function addPointerListeners() {
             // e.preventDefault();
             // pointerDownHandler(e.offsetX, e.offsetY);
             pointerDownHandler(e.clientX, e.clientY)
+            mouseDown=true
         },
             // { passive: false }
         );
@@ -574,7 +585,9 @@ function addPointerListeners() {
             }
         });
         addEventListener('mouseup', e => {
+            mouseDown=false
             pointerUpHandler(e.clientX, e.clientY);
+            
         });
         addEventListener('wheel', e => {
             // console.log(e)
@@ -607,11 +620,11 @@ function zoomHandler(dW, xc, yc) {
 function pointerDownHandler(xc, yc, n = 1) {
     x = xc * pixRat;
     y = yc * pixRat;
-    // console.log(xc, yc)
+    // console.log('scl:',scl,'scl0:',scl0)
     // console.log(x, y)
     if (!showgalleryForm) {
         panelArray.forEach(panel => panel.pointerDown(x, y))
-        // showWheels = true;
+
 
         let now = new Date().getTime();
         let timeSince = now - lastTouch;
@@ -638,22 +651,16 @@ function pointerDownHandler(xc, yc, n = 1) {
     xt = (x - xOff) / (scl)
     yt = (y - yOff) / (scl)
 
-    let d2fixedCentreSq = (xt - (pair.fixed.x)) ** 2 + (yt - (pair.fixed.y)) ** 2 
-
-    console.log(d2fixedCentreSq, 
-        d2fixedCentreSq - (pair.fixed.rad) ** 2, 
-        d2fixedCentreSq - (pair.fixed.rad - pair.fixed.thickness * pair.fixed.ring) ** 2)
-    console.log(pair.fixed.thickness , pair.ring)
-    if (!pair.auto & showWheels & ((xt - (pair.moving.x)) ** 2 + (yt - (pair.moving.y)) ** 2 < (pair.moving.rad) ** 2)) {
+    if (!pair.auto & showWheels & pair.moving.contains(xt, yt)) {
         mselect = "moving";
-        // showInfo = false;
-        // console.log("moving")
+        thDragSt = Math.atan2(yt - pair.fixed.y, xt - pair.fixed.x);
     }
-    else if (!pair.auto & showWheels & 
-        (d2fixedCentreSq - (pair.fixed.rad) ** 2) * (d2fixedCentreSq - (pair.fixed.rad-pair.fixed*pair.ring) ** 2)<0)
-    {
-        console.log("fixed!")
+    else if (!pair.auto & showWheels & pair.fixed.contains(xt, yt)) {
         mselect = "fixed";
+        y0 = y / scl0;
+        x0 = x / scl0;
+        xfix0 = pair.fixed.x;
+        yfix0 = pair.fixed.y;
     }
 
     else if (
@@ -666,15 +673,12 @@ function pointerDownHandler(xc, yc, n = 1) {
         x0 = x / scl0;
         xOff0 = xOff;
         yOff0 = yOff;
-        // console.log("Pan")
+
+
     }
     else {
         mselect = null;
-        // showInfo = false;
-
     }
-    mouseDown = true;
-    thDragSt = Math.atan2(yt - pair.fixed.y, xt - pair.fixed.x);
 }
 function pointerMoveHandler(xc, yc) {
     x = xc * pixRat;
@@ -694,6 +698,15 @@ function pointerMoveHandler(xc, yc) {
         pair.roll(pair.th + dthDrag);
         thDragSt = Math.atan2(yt - pair.fixed.y, xt - pair.fixed.x);
     }
+    if (mselect == "fixed") {
+        pair.penUp()
+        pair.fixed.x = xfix0 + (x / scl0 - x0) * scl0;
+        pair.fixed.y = yfix0 + (y / scl0 - y0) * scl0;
+        pair.move(pair.th)
+        pair.penDown()
+    }
+
+
     if (mselect == "pan") {
         xOff = xOff0 + (x / scl0 - x0) * scl0;
         yOff = yOff0 + (y / scl0 - y0) * scl0;
@@ -706,7 +719,6 @@ function pointerUpHandler(xc, yc) {
     y = yc * pixRat;
     // x = x / scl0;
     // y = y / scl0;
-    mouseDown = false;
     showWheelsOverride = false;
     pair.fixed.color = wheelColor;
     pair.moving.color = wheelColor;
