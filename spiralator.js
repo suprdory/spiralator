@@ -187,11 +187,14 @@ class Pair {
 
     translate(x, y) {
         if (!this.locked) {
+            // let auto=this.auto;
+            this.auto=false;
             pair.penUp()
             this.fixed.x = x;
             this.fixed.y = y;
             pair.move(pair.th)
             pair.penDown()
+            // this.auto=auto
         }
     }
     setColor() {
@@ -545,7 +548,6 @@ class Panel {
     }
 
 }
-
 function isTouchDevice() {
     return (('ontouchstart' in window) ||
         (navigator.maxTouchPoints > 0) ||
@@ -579,7 +581,7 @@ function addPointerListeners() {
                         (e.touches[0].clientY + e.touches[1].clientY) / 2)
                 }
                 prevDiff = curDiff;
-                requestAnimationFrame(anim);
+                if (!pair.auto) { requestAnimationFrame(anim); }
             }
 
         },
@@ -621,7 +623,7 @@ function addPointerListeners() {
 }
 function pointerWheelHandler(dW, xc, yc) {
     zoomHandler(dW, xc, yc);
-    requestAnimationFrame(anim);
+    if (!pair.auto) { requestAnimationFrame(anim); }
 }
 function pointerDownHandler(xc, yc, n = 1) {
     x = xc * pixRat;
@@ -660,7 +662,7 @@ function pointerDownHandler(xc, yc, n = 1) {
         mselect = "moving";
         thDragSt = Math.atan2(yt - pair.fixed.y, xt - pair.fixed.x);
     }
-    else if (!pair.auto & showWheels & pair.fixed.contains(xt, yt)) {
+    else if (showWheels & pair.fixed.contains(xt, yt)) {
         mselect = "fixed";
         y0 = y;
         x0 = x;
@@ -682,7 +684,7 @@ function pointerDownHandler(xc, yc, n = 1) {
     else {
         mselect = null;
     }
-    requestAnimationFrame(anim);
+    if (!pair.auto) { requestAnimationFrame(anim); }
 }
 function pointerMoveHandler(xc, yc) {
     x = xc * pixRat;
@@ -711,7 +713,7 @@ function pointerMoveHandler(xc, yc) {
         xOff = xOff0 + (x - x0);
         yOff = yOff0 + (y - y0);
     }
-    requestAnimationFrame(anim);
+    if (!pair.auto) { requestAnimationFrame(anim); }
 
 }
 function pointerUpHandler(xc, yc) {
@@ -724,7 +726,7 @@ function pointerUpHandler(xc, yc) {
     mselect = null;
 
     panelArray.forEach(panel => panel.pointerUp(x, y))
-    requestAnimationFrame(anim);
+    if (!pair.auto) { requestAnimationFrame(anim); }
 }
 function doubleClickHandler(clickCase) {
     if (showWheels) {
@@ -733,16 +735,17 @@ function doubleClickHandler(clickCase) {
         }
         else if (clickCase == "autoCCW") {
             pair.auto = -1;
+            anim(); //get the ball rolling...
         }
         else if (clickCase == "autoCW") {
             pair.auto = 1;
+            anim();
         }
     }
-
-    // console.log(clickCase)
     topPanel.active = true;
     bottomPanel.active = true;
     showWheels = true;
+
 }
 function zoomHandler(dW, xc, yc) {
 
@@ -1090,20 +1093,13 @@ function wakeGalleryServer() {
 
 }
 function anim() {
-    if (pair.auto) {
-        requestAnimationFrame(anim)
-    }
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // ctx.setTransform(scl, 0, 0, scl, xOff, yOff)
-    ctx.setTransform(scl, 0, 0, scl, xOff, yOff)
-
+    if (pair.auto) { requestAnimationFrame(anim); }
     if (pair.auto & !showColInfo & !showInfo & !showRadInfo) {
         pair.update();
     }
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // ctx.setTransform(1, 0, 0, 1, 0, 0)
+
     ctx.setTransform(scl, 0, 0, scl, xOff, yOff)
     pair.drawTraces(ctx, 0, 0, 1);
 
@@ -1127,7 +1123,7 @@ function anim() {
     }
 
     ctx.textAlign = "left"
-    // ctx.fillText(ctx.getTransform()['a'], 20, uiY + 80)
+    ctx.fillText('auto: ' + pair.auto, 20, uiY + 20)
     // ctx.fillText('xOff='+Math.round(xOff * 10000) / 10000, 20, uiY + 110)
     // ctx.fillText('scl='+Math.round(scl * 10000) / 10000, 20, uiY + 140)
     // ctx.fillText('v21', 10, Y - 15)
