@@ -1305,4 +1305,4 @@ wakeGalleryServer()
 setGallerySubmitHTML();
 addPointerListeners();
 anim();
-pair.drawInfo();
+// pair.drawInfo();
