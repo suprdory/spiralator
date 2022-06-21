@@ -613,31 +613,14 @@ function addPointerListeners() {
         });
         addEventListener('wheel', e => {
             // console.log(e)
-            zoomHandler(-0.0005 * e.deltaY, e.clientX, e.clientY);
+            pointerWheelHandler(-0.0005 * e.deltaY, e.clientX, e.clientY);
+            
         })
     }
 }
-function zoomHandler(dW, xc, yc) {
-
-    y = yc * pixRat;
-    x = xc * pixRat;
-    xt = (x - xOff) / scl
-    yt = (y - yOff) / scl
-    // x = x / scl0;
-    // y = y / scl0;
-
-    // console.log(
-    //     'dW',dw,
-    //     'x',x,
-    //     'xt',xt,
-    //     'y',y,
-    //     'yt',yt,  
-    // )
-    scl = Math.min(10, Math.max(scl * (1 + dW), 0.05));
-    xOff = x - xt * scl
-    yOff = y - yt * scl
-    // console.log(xOff)
-
+function pointerWheelHandler(dW, xc, yc){
+    zoomHandler(dW, xc, yc);
+    requestAnimationFrame(anim);
 }
 function pointerDownHandler(xc, yc, n = 1) {
     x = xc * pixRat;
@@ -695,12 +678,11 @@ function pointerDownHandler(xc, yc, n = 1) {
         x0 = x / scl0;
         xOff0 = xOff;
         yOff0 = yOff;
-
-
     }
     else {
         mselect = null;
     }
+    requestAnimationFrame(anim);
 }
 function pointerMoveHandler(xc, yc) {
     x = xc * pixRat;
@@ -729,7 +711,7 @@ function pointerMoveHandler(xc, yc) {
         xOff = xOff0 + (x / scl0 - x0) * scl0;
         yOff = yOff0 + (y / scl0 - y0) * scl0;
     }
-
+    requestAnimationFrame(anim);
 
 }
 function pointerUpHandler(xc, yc) {
@@ -743,6 +725,7 @@ function pointerUpHandler(xc, yc) {
     mselect = null;
 
     panelArray.forEach(panel => panel.pointerUp(x, y))
+    requestAnimationFrame(anim);
 }
 function doubleClickHandler(clickCase) {
     if (showWheels) {
@@ -761,6 +744,18 @@ function doubleClickHandler(clickCase) {
     topPanel.active = true;
     bottomPanel.active = true;
     showWheels = true;
+}
+function zoomHandler(dW, xc, yc) {
+
+    y = yc * pixRat;
+    x = xc * pixRat;
+    xt = (x - xOff) / scl
+    yt = (y - yOff) / scl
+
+    scl = Math.min(10, Math.max(scl * (1 + dW), 0.05));
+    xOff = x - xt * scl
+    yOff = y - yt * scl
+
 }
 function calcLCM(a, b) { //lowest common multiple
     let min = (a > b) ? a : b;
@@ -1095,7 +1090,7 @@ function wakeGalleryServer() {
 
 }
 function anim() {
-    requestAnimationFrame(anim);
+    // requestAnimationFrame(anim);
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     // ctx.setTransform(scl, 0, 0, scl, xOff, yOff)
@@ -1137,19 +1132,11 @@ function anim() {
 
 }
 
-
 const canvas = document.getElementById("cw");
 const ctx = canvas.getContext("2d");
 const PI2 = Math.PI * 2;
 
 let pixRat = window.devicePixelRatio * 1.0;
-// let pixRat=1;
-// if (window.orientation == 90 || window.orientation == 270) {
-//     //dodgy fix for "incorrect" window size reported in landscape, 
-//     //meaning pixel ratio is inappropriate scaling measure
-//     //only reported on modile device so no problem on desktop
-//     pixRat = pixRat * (Y / X)
-// }
 
 canvas.height = window.innerHeight * pixRat;
 canvas.width = window.innerWidth * pixRat;
@@ -1185,7 +1172,7 @@ const wheelColor = "white"
 const uiTextColor = "white"
 canvas.style.backgroundColor = bgFillStyle
 
-const maxWheelSize = 150;
+const maxWheelSize = 300;
 const minWheelSize = 10;
 const maxDrawRadiusRatio = 2;
 
