@@ -1063,8 +1063,8 @@ function createBottomPanel() {
     fixRadButton.UDarrows = true;
     panel.buttonArray.push(fixRadButton)
 
-    let colButton = new PButton(panel, 0.6, 0, 0.4, 1, "Colour",
-        function (dy, yDragVar0, dx, xdragVar0) {
+    let hueButton = new PButton(panel, 0.6, 0, 0.2, 1, "Hue",
+        function (dy, yDragVar0) {
 
             pair.move(pair.th);
             pair.penUpCont();
@@ -1077,7 +1077,7 @@ function createBottomPanel() {
                 pair.hue += 360;
             }
             // console.log(dy, yDragVar0, dx, xdragVar0)
-            pair.lightness = Math.max(00, Math.min(100, xdragVar0 + dx * 0.25/pixRat));
+            // pair.lightness = Math.max(00, Math.min(100, xdragVar0 + dx * 0.25/pixRat));
 
             pair.setColor();
             pair.fixed.color = pair.color;
@@ -1086,9 +1086,7 @@ function createBottomPanel() {
             pair.move(pair.th);
             pair.penDown();
 
-        }, [], function () {
-            return pair.lightness;
-        },
+        }, [], [],
         function () {
             return pair.hue;
         },
@@ -1096,11 +1094,51 @@ function createBottomPanel() {
             showColInfo = isDepressed;
         }
     )
-    colButton.yDrag = true;
-    colButton.xDrag = true;
-    colButton.UDarrows = true;
-    colButton.LRarrows = true;
-    panel.buttonArray.push(colButton)
+    hueButton.yDrag = true;
+    // colButton.xDrag = true;
+    hueButton.UDarrows = true;
+    // colButton.LRarrows = true;
+    panel.buttonArray.push(hueButton)
+
+    let lightnessButton = new PButton(panel, 0.8, 0, 0.2, 1, "Lightness",
+    function (dy, yDragVar0) {
+
+        pair.move(pair.th);
+        pair.penUpCont();
+
+        // pair.hue = yDragVar0 - 0.5/pixRat * dy;
+        // if (pair.hue > 360) {
+        //     pair.hue -= 360;
+        // }
+        // if (pair.hue < 0) {
+        //     pair.hue += 360;
+        // }
+        // console.log(dy, yDragVar0, dx, xdragVar0)
+        
+        pair.lightness = Math.max(00, Math.min(100, yDragVar0 + dy * -0.25/pixRat));
+
+        pair.setColor();
+        pair.fixed.color = pair.color;
+        pair.moving.color = pair.color;
+        document.querySelector(':root').style.setProperty('--fgColor', pair.color)
+        pair.move(pair.th);
+        pair.penDown();
+
+    }, [], [],
+    function () {
+        return pair.lightness;
+    },
+    function (isDepressed) {
+        showColInfo = isDepressed;
+    }
+)
+lightnessButton.yDrag = true;
+// colButton.xDrag = true;
+lightnessButton.UDarrows = true;
+// colButton.LRarrows = true;
+panel.buttonArray.push(lightnessButton)
+
+
 
     return panel;
 }
