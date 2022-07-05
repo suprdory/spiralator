@@ -858,6 +858,7 @@ function shareImage() {
 function uploadImage(name, comment) {
     if (pair.traces.length > 0) {
         sharePanel.wait = true;
+        anim();
         canvasSq = drawSquareFullImage(gallerySize);
         canvasSq.toBlob(function (blob) {
             imgFile = new File(
