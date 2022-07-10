@@ -194,6 +194,7 @@ class Pair {
     }
     setColor() {
         this.color = "hsl(" + this.hue + "," + this.saturation + "%," + this.lightness + "%)"
+        this.transCol= "hsla(" + this.hue + "," + this.saturation + "%," + this.lightness + "%, 0.2)"
     }
     drawRadInfo() {
         ctx.strokeStyle = this.fixed.color;
@@ -443,7 +444,7 @@ class PButton {
         }
         if (this.toggle) {
             if (this.toggleValFun()) {
-                ctx.fillStyle = transCol;
+                ctx.fillStyle = pair.transCol;
                 ctx.fillRect(this.x, this.y, this.w, this.h)
             }
         }
@@ -1291,7 +1292,7 @@ const shareBorderfrac = 0.15;
 const hueInit = Math.random() * 360
 const bgFillStyle = "hsl(" + hueInit + ",100%,5%)";
 const bgFillStyleAlpha = "hsla(" + hueInit + ",100%,5%,.80)";
-const transCol = "rgb(128,128,128,0.2)"
+const transCol = "rgb(128,128,128,0.3)"
 const wheelColor = "white"
 const uiTextColor = "white"
 canvas.style.backgroundColor = bgFillStyle
