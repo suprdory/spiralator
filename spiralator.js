@@ -70,6 +70,7 @@ class Disc {
 
     }
 }
+
 class MovingDisc extends Disc {
     constructor(
         teeth = 84, rat = 0.7, ring = 0
@@ -115,6 +116,7 @@ class MovingDisc extends Disc {
         return (this.rat);
     }
 }
+
 class Point {
     constructor(x, y) {
         this.x = x;
@@ -194,7 +196,7 @@ class Pair {
     }
     setColor() {
         this.color = "hsl(" + this.hue + "," + this.saturation + "%," + this.lightness + "%)"
-        this.transCol= "hsla(" + this.hue + "," + this.saturation + "%," + this.lightness + "%, 0.2)"
+        this.transCol = "hsla(" + this.hue + "," + this.saturation + "%," + this.lightness + "%, 0.2)"
     }
     drawRadInfo() {
         ctx.strokeStyle = this.fixed.color;
@@ -202,9 +204,9 @@ class Pair {
         ctx.textAlign = "center";
         ctx.font = txtSize + 'px sans-serif';
         ctx.textBaseline = "middle";
-        ctx.fillText(Math.round(this.moving.rat * this.moving.teeth), X / 2 , Y / 2);
+        ctx.fillText(Math.round(this.moving.rat * this.moving.teeth), X / 2, Y / 2);
         ctx.font = txtSize / 2 + 'px sans-serif';
-        ctx.fillText('Draw Radius', X / 2 , Y / 2 - txtSize);
+        ctx.fillText('Draw Radius', X / 2, Y / 2 - txtSize);
 
     }
     drawColInfo() {
@@ -215,9 +217,9 @@ class Pair {
         ctx.textBaseline = "middle";
         ctx.fillText(Math.round(this.hue), X / 2 - txtSize, Y / 2);
         ctx.fillText(Math.round(this.lightness - 50), X / 2 + txtSize, Y / 2);
-        ctx.font = txtSize/2 + 'px sans-serif';
+        ctx.font = txtSize / 2 + 'px sans-serif';
         ctx.fillText('Hue', X / 2 - txtSize, Y / 2 - txtSize);
-        ctx.fillText('Lightness', X / 2 + txtSize, Y / 2-txtSize);
+        ctx.fillText('Lightness', X / 2 + txtSize, Y / 2 - txtSize);
     }
     drawInfo() {
         ctx.strokeStyle = this.fixed.color;
@@ -225,20 +227,20 @@ class Pair {
         ctx.textAlign = "center";
         ctx.font = txtSize + 'px sans-serif';
         ctx.textBaseline = "middle";
-        ctx.fillText(this.fixed.teeth, X / 2 - txtSize*1.5, Y / 2 - txtSize * 0.45);
-        ctx.fillText(this.moving.teeth, X / 2 - txtSize*1.5, Y / 2 + txtSize * 0.60);
-        ctx.fillText(calcLCM(this.fixed.teeth, this.moving.teeth) / this.moving.teeth, X / 2 + 1.5*txtSize, Y / 2);
+        ctx.fillText(this.fixed.teeth, X / 2 - txtSize * 1.5, Y / 2 - txtSize * 0.45);
+        ctx.fillText(this.moving.teeth, X / 2 - txtSize * 1.5, Y / 2 + txtSize * 0.60);
+        ctx.fillText(calcLCM(this.fixed.teeth, this.moving.teeth) / this.moving.teeth, X / 2 + 1.5 * txtSize, Y / 2);
 
         ctx.beginPath();
         ctx.moveTo(X / 2 - txtSize * 2.5, Y / 2 - txtSize * 0.00);
         ctx.lineTo(X / 2 - txtSize * 0.5, Y / 2 - txtSize * 0.00);
-        ctx.lineWidth=3*pixRat;
+        ctx.lineWidth = 3 * pixRat;
         ctx.stroke();
-        
-        ctx.font = txtSize/2 + 'px sans-serif';
-        ctx.fillText('Fixed wheel', X / 2 - txtSize*1.5, Y / 2 - txtSize * 1.5);
-        ctx.fillText('Moving wheel', X / 2 - txtSize*1.5, Y / 2 + txtSize * 1.5);
-        ctx.fillText('Symmetry', X / 2 + txtSize*1.5, Y / 2 + txtSize * -1.0);
+
+        ctx.font = txtSize / 2 + 'px sans-serif';
+        ctx.fillText('Fixed wheel', X / 2 - txtSize * 1.5, Y / 2 - txtSize * 1.5);
+        ctx.fillText('Moving wheel', X / 2 - txtSize * 1.5, Y / 2 + txtSize * 1.5);
+        ctx.fillText('Symmetry', X / 2 + txtSize * 1.5, Y / 2 + txtSize * -1.0);
     }
     penUp() {
         this.tracing = false;
@@ -291,9 +293,9 @@ class Pair {
             m.th = m.th0 + th * (f.rad / m.rad + 1)
         }
         if (!this.out) {
-            m.x = f.x + (f.rad - m.rad) * Math.cos(th);
-            m.y = f.y + (f.rad - m.rad) * Math.sin(th);
-            m.th = m.th0 - th * (f.rad / m.rad - 1)
+            m.x = f.x + (f.rad - m.rArc(m.th)) * Math.cos(th);
+            m.y = f.y + (f.rad - m.rArc(m.th)) * Math.sin(th);
+            m.th = m.th0 - th * (f.rad / m.rad*m.arcRat - 1)
         }
 
         this.th = th;
@@ -427,13 +429,13 @@ class PButton {
         this.getYdragVar = getYdragVar;
         this.getXdragVar = getXdragVar;
         this.isDepressedFun = isDepressedFun;
-        this.UDarrows=false;
-        this.LRarrows=false;
-        this.UDarrLen=this.h/6;
+        this.UDarrows = false;
+        this.LRarrows = false;
+        this.UDarrLen = this.h / 6;
         this.LRarrLen = this.w / 6;
     }
     draw() {
-        ctx.strokeStyle=pair.color;
+        ctx.strokeStyle = pair.color;
         ctx.beginPath();
         ctx.rect(this.x, this.y, this.w, this.h);
         ctx.stroke();
@@ -448,20 +450,20 @@ class PButton {
                 ctx.fillRect(this.x, this.y, this.w, this.h)
             }
         }
-        if (this.UDarrows){
-            drawArrow(ctx, 
-                this.x + this.w / 2, this.y + this.h / 2 + txtSize / 4, 
-                this.x + this.w / 2, this.y + this.h / 2 + txtSize / 4 +this.UDarrLen,
-                baseLW,uiTextColor)
+        if (this.UDarrows) {
+            drawArrow(ctx,
+                this.x + this.w / 2, this.y + this.h / 2 + txtSize / 4,
+                this.x + this.w / 2, this.y + this.h / 2 + txtSize / 4 + this.UDarrLen,
+                baseLW, uiTextColor)
             drawArrow(ctx,
                 this.x + this.w / 2, this.y + this.h / 2 - txtSize / 4,
                 this.x + this.w / 2, this.y + this.h / 2 - txtSize / 4 - this.UDarrLen,
-                baseLW, uiTextColor)   
+                baseLW, uiTextColor)
         }
         if (this.LRarrows) {
             drawArrow(ctx,
-                this.x + this.w / 2 - txtSize / 2, this.y + this.h / 2 ,
-                this.x + this.w / 2 - txtSize / 2 - this.LRarrLen, this.y + this.h / 2 ,
+                this.x + this.w / 2 - txtSize / 2, this.y + this.h / 2,
+                this.x + this.w / 2 - txtSize / 2 - this.LRarrLen, this.y + this.h / 2,
                 baseLW, uiTextColor)
             drawArrow(ctx,
                 this.x + this.w / 2 + txtSize / 2, this.y + this.h / 2,
@@ -477,7 +479,7 @@ class PButton {
         ctx.font = txtSize / 4 + 'px sans-serif';
         ctx.textBaseline = "middle";
         ctx.lineWidth = baseLW;
-        ctx.fillText(this.txt, this.x + this.w / 2, this.y + this.h / 2,this.w*0.9);
+        ctx.fillText(this.txt, this.x + this.w / 2, this.y + this.h / 2, this.w * 0.9);
     }
     contains(x, y) {
         return (x > this.x & x < (this.x + this.w) & y > this.y & y < (this.y + this.h));
@@ -998,7 +1000,7 @@ function createBottomPanel() {
         function (dy, yDragVar0) {
             showWheelsOverride = true;
             pair.penUp();
-            pair.moving.rat = Math.min(maxDrawRadiusRatio, Math.max(-0.001/pixRat * dy + yDragVar0, 0))
+            pair.moving.rat = Math.min(maxDrawRadiusRatio, Math.max(-0.001 / pixRat * dy + yDragVar0, 0))
             pair.penDown();
 
         }, [], [],
@@ -1010,7 +1012,7 @@ function createBottomPanel() {
         },
     )
     ratButton.yDrag = true;
-    ratButton.UDarrows=true;
+    ratButton.UDarrows = true;
     panel.buttonArray.push(ratButton)
 
     let movRadButton = new PButton(panel, 0.20, 0, 0.2, 1, "Moving",
@@ -1018,7 +1020,7 @@ function createBottomPanel() {
 
             showWheelsOverride = true;
             pair.penUp();
-            pair.moving.teeth = Math.round(Math.min(maxWheelSize, Math.max(-0.1/pixRat * dy + yDragVar0, minWheelSize)));
+            pair.moving.teeth = Math.round(Math.min(maxWheelSize, Math.max(-0.1 / pixRat * dy + yDragVar0, minWheelSize)));
             if (pair.moving.teeth == pair.fixed.teeth) {
                 pair.moving.teeth--;
             }
@@ -1044,7 +1046,7 @@ function createBottomPanel() {
         function (dy, yDragVar0) {
             showWheelsOverride = true;
             pair.penUp();
-            pair.fixed.teeth = Math.round(Math.min(maxWheelSize, Math.max(-0.1/pixRat * dy + yDragVar0, minWheelSize)));
+            pair.fixed.teeth = Math.round(Math.min(maxWheelSize, Math.max(-0.1 / pixRat * dy + yDragVar0, minWheelSize)));
             if (pair.fixed.teeth == pair.moving.teeth) {
                 pair.fixed.teeth--;
             }
@@ -1071,7 +1073,7 @@ function createBottomPanel() {
             pair.move(pair.th);
             pair.penUpCont();
 
-            pair.hue = yDragVar0 - 0.5/pixRat * dy;
+            pair.hue = yDragVar0 - 0.5 / pixRat * dy;
             if (pair.hue > 360) {
                 pair.hue -= 360;
             }
@@ -1103,42 +1105,42 @@ function createBottomPanel() {
     panel.buttonArray.push(hueButton)
 
     let lightnessButton = new PButton(panel, 0.8, 0, 0.2, 1, "Lightness",
-    function (dy, yDragVar0) {
+        function (dy, yDragVar0) {
 
-        pair.move(pair.th);
-        pair.penUpCont();
+            pair.move(pair.th);
+            pair.penUpCont();
 
-        // pair.hue = yDragVar0 - 0.5/pixRat * dy;
-        // if (pair.hue > 360) {
-        //     pair.hue -= 360;
-        // }
-        // if (pair.hue < 0) {
-        //     pair.hue += 360;
-        // }
-        // console.log(dy, yDragVar0, dx, xdragVar0)
-        
-        pair.lightness = Math.max(00, Math.min(100, yDragVar0 + dy * -0.25/pixRat));
+            // pair.hue = yDragVar0 - 0.5/pixRat * dy;
+            // if (pair.hue > 360) {
+            //     pair.hue -= 360;
+            // }
+            // if (pair.hue < 0) {
+            //     pair.hue += 360;
+            // }
+            // console.log(dy, yDragVar0, dx, xdragVar0)
 
-        pair.setColor();
-        pair.fixed.color = pair.color;
-        pair.moving.color = pair.color;
-        document.querySelector(':root').style.setProperty('--fgColor', pair.color)
-        pair.move(pair.th);
-        pair.penDown();
+            pair.lightness = Math.max(00, Math.min(100, yDragVar0 + dy * -0.25 / pixRat));
 
-    }, [], [],
-    function () {
-        return pair.lightness;
-    },
-    function (isDepressed) {
-        showColInfo = isDepressed;
-    }
-)
-lightnessButton.yDrag = true;
-// colButton.xDrag = true;
-lightnessButton.UDarrows = true;
-// colButton.LRarrows = true;
-panel.buttonArray.push(lightnessButton)
+            pair.setColor();
+            pair.fixed.color = pair.color;
+            pair.moving.color = pair.color;
+            document.querySelector(':root').style.setProperty('--fgColor', pair.color)
+            pair.move(pair.th);
+            pair.penDown();
+
+        }, [], [],
+        function () {
+            return pair.lightness;
+        },
+        function (isDepressed) {
+            showColInfo = isDepressed;
+        }
+    )
+    lightnessButton.yDrag = true;
+    // colButton.xDrag = true;
+    lightnessButton.UDarrows = true;
+    // colButton.LRarrows = true;
+    panel.buttonArray.push(lightnessButton)
 
 
 
@@ -1221,12 +1223,12 @@ function anim() {
 }
 function drawArrow(ctx, fromx, fromy, tox, toy, arrowWidth, color) {
     //variables to be used when creating the arrow
-    var headlen = 10*pixRat;
+    var headlen = 10 * pixRat;
     var angle = Math.atan2(toy - fromy, tox - fromx);
 
     // ctx.save();
     ctx.strokeStyle = color;
-    ctx.fillStyle=color;
+    ctx.fillStyle = color;
 
 
     //starting path of the arrow from the start square to the end square
@@ -1332,8 +1334,108 @@ else {
 ringSizes = [96, 105]//,144,150]
 discSizes = [24, 30, 32, 40, 42, 45, 48, 52, 56, 60, 63, 72, 75, 80, 84]
 
+class ArcSidedDisc extends MovingDisc {
+    constructor(
+        teeth = 84, rat = 0.7, nArc = 3, arcRat = 4 / 3, ring = false
+    ) {
+        super(teeth, ring);
+        this.rat = rat;
+        this.th0 = 0;
+        this.th = 0;
+        this.lw = baseLW * 2;
+        this.nArc = nArc;
+        this.arcRat = arcRat;
+    }
+    draw() {
+        // super.draw();
+
+        //stroke and fill disk
+        ctx.fillStyle = this.color;
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = this.lw;
+        ctx.beginPath();
+        // console.log(this.arcRat, this.nArc)
+        let theta = PI2 / 2 / this.nArc;
+        let theta0 = this.th;
+        let phi = Math.asin(Math.sin(PI2 / this.nArc / 2) / this.arcRat);
+        let rArc = this.rad * (this.arcRat * Math.cos(phi) - Math.cos(theta))
+        for (let i = 0; i < 3; i++) {
+
+            ctx.arc(
+                this.x + rArc * (Math.cos(theta0 + PI2 / 2)),
+                this.y + rArc * (Math.sin(theta0 + PI2 / 2)),
+                this.rad * this.arcRat,
+                theta0 - phi,
+                theta0 + phi,
+            );
+            theta0 += (PI2 / this.nArc);
+
+        }
+        ctx.stroke();
+        // ctx.fill();
+
+        // centre to edge
+        ctx.strokeStyle = "rgb(200,0,0)"
+        for (let thrad = 0; thrad < PI2; thrad += PI2 / 100) {
+            let r2a = this.rArc(thrad-this.th);
+            ctx.beginPath();
+            ctx.moveTo(this.x, this.y);
+            ctx.lineTo(
+                this.x + r2a * Math.cos(thrad),
+                this.y + r2a * Math.sin(thrad)
+            )
+            ctx.stroke();
+        }
+
+
+        // centre to pen
+        ctx.beginPath();
+        ctx.strokeStyle = transCol
+        ctx.moveTo(this.x, this.y);
+        ctx.lineTo(
+            this.x + this.rad * Math.cos(this.th) * this.rat,
+            this.y + this.rad * Math.sin(this.th) * this.rat
+        )
+        ctx.stroke();
+        // central point
+        ctx.beginPath();
+        ctx.fillStyle = this.color;
+        ctx.arc(
+            this.x, this.y,
+            3 * baseLW, 0, PI2);
+        ctx.fill();
+
+        // // pen point
+        // ctx.beginPath();
+        // ctx.fillStyle = pair.color;
+        // ctx.arc(
+        //     this.x + this.rat * this.rad * Math.cos(this.th),
+        //     this.y + this.rat * this.rad * Math.sin(this.th),
+        //     3 * baseLW, 0, PI2);
+        // ctx.fill();
+    }
+    setRat(r) {
+        this.rat = r;
+    }
+    getRat() {
+        return (this.rat);
+    }
+    rArc(tha) {
+        let theta = PI2 / 2 / this.nArc;
+        // tha = ((tha+theta) % (theta*2))-theta;
+        tha = ((((tha + theta) % (theta * 2)) + (theta * 2)) % (theta * 2)) - theta
+        let phi = Math.asin(Math.sin(PI2 / this.nArc / 2) / this.arcRat);
+        let A = this.rad * (this.arcRat * Math.cos(phi) - Math.cos(theta));
+        // let cosalphr = Math.cos((PI2 / 2) - tha);
+        // let rArc = A * cosalphr + Math.sqrt(0.5 * A * cosalphr ** 2 - (A ** 2 - this.arcRat ** 2 * this.rad ** 2));
+        let rArc=A*Math.cos(PI2/2-tha)+Math.sqrt((this.arcRat*this.rad)**2-A**2*Math.sin(PI2/2-tha)**2)
+        return rArc;
+    }
+}
+
+
 let fixedDisc = new Disc(ringSizes.random(), ring = 1)
-let movingDisc = new MovingDisc(discSizes.random(), Math.random() / 2 + 0.5, ring = 0);
+let movingDisc = new ArcSidedDisc(discSizes.random(), Math.random() / 2 + 0.5, nArc = 3, arcRat = 2, ring = 0);
 let pair = new Pair(fixedDisc, movingDisc)
 
 topPanel = createTopPanel();
