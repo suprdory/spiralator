@@ -866,7 +866,7 @@ function uploadImage(name, comment) {
     if (pair.traces.length > 0) {
         sharePanel.wait = true;
         anim();
-        canvasSq = drawSquareFullImage(gallerySize);
+        canvasSq = drawSquareFullImage(galleryRes;
         canvasSq.toBlob(function (blob) {
             imgFile = new File(
                 [blob],
@@ -1333,7 +1333,7 @@ const minWheelSize = 10;
 const maxDrawRadiusRatio = 2;
 
 const galleryLW = 1;
-const gallerySize = 1920;
+const galleryRes = 1920;
 const shareRes = 1920;
 
 const dth = PI2 / 100;
