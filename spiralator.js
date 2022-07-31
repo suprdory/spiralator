@@ -811,7 +811,7 @@ function calcLCM(a, b) { //lowest common multiple
         min++;
     }
 }
-function drawSquareFullImage(n = 1080) {
+function drawSquareFullImage(n = 1920) {
     pair.penUp();
     let baseLWtemp = baseLW;
     baseLW = galleryLW * baseLW;
@@ -841,7 +841,7 @@ function drawSquareFullImage(n = 1080) {
 function shareImage() {
     if (pair.traces.length > 0) {
         sharePanel.wait = true;
-        canvasSq = drawSquareFullImage(1080);
+        canvasSq = drawSquareFullImage(shareRes);
         canvasSq.toBlob(function (blob) {
             const filesArray = [
                 new File(
@@ -1333,7 +1333,8 @@ const minWheelSize = 10;
 const maxDrawRadiusRatio = 2;
 
 const galleryLW = 1;
-const gallerySize = 1080;
+const gallerySize = 1920;
+const shareRes = 1920;
 
 const dth = PI2 / 100;
 
