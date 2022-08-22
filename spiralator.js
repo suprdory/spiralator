@@ -8,9 +8,9 @@ class Disc {
     ) {
         this.x = 0;
         this.y = 0;
-        this.thickness = 3 * pixPertooth;
+        this.thickness = 3 * pixPerTooth;
         this.teeth = teeth;
-        this.circ = teeth * pixPertooth;
+        this.circ = teeth * pixPerTooth;
         this.rad = this.circ / PI2;
         this.color = 'white';
         this.lw = baseLW * 1;
@@ -194,7 +194,7 @@ class Pair {
     }
     setColor() {
         this.color = "hsl(" + this.hue + "," + this.saturation + "%," + this.lightness + "%)"
-        this.transCol= "hsla(" + this.hue + "," + this.saturation + "%," + this.lightness + "%, 0.2)"
+        this.transCol = "hsla(" + this.hue + "," + this.saturation + "%," + this.lightness + "%, 0.2)"
     }
     drawRadInfo() {
         ctx.strokeStyle = this.fixed.color;
@@ -202,9 +202,9 @@ class Pair {
         ctx.textAlign = "center";
         ctx.font = txtSize + 'px sans-serif';
         ctx.textBaseline = "middle";
-        ctx.fillText(Math.round(this.moving.rat * this.moving.teeth), X / 2 , Y / 2);
+        ctx.fillText(Math.round(this.moving.rat * this.moving.teeth), X / 2, Y / 2);
         ctx.font = txtSize / 2 + 'px sans-serif';
-        ctx.fillText('Draw Radius', X / 2 , Y / 2 - txtSize);
+        ctx.fillText('Draw Radius', X / 2, Y / 2 - txtSize);
 
     }
     drawColInfo() {
@@ -215,9 +215,9 @@ class Pair {
         ctx.textBaseline = "middle";
         ctx.fillText(Math.round(this.hue), X / 2 - txtSize, Y / 2);
         ctx.fillText(Math.round(this.lightness - 50), X / 2 + txtSize, Y / 2);
-        ctx.font = txtSize/2 + 'px sans-serif';
+        ctx.font = txtSize / 2 + 'px sans-serif';
         ctx.fillText('Hue', X / 2 - txtSize, Y / 2 - txtSize);
-        ctx.fillText('Lightness', X / 2 + txtSize, Y / 2-txtSize);
+        ctx.fillText('Lightness', X / 2 + txtSize, Y / 2 - txtSize);
     }
     drawInfo() {
         ctx.strokeStyle = this.fixed.color;
@@ -225,20 +225,20 @@ class Pair {
         ctx.textAlign = "center";
         ctx.font = txtSize + 'px sans-serif';
         ctx.textBaseline = "middle";
-        ctx.fillText(this.fixed.teeth, X / 2 - txtSize*1.5, Y / 2 - txtSize * 0.45);
-        ctx.fillText(this.moving.teeth, X / 2 - txtSize*1.5, Y / 2 + txtSize * 0.60);
-        ctx.fillText(calcLCM(this.fixed.teeth, this.moving.teeth) / this.moving.teeth, X / 2 + 1.5*txtSize, Y / 2);
+        ctx.fillText(this.fixed.teeth, X / 2 - txtSize * 1.5, Y / 2 - txtSize * 0.45);
+        ctx.fillText(this.moving.teeth, X / 2 - txtSize * 1.5, Y / 2 + txtSize * 0.60);
+        ctx.fillText(calcLCM(this.fixed.teeth, this.moving.teeth) / this.moving.teeth, X / 2 + 1.5 * txtSize, Y / 2);
 
         ctx.beginPath();
         ctx.moveTo(X / 2 - txtSize * 2.5, Y / 2 - txtSize * 0.00);
         ctx.lineTo(X / 2 - txtSize * 0.5, Y / 2 - txtSize * 0.00);
-        ctx.lineWidth=3*pixRat;
+        ctx.lineWidth = 3 * pixRat;
         ctx.stroke();
-        
-        ctx.font = txtSize/2 + 'px sans-serif';
-        ctx.fillText('Fixed wheel', X / 2 - txtSize*1.5, Y / 2 - txtSize * 1.5);
-        ctx.fillText('Moving wheel', X / 2 - txtSize*1.5, Y / 2 + txtSize * 1.5);
-        ctx.fillText('Symmetry', X / 2 + txtSize*1.5, Y / 2 + txtSize * -1.0);
+
+        ctx.font = txtSize / 2 + 'px sans-serif';
+        ctx.fillText('Fixed wheel', X / 2 - txtSize * 1.5, Y / 2 - txtSize * 1.5);
+        ctx.fillText('Moving wheel', X / 2 - txtSize * 1.5, Y / 2 + txtSize * 1.5);
+        ctx.fillText('Symmetry', X / 2 + txtSize * 1.5, Y / 2 + txtSize * -1.0);
     }
     penUp() {
         this.tracing = false;
@@ -427,13 +427,13 @@ class PButton {
         this.getYdragVar = getYdragVar;
         this.getXdragVar = getXdragVar;
         this.isDepressedFun = isDepressedFun;
-        this.UDarrows=false;
-        this.LRarrows=false;
-        this.UDarrLen=this.h/6;
+        this.UDarrows = false;
+        this.LRarrows = false;
+        this.UDarrLen = this.h / 6;
         this.LRarrLen = this.w / 6;
     }
     draw() {
-        ctx.strokeStyle=pair.color;
+        ctx.strokeStyle = pair.color;
         ctx.beginPath();
         ctx.rect(this.x, this.y, this.w, this.h);
         ctx.stroke();
@@ -448,20 +448,20 @@ class PButton {
                 ctx.fillRect(this.x, this.y, this.w, this.h)
             }
         }
-        if (this.UDarrows){
-            drawArrow(ctx, 
-                this.x + this.w / 2, this.y + this.h / 2 + txtSize / 4, 
-                this.x + this.w / 2, this.y + this.h / 2 + txtSize / 4 +this.UDarrLen,
-                baseLW,uiTextColor)
+        if (this.UDarrows) {
+            drawArrow(ctx,
+                this.x + this.w / 2, this.y + this.h / 2 + txtSize / 4,
+                this.x + this.w / 2, this.y + this.h / 2 + txtSize / 4 + this.UDarrLen,
+                baseLW, uiTextColor)
             drawArrow(ctx,
                 this.x + this.w / 2, this.y + this.h / 2 - txtSize / 4,
                 this.x + this.w / 2, this.y + this.h / 2 - txtSize / 4 - this.UDarrLen,
-                baseLW, uiTextColor)   
+                baseLW, uiTextColor)
         }
         if (this.LRarrows) {
             drawArrow(ctx,
-                this.x + this.w / 2 - txtSize / 2, this.y + this.h / 2 ,
-                this.x + this.w / 2 - txtSize / 2 - this.LRarrLen, this.y + this.h / 2 ,
+                this.x + this.w / 2 - txtSize / 2, this.y + this.h / 2,
+                this.x + this.w / 2 - txtSize / 2 - this.LRarrLen, this.y + this.h / 2,
                 baseLW, uiTextColor)
             drawArrow(ctx,
                 this.x + this.w / 2 + txtSize / 2, this.y + this.h / 2,
@@ -477,7 +477,7 @@ class PButton {
         ctx.font = txtSize / 4 + 'px sans-serif';
         ctx.textBaseline = "middle";
         ctx.lineWidth = baseLW;
-        ctx.fillText(this.txt, this.x + this.w / 2, this.y + this.h / 2,this.w*0.9);
+        ctx.fillText(this.txt, this.x + this.w / 2, this.y + this.h / 2, this.w * 0.9);
     }
     contains(x, y) {
         return (x > this.x & x < (this.x + this.w) & y > this.y & y < (this.y + this.h));
@@ -590,6 +590,11 @@ function isTouchDevice() {
         (navigator.msMaxTouchPoints > 0));
 }
 function addPointerListeners() {
+    window.addEventListener("resize", () => {
+        setSize()
+        if (!pair.auto) { requestAnimationFrame(anim); }
+    }
+    );
     if (isTouchDevice()) {
         canvas.addEventListener("touchstart", e => {
             e.preventDefault();
@@ -662,8 +667,8 @@ function pointerWheelHandler(dW, xc, yc) {
     if (!pair.auto) { requestAnimationFrame(anim); }
 }
 function pointerDownHandler(xc, yc, n = 1) {
-    x = xc * pixRat;
-    y = yc * pixRat;
+    let x = xc * pixRat;
+    let y = yc * pixRat;
 
     if (!showgalleryForm) {
         panelArray.forEach(panel => panel.pointerDown(x, y))
@@ -677,13 +682,15 @@ function pointerDownHandler(xc, yc, n = 1) {
         }
         lastTouch = now;
 
-        if (((y > .5 * Y & y < (Y - uiY)) & !isLandscape) ||
-            ((y > .5 * Y & y < Y & x > uiX) & isLandscape)) {
+        if ((y > 0.4 * Y & y < (Y - uiY) & orient == "wideandtall") ||
+            ((y > .5 * Y & y < (Y - uiY)) & orient == "tallorsquare") ||
+            ((y > .5 * Y & y < Y & x > uiX) & orient == "wideandshort")) {
             clickCase = "autoCW";
-        }
 
-        else if (((y < .5 * Y & y > (uiY)) & !isLandscape) ||
-            ((y < .5 * Y & y > 0 & x > uiX) & isLandscape)) {
+        }
+        else if ((y < 0.4 * Y & orient == "wideandtall") ||
+            ((y < .5 * Y & y > (uiY)) & orient == "tallorsquare") ||
+            ((y < .5 * Y & y > 0 & x > uiX) & orient == "wideandshort")) {
             clickCase = "autoCCW";
         }
         else {
@@ -707,8 +714,11 @@ function pointerDownHandler(xc, yc, n = 1) {
     }
 
     else if (
-        !isLandscape & topPanel.active & (y < (Y - uiY) & y > uiY) ||
-        isLandscape & topPanel.active & (x > uiX) ||
+        (topPanel.active & 
+            (orient == "wideandtall" & y < (Y - uiY)) ||
+            (orient == "tallorsquare" & y>uiY & y<(Y-uiY)) ||
+            (orient == "wideandshort" & x>uiX)
+        ) ||
         !topPanel.active
     ) {
         mselect = "pan";
@@ -925,8 +935,7 @@ function createSharePanel() {
 }
 function createTopPanel() {
 
-    let uiBorder = X / 100;
-    let panel = new Panel(0 + uiBorder, 0 + uiBorder, uiX - 2 * uiBorder, uiY);
+    let panel = new Panel(uiTopX + uiBorder, uiTopY + uiBorder, uiX - 2 * uiBorder, uiY - 2 * uiBorder);
     panel.anyClickActivates = true;
 
     panel.buttonArray.push(
@@ -950,8 +959,6 @@ function createTopPanel() {
         new PButton(panel, 0.25, .333, 0.25, 0.666, "Clear",
             function () { pair.clear(); })
     );
-
-
 
 
 
@@ -990,15 +997,14 @@ function createTopPanel() {
 }
 function createBottomPanel() {
 
-    let uiBorder = X / 100;
-    let panel = new Panel(0 + uiBorder, Y - uiY - 2 * uiBorder + uiBorder, uiX - 2 * uiBorder, uiY);
+    let panel = new Panel(uiBottomX + uiBorder, uiBottomY + uiBorder, uiX - 2 * uiBorder, uiY - 2 * uiBorder);
     panel.anyClickActivates = true;
 
     let ratButton = new PButton(panel, 0.0, 0, 0.2, 1, "Radius",
         function (dy, yDragVar0) {
             showWheelsOverride = true;
             pair.penUp();
-            pair.moving.rat = Math.min(maxDrawRadiusRatio, Math.max(-0.001/pixRat * dy + yDragVar0, 0))
+            pair.moving.rat = Math.min(maxDrawRadiusRatio, Math.max(-0.001 / pixRat * dy + yDragVar0, 0))
             pair.penDown();
 
         }, [], [],
@@ -1010,7 +1016,7 @@ function createBottomPanel() {
         },
     )
     ratButton.yDrag = true;
-    ratButton.UDarrows=true;
+    ratButton.UDarrows = true;
     panel.buttonArray.push(ratButton)
 
     let movRadButton = new PButton(panel, 0.20, 0, 0.2, 1, "Moving",
@@ -1018,13 +1024,13 @@ function createBottomPanel() {
 
             showWheelsOverride = true;
             pair.penUp();
-            pair.moving.teeth = Math.round(Math.min(maxWheelSize, Math.max(-0.1/pixRat * dy + yDragVar0, minWheelSize)));
+            pair.moving.teeth = Math.round(Math.min(maxWheelSize, Math.max(-0.1 / pixRat * dy + yDragVar0, minWheelSize)));
             if (pair.moving.teeth == pair.fixed.teeth) {
                 pair.moving.teeth--;
             }
             pair.configRings()
 
-            pair.moving.circ = pair.moving.teeth * pixPertooth;
+            pair.moving.circ = pair.moving.teeth * pixPerTooth;
             pair.moving.rad = pair.moving.circ / PI2
             pair.move(pair.th);
             pair.penDown();
@@ -1044,12 +1050,12 @@ function createBottomPanel() {
         function (dy, yDragVar0) {
             showWheelsOverride = true;
             pair.penUp();
-            pair.fixed.teeth = Math.round(Math.min(maxWheelSize, Math.max(-0.1/pixRat * dy + yDragVar0, minWheelSize)));
+            pair.fixed.teeth = Math.round(Math.min(maxWheelSize, Math.max(-0.1 / pixRat * dy + yDragVar0, minWheelSize)));
             if (pair.fixed.teeth == pair.moving.teeth) {
                 pair.fixed.teeth--;
             }
             pair.configRings()
-            pair.fixed.circ = pair.fixed.teeth * pixPertooth;
+            pair.fixed.circ = pair.fixed.teeth * pixPerTooth;
             pair.fixed.rad = pair.fixed.circ / PI2
             pair.move(pair.th);
             pair.penDown();
@@ -1071,7 +1077,7 @@ function createBottomPanel() {
             pair.move(pair.th);
             pair.penUpCont();
 
-            pair.hue = yDragVar0 - 0.5/pixRat * dy;
+            pair.hue = yDragVar0 - 0.5 / pixRat * dy;
             if (pair.hue > 360) {
                 pair.hue -= 360;
             }
@@ -1103,42 +1109,42 @@ function createBottomPanel() {
     panel.buttonArray.push(hueButton)
 
     let lightnessButton = new PButton(panel, 0.8, 0, 0.2, 1, "Lightness",
-    function (dy, yDragVar0) {
+        function (dy, yDragVar0) {
 
-        pair.move(pair.th);
-        pair.penUpCont();
+            pair.move(pair.th);
+            pair.penUpCont();
 
-        // pair.hue = yDragVar0 - 0.5/pixRat * dy;
-        // if (pair.hue > 360) {
-        //     pair.hue -= 360;
-        // }
-        // if (pair.hue < 0) {
-        //     pair.hue += 360;
-        // }
-        // console.log(dy, yDragVar0, dx, xdragVar0)
-        
-        pair.lightness = Math.max(00, Math.min(100, yDragVar0 + dy * -0.25/pixRat));
+            // pair.hue = yDragVar0 - 0.5/pixRat * dy;
+            // if (pair.hue > 360) {
+            //     pair.hue -= 360;
+            // }
+            // if (pair.hue < 0) {
+            //     pair.hue += 360;
+            // }
+            // console.log(dy, yDragVar0, dx, xdragVar0)
 
-        pair.setColor();
-        pair.fixed.color = pair.color;
-        pair.moving.color = pair.color;
-        document.querySelector(':root').style.setProperty('--fgColor', pair.color)
-        pair.move(pair.th);
-        pair.penDown();
+            pair.lightness = Math.max(00, Math.min(100, yDragVar0 + dy * -0.25 / pixRat));
 
-    }, [], [],
-    function () {
-        return pair.lightness;
-    },
-    function (isDepressed) {
-        showColInfo = isDepressed;
-    }
-)
-lightnessButton.yDrag = true;
-// colButton.xDrag = true;
-lightnessButton.UDarrows = true;
-// colButton.LRarrows = true;
-panel.buttonArray.push(lightnessButton)
+            pair.setColor();
+            pair.fixed.color = pair.color;
+            pair.moving.color = pair.color;
+            document.querySelector(':root').style.setProperty('--fgColor', pair.color)
+            pair.move(pair.th);
+            pair.penDown();
+
+        }, [], [],
+        function () {
+            return pair.lightness;
+        },
+        function (isDepressed) {
+            showColInfo = isDepressed;
+        }
+    )
+    lightnessButton.yDrag = true;
+    // colButton.xDrag = true;
+    lightnessButton.UDarrows = true;
+    // colButton.LRarrows = true;
+    panel.buttonArray.push(lightnessButton)
 
 
 
@@ -1221,12 +1227,12 @@ function anim() {
 }
 function drawArrow(ctx, fromx, fromy, tox, toy, arrowWidth, color) {
     //variables to be used when creating the arrow
-    var headlen = 10*pixRat;
+    var headlen = 10 * pixRat;
     var angle = Math.atan2(toy - fromy, tox - fromx);
 
     // ctx.save();
     ctx.strokeStyle = color;
-    ctx.fillStyle=color;
+    ctx.fillStyle = color;
 
 
     //starting path of the arrow from the start square to the end square
@@ -1259,24 +1265,79 @@ function drawArrow(ctx, fromx, fromy, tox, toy, arrowWidth, color) {
     // ctx.restore();
 }
 
+function setSize() {
+    pixRat = window.devicePixelRatio * 1.0;
+
+    canvas.height = window.innerHeight * pixRat;
+    canvas.width = window.innerWidth * pixRat;
+    canvas.style.width = window.innerWidth + "px";
+    canvas.style.height = window.innerHeight + "px";
+    X = canvas.width;
+    Y = canvas.height;
+
+    scl = 1.0;
+    txtSize = 60 * pixRat;
+    baseLW = 1 * pixRat;
+    pixPerTooth = 9 * pixRat;
+
+    nOscButtons = 9;
+    maxPanelWidth = 60 * pixRat
+    uiBorder = 5 * pixRat;
+
+
+    if (X > maxPanelWidth * nOscButtons & window.innerHeight > 500) {
+        //wide and tall enough
+        pixPerTooth=12*pixRat
+        orient = "wideandtall"
+        console.log('wide and tall enough')
+        uiY = 0.2 * Y;
+        uiX = maxPanelWidth * 9 / 2;
+        uiTopX = (X - 2 * uiX) / 2;
+        uiTopY = Y - uiY;
+        uiBottomX = (X - 2 * uiX) / 2 + uiX;
+        uiBottomY = Y - uiY;
+
+        xOff = X / 2;
+        yOff = Y * 0.4;
+
+    }
+    else if (window.innerHeight < 500 & window.innerWidth > 800) {
+        // wide and short
+        console.log('wide and  short')
+        orient = "wideandshort";
+        uiY = 0.5 * Y;
+        uiX = 0.333 * X;
+        uiTopX = 0;
+        uiTopY = 0;
+        uiBottomX = 0;
+        uiBottomY = Y - uiY;
+
+        xOff = 2 * X / 3;
+        yOff = Y * .5;
+    }
+    else {
+        //tall or squarish
+        console.log('tall or squarish')
+        orient = "tallorsquare"
+        uiY = 0.2 * Y;
+        uiX = X;
+        uiTopX = (X - 1 * uiX) / 2;
+        uiTopY = 0;
+        uiBottomX = (X - 1 * uiX) / 2;
+        uiBottomY = Y - uiY;
+        xOff = X * .5;
+        yOff = Y * .5;
+    }
+
+    topPanel = createTopPanel();
+    sharePanel = createSharePanel();
+    bottomPanel = createBottomPanel();
+    panelArray = [topPanel, bottomPanel, sharePanel];
+}
+
 const canvas = document.getElementById("cw");
 const ctx = canvas.getContext("2d");
 const PI2 = Math.PI * 2;
-
-let pixRat = window.devicePixelRatio * 1.0;
-
-canvas.height = window.innerHeight * pixRat;
-canvas.width = window.innerWidth * pixRat;
-canvas.style.width = window.innerWidth + "px";
-canvas.style.height = window.innerHeight + "px";
-let X = canvas.width;
-let Y = canvas.height;
-
-let scl = 1.0;
-
-const txtSize = 60 * pixRat;
-let baseLW = 1 * pixRat;
-let pixPertooth = 9 * pixRat;
 
 let clickCase = null;
 let mouseDown = false;
@@ -1311,38 +1372,22 @@ var prevDiff = 0;
 var curDiff = 0;
 var dDiff = 0;
 
-// initial screen centre
-let xOff = X / 2;
-let yOff = Y / 2;
-
-// ui size
-let uiY = 0.2 * Y;
-let uiX = X;
-
-if (X > 1.4 * Y) {
-    isLandscape = true
-    uiY = 0.4 * Y;
-    uiX = 0.333 * X;
-    xOff = 2 * X / 3;
-}
-else {
-    isLandscape = false;
-}
-
 ringSizes = [96, 105]//,144,150]
 discSizes = [24, 30, 32, 40, 42, 45, 48, 52, 56, 60, 63, 72, 75, 80, 84]
 
+let pixRat, X, Y, scl, txtSize, baseLW, pixPerTooth, xOff, yOff, uiX, uiY
+
+setSize()
 let fixedDisc = new Disc(ringSizes.random(), ring = 1)
 let movingDisc = new MovingDisc(discSizes.random(), Math.random() / 2 + 0.5, ring = 0);
 let pair = new Pair(fixedDisc, movingDisc)
 
-topPanel = createTopPanel();
-sharePanel = createSharePanel();
-bottomPanel = createBottomPanel();
-panelArray = [topPanel, bottomPanel, sharePanel];
-
 wakeGalleryServer()
 setGallerySubmitHTML();
 addPointerListeners();
+
 anim();
+
+
+
 // pair.drawInfo();
