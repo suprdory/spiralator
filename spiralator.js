@@ -1275,44 +1275,6 @@ function setSize() {
     X = canvas.width;
     Y = canvas.height;
 
-    txtSize = 60 * pixRat;
-    baseLW = 1 * pixRat;
-    pixPertooth = 9 * pixRat;
-
-    // initial screen centre
-    xOff = X / 2;
-    yOff = Y / 2;
-
-    // ui size
-    uiY = 0.2 * Y;
-    uiX = X;
-
-    if (X > 1.4 * Y) {
-        isLandscape = true
-        uiY = 0.4 * Y;
-        uiX = 0.333 * X;
-        xOff = 2 * X / 3;
-    }
-    else {
-        isLandscape = false;
-    }
-
-    topPanel = createTopPanel();
-    sharePanel = createSharePanel();
-    bottomPanel = createBottomPanel();
-    panelArray = [topPanel, bottomPanel, sharePanel];
-}
-
-function setSize() {
-    pixRat = window.devicePixelRatio * 1.0;
-
-    canvas.height = window.innerHeight * pixRat;
-    canvas.width = window.innerWidth * pixRat;
-    canvas.style.width = window.innerWidth + "px";
-    canvas.style.height = window.innerHeight + "px";
-    X = canvas.width;
-    Y = canvas.height;
-
     scl = 1.0;
     txtSize = 60 * pixRat;
     baseLW = 1 * pixRat;
