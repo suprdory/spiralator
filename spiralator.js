@@ -595,6 +595,7 @@ function addPointerListeners() {
         if (!pair.auto) { requestAnimationFrame(anim); }
     }
     );
+
     if (isTouchDevice()) {
         canvas.addEventListener("touchstart", e => {
             e.preventDefault();
@@ -815,7 +816,7 @@ function calcLCM(a, b) { //lowest common multiple
         min++;
     }
 }
-function drawSquareFullImage(n = 1080) {
+function drawSquareFullImage(n = 1920) {
     pair.penUp();
     let baseLWtemp = baseLW;
     baseLW = galleryLW * baseLW;
@@ -845,7 +846,7 @@ function drawSquareFullImage(n = 1080) {
 function shareImage() {
     if (pair.traces.length > 0) {
         sharePanel.wait = true;
-        canvasSq = drawSquareFullImage(1080);
+        canvasSq = drawSquareFullImage(shareRes);
         canvasSq.toBlob(function (blob) {
             const filesArray = [
                 new File(
@@ -870,7 +871,7 @@ function uploadImage(name, comment) {
     if (pair.traces.length > 0) {
         sharePanel.wait = true;
         anim();
-        canvasSq = drawSquareFullImage(gallerySize);
+        canvasSq = drawSquareFullImage(galleryRes);
         canvasSq.toBlob(function (blob) {
             imgFile = new File(
                 [blob],
@@ -1264,6 +1265,43 @@ function drawArrow(ctx, fromx, fromy, tox, toy, arrowWidth, color) {
     ctx.fill();
     // ctx.restore();
 }
+function setSize() {
+    pixRat = window.devicePixelRatio * 1.0;
+
+    canvas.height = window.innerHeight * pixRat;
+    canvas.width = window.innerWidth * pixRat;
+    canvas.style.width = window.innerWidth + "px";
+    canvas.style.height = window.innerHeight + "px";
+    X = canvas.width;
+    Y = canvas.height;
+
+    txtSize = 60 * pixRat;
+    baseLW = 1 * pixRat;
+    pixPertooth = 9 * pixRat;
+
+    // initial screen centre
+    xOff = X / 2;
+    yOff = Y / 2;
+
+    // ui size
+    uiY = 0.2 * Y;
+    uiX = X;
+
+    if (X > 1.4 * Y) {
+        isLandscape = true
+        uiY = 0.4 * Y;
+        uiX = 0.333 * X;
+        xOff = 2 * X / 3;
+    }
+    else {
+        isLandscape = false;
+    }
+
+    topPanel = createTopPanel();
+    sharePanel = createSharePanel();
+    bottomPanel = createBottomPanel();
+    panelArray = [topPanel, bottomPanel, sharePanel];
+}
 
 function setSize() {
     pixRat = window.devicePixelRatio * 1.0;
@@ -1363,7 +1401,8 @@ const minWheelSize = 10;
 const maxDrawRadiusRatio = 2;
 
 const galleryLW = 1;
-const gallerySize = 1080;
+const galleryRes = 1920;
+const shareRes = 1920;
 
 const dth = PI2 / 100;
 
@@ -1377,7 +1416,7 @@ discSizes = [24, 30, 32, 40, 42, 45, 48, 52, 56, 60, 63, 72, 75, 80, 84]
 
 let pixRat, X, Y, scl, txtSize, baseLW, pixPerTooth, xOff, yOff, uiX, uiY
 
-setSize()
+setSize();
 let fixedDisc = new Disc(ringSizes.random(), ring = 1)
 let movingDisc = new MovingDisc(discSizes.random(), Math.random() / 2 + 0.5, ring = 0);
 let pair = new Pair(fixedDisc, movingDisc)
