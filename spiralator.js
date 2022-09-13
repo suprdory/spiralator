@@ -7,9 +7,9 @@ class Disc {
     ) {
         this.x = 0;
         this.y = 0;
-        this.thickness = 3 * pixPertooth;
+        this.thickness = 3 * pixPerTooth;
         this.teeth = teeth;
-        this.circ = teeth * pixPertooth;
+        this.circ = teeth * pixPerTooth;
         this.rad = this.circ / PI2;
         this.color = 'white';
         this.lw = baseLW * 1;
@@ -591,6 +591,12 @@ function isTouchDevice() {
         (navigator.msMaxTouchPoints > 0));
 }
 function addPointerListeners() {
+    window.addEventListener("resize", () => {
+        setSize()
+        if (!pair.auto) { requestAnimationFrame(anim); }
+    }
+    );
+
     if (isTouchDevice()) {
         canvas.addEventListener("touchstart", e => {
             e.preventDefault();
@@ -663,8 +669,8 @@ function pointerWheelHandler(dW, xc, yc) {
     if (!pair.auto) { requestAnimationFrame(anim); }
 }
 function pointerDownHandler(xc, yc, n = 1) {
-    x = xc * pixRat;
-    y = yc * pixRat;
+    let x = xc * pixRat;
+    let y = yc * pixRat;
 
     if (!showgalleryForm) {
         panelArray.forEach(panel => panel.pointerDown(x, y))
@@ -678,13 +684,15 @@ function pointerDownHandler(xc, yc, n = 1) {
         }
         lastTouch = now;
 
-        if (((y > .5 * Y & y < (Y - uiY)) & !isLandscape) ||
-            ((y > .5 * Y & y < Y & x > uiX) & isLandscape)) {
+        if ((y > 0.4 * Y & y < (Y - uiY) & orient == "wideandtall") ||
+            ((y > .5 * Y & y < (Y - uiY)) & orient == "tallorsquare") ||
+            ((y > .5 * Y & y < Y & x > uiX) & orient == "wideandshort")) {
             clickCase = "autoCW";
-        }
 
-        else if (((y < .5 * Y & y > (uiY)) & !isLandscape) ||
-            ((y < .5 * Y & y > 0 & x > uiX) & isLandscape)) {
+        }
+        else if ((y < 0.4 * Y & orient == "wideandtall") ||
+            ((y < .5 * Y & y > (uiY)) & orient == "tallorsquare") ||
+            ((y < .5 * Y & y > 0 & x > uiX) & orient == "wideandshort")) {
             clickCase = "autoCCW";
         }
         else {
@@ -708,8 +716,11 @@ function pointerDownHandler(xc, yc, n = 1) {
     }
 
     else if (
-        !isLandscape & topPanel.active & (y < (Y - uiY) & y > uiY) ||
-        isLandscape & topPanel.active & (x > uiX) ||
+        (topPanel.active & 
+            (orient == "wideandtall" & y < (Y - uiY)) ||
+            (orient == "tallorsquare" & y>uiY & y<(Y-uiY)) ||
+            (orient == "wideandshort" & x>uiX)
+        ) ||
         !topPanel.active
     ) {
         mselect = "pan";
@@ -806,7 +817,7 @@ function calcLCM(a, b) { //lowest common multiple
         min++;
     }
 }
-function drawSquareFullImage(n = 1080) {
+function drawSquareFullImage(n = 1920) {
     pair.penUp();
     let baseLWtemp = baseLW;
     baseLW = galleryLW * baseLW;
@@ -836,7 +847,7 @@ function drawSquareFullImage(n = 1080) {
 function shareImage() {
     if (pair.traces.length > 0) {
         sharePanel.wait = true;
-        canvasSq = drawSquareFullImage(1080);
+        canvasSq = drawSquareFullImage(shareRes);
         canvasSq.toBlob(function (blob) {
             const filesArray = [
                 new File(
@@ -861,7 +872,7 @@ function uploadImage(name, comment) {
     if (pair.traces.length > 0) {
         sharePanel.wait = true;
         anim();
-        canvasSq = drawSquareFullImage(gallerySize);
+        canvasSq = drawSquareFullImage(galleryRes);
         canvasSq.toBlob(function (blob) {
             imgFile = new File(
                 [blob],
@@ -926,8 +937,7 @@ function createSharePanel() {
 }
 function createTopPanel() {
 
-    let uiBorder = X / 100;
-    let panel = new Panel(0 + uiBorder, 0 + uiBorder, uiX - 2 * uiBorder, uiY);
+    let panel = new Panel(uiTopX + uiBorder, uiTopY + uiBorder, uiX - 2 * uiBorder, uiY - 2 * uiBorder);
     panel.anyClickActivates = true;
 
     panel.buttonArray.push(
@@ -951,8 +961,6 @@ function createTopPanel() {
         new PButton(panel, 0.25, .333, 0.25, 0.666, "Clear",
             function () { pair.clear(); })
     );
-
-
 
 
 
@@ -991,8 +999,7 @@ function createTopPanel() {
 }
 function createBottomPanel() {
 
-    let uiBorder = X / 100;
-    let panel = new Panel(0 + uiBorder, Y - uiY - 2 * uiBorder + uiBorder, uiX - 2 * uiBorder, uiY);
+    let panel = new Panel(uiBottomX + uiBorder, uiBottomY + uiBorder, uiX - 2 * uiBorder, uiY - 2 * uiBorder);
     panel.anyClickActivates = true;
 
     let ratButton = new PButton(panel, 0.0, 0, 0.2, 1, "Radius",
@@ -1025,7 +1032,7 @@ function createBottomPanel() {
             }
             pair.configRings()
 
-            pair.moving.circ = pair.moving.teeth * pixPertooth;
+            pair.moving.circ = pair.moving.teeth * pixPerTooth;
             pair.moving.rad = pair.moving.circ / PI2
             pair.move(pair.th);
             pair.penDown();
@@ -1050,7 +1057,7 @@ function createBottomPanel() {
                 pair.fixed.teeth--;
             }
             pair.configRings()
-            pair.fixed.circ = pair.fixed.teeth * pixPertooth;
+            pair.fixed.circ = pair.fixed.teeth * pixPerTooth;
             pair.fixed.rad = pair.fixed.circ / PI2
             pair.move(pair.th);
             pair.penDown();
@@ -1259,25 +1266,79 @@ function drawArrow(ctx, fromx, fromy, tox, toy, arrowWidth, color) {
     ctx.fill();
     // ctx.restore();
 }
+function setSize() {
+    pixRat = window.devicePixelRatio * 1.0;
+
+    canvas.height = window.innerHeight * pixRat;
+    canvas.width = window.innerWidth * pixRat;
+    canvas.style.width = window.innerWidth + "px";
+    canvas.style.height = window.innerHeight + "px";
+    X = canvas.width;
+    Y = canvas.height;
+
+    scl = 1.0;
+    txtSize = 60 * pixRat;
+    baseLW = 1 * pixRat;
+    pixPerTooth = 9 * pixRat;
+
+    nOscButtons = 9;
+    maxPanelWidth = 60 * pixRat
+    uiBorder = 5 * pixRat;
+
+
+    if (X > maxPanelWidth * nOscButtons & window.innerHeight > 500) {
+        //wide and tall enough
+        pixPerTooth=12*pixRat
+        orient = "wideandtall"
+        console.log('wide and tall enough')
+        uiY = 0.2 * Y;
+        uiX = maxPanelWidth * 9 / 2;
+        uiTopX = (X - 2 * uiX) / 2;
+        uiTopY = Y - uiY;
+        uiBottomX = (X - 2 * uiX) / 2 + uiX;
+        uiBottomY = Y - uiY;
+
+        xOff = X / 2;
+        yOff = Y * 0.4;
+
+    }
+    else if (window.innerHeight < 500 & window.innerWidth > 800) {
+        // wide and short
+        console.log('wide and  short')
+        orient = "wideandshort";
+        uiY = 0.5 * Y;
+        uiX = 0.333 * X;
+        uiTopX = 0;
+        uiTopY = 0;
+        uiBottomX = 0;
+        uiBottomY = Y - uiY;
+
+        xOff = 2 * X / 3;
+        yOff = Y * .5;
+    }
+    else {
+        //tall or squarish
+        console.log('tall or squarish')
+        orient = "tallorsquare"
+        uiY = 0.2 * Y;
+        uiX = X;
+        uiTopX = (X - 1 * uiX) / 2;
+        uiTopY = 0;
+        uiBottomX = (X - 1 * uiX) / 2;
+        uiBottomY = Y - uiY;
+        xOff = X * .5;
+        yOff = Y * .5;
+    }
+
+    topPanel = createTopPanel();
+    sharePanel = createSharePanel();
+    bottomPanel = createBottomPanel();
+    panelArray = [topPanel, bottomPanel, sharePanel];
+}
 
 const canvas = document.getElementById("cw");
 const ctx = canvas.getContext("2d");
 const PI2 = Math.PI * 2;
-
-let pixRat = window.devicePixelRatio * 1.0;
-
-canvas.height = window.innerHeight * pixRat;
-canvas.width = window.innerWidth * pixRat;
-canvas.style.width = window.innerWidth + "px";
-canvas.style.height = window.innerHeight + "px";
-let X = canvas.width;
-let Y = canvas.height;
-
-let scl = 1.0;
-
-const txtSize = 60 * pixRat;
-let baseLW = 1 * pixRat;
-let pixPertooth = 9 * pixRat;
 
 let clickCase = null;
 let mouseDown = false;
@@ -1303,7 +1364,8 @@ const minWheelSize = 10;
 const maxDrawRadiusRatio = 2;
 
 const galleryLW = 1;
-const gallerySize = 1080;
+const galleryRes = 1920;
+const shareRes = 1920;
 
 const dth = PI2 / 100;
 
@@ -1311,24 +1373,6 @@ const dth = PI2 / 100;
 var prevDiff = 0;
 var curDiff = 0;
 var dDiff = 0;
-
-// initial screen centre
-let xOff = X / 2;
-let yOff = Y / 2;
-
-// ui size
-let uiY = 0.2 * Y;
-let uiX = X;
-
-if (X > 1.4 * Y) {
-    isLandscape = true
-    uiY = 0.4 * Y;
-    uiX = 0.333 * X;
-    xOff = 2 * X / 3;
-}
-else {
-    isLandscape = false;
-}
 
 ringSizes = [96, 105]//,144,150]
 discSizes = [24, 30, 32, 40, 42, 45, 48, 52, 56, 60, 63, 72, 75, 80, 84]
@@ -1339,9 +1383,9 @@ class ArcSidedDisc extends MovingDisc {
     ) {
         super(teeth, rat);
 
-        this.thickness = 3 * pixPertooth;
+        this.thickness = 3 * pixPerTooth;
         this.teeth = teeth;
-        this.circ = teeth * pixPertooth;
+        this.circ = teeth * pixPerTooth;
         this.arcRat = arcRat;
         this.rad = this.circ / PI2; //radius of arcs
         this.radCont = this.rad / this.arcRat;//radius of containing circle
@@ -1533,23 +1577,22 @@ class ArcSidedDisc extends MovingDisc {
 }
 
 
-// let fixedDisc = new Disc(ringSizes.random(), ring = 1)
-// let movingDisc = new ArcSidedDisc(discSizes.random(), Math.random() / 2 + 0.5, nArc = 3, arcRat = 2, ring = 0);
-
+let pixRat, X, Y, scl, txtSize, baseLW, pixPerTooth, xOff, yOff, uiX, uiY
+setSize();
 let fixedDisc = new Disc(105, ring = 1)
-let movingDisc = new ArcSidedDisc(60, 0.5,
-    nArc = 3, arcRat = 1.75, ring = 0);
+let movingDisc = new ArcSidedDisc(60, 0.5, nArc = 3, arcRat = 1.75, ring = 0);
 
+// let fixedDisc = new Disc(ringSizes.random(), ring = 1)
+// let movingDisc = new MovingDisc(discSizes.random(), Math.random() / 2 + 0.5, ring = 0);
 
 let pair = new Pair(fixedDisc, movingDisc)
-
-topPanel = createTopPanel();
-sharePanel = createSharePanel();
-bottomPanel = createBottomPanel();
-panelArray = [topPanel, bottomPanel, sharePanel];
 
 wakeGalleryServer()
 setGallerySubmitHTML();
 addPointerListeners();
+
 anim();
+
+
+
 // pair.drawInfo();
