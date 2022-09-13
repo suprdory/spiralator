@@ -206,6 +206,25 @@ class Pair {
         ctx.fillText('Draw Radius', X / 2, Y / 2 - txtSize);
 
     }
+    drawArcInfo() {
+        ctx.strokeStyle = this.fixed.color;
+        ctx.fillStyle = this.fixed.color;
+        ctx.textAlign = "center";
+        ctx.font = txtSize + 'px sans-serif';
+        ctx.textBaseline = "middle";
+        ctx.fillText(this.moving.nArc, X / 2, Y / 2);
+        ctx.font = txtSize / 2 + 'px sans-serif';
+        ctx.fillText('N Sides', X / 2, Y / 2 - txtSize);
+
+        ctx.font = txtSize + 'px sans-serif';
+        ctx.textBaseline = "middle";
+        ctx.fillText(Math.round(100 * this.moving.arcRat) / 100, X / 2, Y / 2 - txtSize * 1.8);
+        ctx.font = txtSize / 2 + 'px sans-serif';
+        ctx.fillText('Arc Ratio', X / 2, Y / 2 - txtSize - txtSize * 1.8);
+
+    }
+
+
     drawColInfo() {
         ctx.strokeStyle = this.color;
         ctx.fillStyle = this.color;
@@ -684,15 +703,15 @@ function pointerDownHandler(xc, yc, n = 1) {
         }
         lastTouch = now;
 
-        if ((y > 0.4 * Y & y < (Y - uiY) & orient == "wideandtall") ||
-            ((y > .5 * Y & y < (Y - uiY)) & orient == "tallorsquare") ||
-            ((y > .5 * Y & y < Y & x > uiX) & orient == "wideandshort")) {
+        if ((y > 0.4 * Y & y < (Y - uiHeight) & orient == "wideandtall") ||
+            ((y > .5 * Y & y < (Y - uiHeight)) & orient == "tallorsquare") ||
+            ((y > .5 * Y & y < Y & x > uiButtonsWidth) & orient == "wideandshort")) {
             clickCase = "autoCW";
 
         }
         else if ((y < 0.4 * Y & orient == "wideandtall") ||
-            ((y < .5 * Y & y > (uiY)) & orient == "tallorsquare") ||
-            ((y < .5 * Y & y > 0 & x > uiX) & orient == "wideandshort")) {
+            ((y < .5 * Y & y > (uiHeight)) & orient == "tallorsquare") ||
+            ((y < .5 * Y & y > 0 & x > uiButtonsWidth) & orient == "wideandshort")) {
             clickCase = "autoCCW";
         }
         else {
@@ -716,10 +735,10 @@ function pointerDownHandler(xc, yc, n = 1) {
     }
 
     else if (
-        (topPanel.active & 
-            (orient == "wideandtall" & y < (Y - uiY)) ||
-            (orient == "tallorsquare" & y>uiY & y<(Y-uiY)) ||
-            (orient == "wideandshort" & x>uiX)
+        (topPanel.active &
+            (orient == "wideandtall" & y < (Y - uiHeight)) ||
+            (orient == "tallorsquare" & y > uiHeight & y < (Y - uiHeight)) ||
+            (orient == "wideandshort" & x > uiButtonsWidth)
         ) ||
         !topPanel.active
     ) {
@@ -792,6 +811,7 @@ function doubleClickHandler(clickCase) {
     }
     topPanel.active = true;
     bottomPanel.active = true;
+    shapePanel.active = true;
     showWheels = true;
 
 }
@@ -937,7 +957,7 @@ function createSharePanel() {
 }
 function createTopPanel() {
 
-    let panel = new Panel(uiTopX + uiBorder, uiTopY + uiBorder, uiX - 2 * uiBorder, uiY - 2 * uiBorder);
+    let panel = new Panel(uiButtonsX + uiBorder, uiButtonsY + uiBorder, uiButtonsWidth - 2 * uiBorder, uiHeight - 2 * uiBorder);
     panel.anyClickActivates = true;
 
     panel.buttonArray.push(
@@ -999,7 +1019,7 @@ function createTopPanel() {
 }
 function createBottomPanel() {
 
-    let panel = new Panel(uiBottomX + uiBorder, uiBottomY + uiBorder, uiX - 2 * uiBorder, uiY - 2 * uiBorder);
+    let panel = new Panel(uiSlidersX + uiBorder, uiSlidersY + uiBorder, uiSlidersWidth - 2 * uiBorder, uiHeight - 2 * uiBorder);
     panel.anyClickActivates = true;
 
     let ratButton = new PButton(panel, 0.0, 0, 0.2, 1, "Radius",
@@ -1152,6 +1172,59 @@ function createBottomPanel() {
 
     return panel;
 }
+function createShapePanel() {
+
+    let panel = new Panel(uiShapeX + uiBorder, uiShapeY + uiBorder, uiShapeWidth - 2 * uiBorder, uiHeight - 2 * uiBorder);
+    panel.anyClickActivates = true;
+
+    let arcRatButton = new PButton(panel, 0.0, 0, 0.5, 1, "arcRat",
+        function (dy, yDragVar0) {
+            showWheelsOverride = true;
+            pair.penUp();
+            pair.moving.arcRat = Math.min(5, Math.max(-0.005 / pixRat * dy + yDragVar0, 1))
+            pair.moving.updateShape();
+            pair.penDown();
+
+        }, [], [],
+        function () {
+            return pair.moving.arcRat;
+        },
+        function (isDepressed) {
+            showArcInfo = isDepressed;
+        },
+    )
+    arcRatButton.yDrag = true;
+    arcRatButton.UDarrows = true;
+    panel.buttonArray.push(arcRatButton)
+
+    let nArcsButton = new PButton(panel, 0.50, 0, 0.5, 1, "nArcs",
+        function (dy, yDragVar0) {
+
+            showWheelsOverride = true;
+            pair.penUp();
+            pair.moving.nArc = Math.round(Math.min(7, Math.max(-0.05 / pixRat * dy + yDragVar0, 1)));
+            // if (pair.moving.teeth == pair.fixed.teeth) {
+            //     pair.moving.teeth--;
+            // }
+            pair.moving.updateShape();
+            pair.configRings()
+
+            pair.move(pair.th);
+            pair.penDown();
+        }, [], [],
+        function () {
+            return pair.moving.nArc;
+        },
+        function (isDepressed) {
+            showArcInfo = isDepressed;
+        }
+    )
+    nArcsButton.yDrag = true;
+    nArcsButton.UDarrows = true;
+    panel.buttonArray.push(nArcsButton)
+
+    return panel;
+}
 function submitToGallery() {
     let name = document.getElementById('name').value;
     localStorage.setItem('name', name);
@@ -1212,6 +1285,9 @@ function anim() {
 
     if (showInfo) {
         pair.drawInfo();
+    }
+    if (showArcInfo) {
+        pair.drawArcInfo();
     }
     if (showRadInfo) {
         pair.drawRadInfo();
@@ -1281,22 +1357,29 @@ function setSize() {
     baseLW = 1 * pixRat;
     pixPerTooth = 9 * pixRat;
 
-    nOscButtons = 9;
-    maxPanelWidth = 60 * pixRat
+    nOscButtons = 11;
+    minPanelWidth = 60 * pixRat
     uiBorder = 5 * pixRat;
 
 
-    if (X > maxPanelWidth * nOscButtons & window.innerHeight > 500) {
+    if (X > minPanelWidth * nOscButtons & window.innerHeight > 500) {
         //wide and tall enough
-        pixPerTooth=12*pixRat
+        pixPerTooth = 12 * pixRat
         orient = "wideandtall"
         console.log('wide and tall enough')
-        uiY = 0.2 * Y;
-        uiX = maxPanelWidth * 9 / 2;
-        uiTopX = (X - 2 * uiX) / 2;
-        uiTopY = Y - uiY;
-        uiBottomX = (X - 2 * uiX) / 2 + uiX;
-        uiBottomY = Y - uiY;
+        uiHeight = 0.2 * Y;
+
+        uiButtonsWidth = minPanelWidth * 4;
+        uiSlidersWidth = minPanelWidth * 5;
+        uiShapeWidth = minPanelWidth * 2;
+
+        uiButtonsX = (X - nOscButtons * minPanelWidth) / 2;
+        uiSlidersX = uiButtonsX + uiButtonsWidth;
+        uiShapeX = uiSlidersX + uiSlidersWidth;
+
+        uiButtonsY = Y - uiHeight;
+        uiSlidersY = Y - uiHeight;
+        uiShapeY = uiSlidersY;
 
         xOff = X / 2;
         yOff = Y * 0.4;
@@ -1306,12 +1389,16 @@ function setSize() {
         // wide and short
         console.log('wide and  short')
         orient = "wideandshort";
-        uiY = 0.5 * Y;
-        uiX = 0.333 * X;
-        uiTopX = 0;
-        uiTopY = 0;
-        uiBottomX = 0;
-        uiBottomY = Y - uiY;
+        uiHeight = 0.5 * Y;
+        uiButtonsWidth = 0.333 * X;
+        uiSlidersWidth=uiButtonsWidth*5/7;
+        uiShapeWidth=uiButtonsWidth*2/7;
+        uiButtonsX = 0;
+        uiButtonsY = 0;
+        uiSlidersX = 0;
+        uiSlidersY = Y - uiHeight;
+        uiShapeX = uiSlidersWidth;
+        uiShapeY = Y - uiHeight;
 
         xOff = 2 * X / 3;
         yOff = Y * .5;
@@ -1320,12 +1407,19 @@ function setSize() {
         //tall or squarish
         console.log('tall or squarish')
         orient = "tallorsquare"
-        uiY = 0.2 * Y;
-        uiX = X;
-        uiTopX = (X - 1 * uiX) / 2;
-        uiTopY = 0;
-        uiBottomX = (X - 1 * uiX) / 2;
-        uiBottomY = Y - uiY;
+        uiHeight = 0.2 * Y;
+        
+        uiButtonsWidth = X;
+        uiSlidersWidth= X*(5/7);
+        uiShapeWidth = X*(2/7);
+
+        uiButtonsX = (X - 1 * uiButtonsWidth) / 2;
+        uiButtonsY = 0;
+        uiSlidersX = (X - 1 * uiButtonsWidth) / 2;
+        uiSlidersY = Y - uiHeight;
+        uiShapeX = (X - 1 * uiButtonsWidth) / 2+(5/7)*uiButtonsWidth;
+        uiShapeY = Y - uiHeight;
+
         xOff = X * .5;
         yOff = Y * .5;
     }
@@ -1333,7 +1427,8 @@ function setSize() {
     topPanel = createTopPanel();
     sharePanel = createSharePanel();
     bottomPanel = createBottomPanel();
-    panelArray = [topPanel, bottomPanel, sharePanel];
+    shapePanel = createShapePanel();
+    panelArray = [topPanel, bottomPanel, sharePanel, shapePanel];
 }
 
 const canvas = document.getElementById("cw");
@@ -1349,6 +1444,7 @@ let showInfo = false;
 let showRadInfo = false;
 let showColInfo = false;
 let showgalleryForm = false;
+let showArcInfo = false;
 
 const shareBorderfrac = 0.15;
 const hueInit = Math.random() * 360
@@ -1388,7 +1484,7 @@ class ArcSidedDisc extends MovingDisc {
         this.circ = teeth * pixPerTooth;
         this.arcRat = arcRat;
         this.rad = this.circ / PI2; //radius of arcs
-        this.radCont = this.rad / this.arcRat;//radius of containing circle
+
 
         this.color = 'white';
         this.lw = baseLW * 2;
@@ -1400,6 +1496,19 @@ class ArcSidedDisc extends MovingDisc {
         this.th = 0; //current rotation angle
         this.nArc = nArc; //number of arcs
         this.n = 0; //current centre arc
+        this.updateShape();
+
+        // console.log(this.dxArc)
+        this.x = this.dxArc[this.n]; //current centre of rotation coords, pair object interacts with this.
+        this.y = this.dyArc[this.n];
+        this.x0 = 0; //current geo centre, need to update for drawing
+        this.y0 = 0;
+        this.updateGeoCentre();
+
+    }
+    updateShape() {
+        //call after changing nArcs or arc rad
+        this.radCont = this.rad / this.arcRat;//radius of containing circle
         this.theta = PI2 / 2 / this.nArc; // half angle from geo centre to arc intersect points
         this.phi = Math.asin(Math.sin(this.theta) / this.arcRat);// half angle from arc centre to arc intersect points
         this.drArc = this.rad * (Math.cos(this.phi) - Math.cos(this.theta) / this.arcRat); //dist from geo centre to arc centre
@@ -1412,18 +1521,10 @@ class ArcSidedDisc extends MovingDisc {
         for (let i = 0; i < this.nArc; i++) {
             this.dxArc.push(this.drArc * (Math.cos(theta0 + PI2 / 2)));
             this.dyArc.push(this.drArc * (Math.sin(theta0 + PI2 / 2)));
-            this.dxInt.push(this.rad * (Math.cos(theta0 + this.theta/2)));
-            this.dyInt.push(this.rad * (Math.sin(theta0 + this.theta/2)));
+            this.dxInt.push(this.rad * (Math.cos(theta0 + this.theta / 2)));
+            this.dyInt.push(this.rad * (Math.sin(theta0 + this.theta / 2)));
             theta0 += this.theta * 2;
         }
-
-        console.log(this.dxArc)
-        this.x = this.dxArc[0]; //current centre of rotation coords, pair object interacts with this.
-        this.y = this.dyArc[0];;
-        this.x0 = 0; //current geo centre, need to update for drawing
-        this.y0 = 0;
-        this.updateGeoCentre();
-
     }
     updateGeoCentre() {
         this.x0 = this.x + this.drArc * Math.cos(this.th);
@@ -1577,10 +1678,10 @@ class ArcSidedDisc extends MovingDisc {
 }
 
 
-let pixRat, X, Y, scl, txtSize, baseLW, pixPerTooth, xOff, yOff, uiX, uiY
+let uiSlidersX, uiSlidersY, uiSlidersWidth,pixRat, X, Y, scl, txtSize, baseLW, pixPerTooth, xOff, yOff, uiButtonsX, uiButtonsY, uiButtonsWidth, uiShapeX, uiShapeY, uiShapeWidth;
 setSize();
 let fixedDisc = new Disc(105, ring = 1)
-let movingDisc = new ArcSidedDisc(60, 0.5, nArc = 3, arcRat = 1.75, ring = 0);
+let movingDisc = new ArcSidedDisc(60, 0.5, nArc = 3, arcRat = 1.30, ring = 0);
 
 // let fixedDisc = new Disc(ringSizes.random(), ring = 1)
 // let movingDisc = new MovingDisc(discSizes.random(), Math.random() / 2 + 0.5, ring = 0);
