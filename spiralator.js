@@ -157,6 +157,205 @@ class Trace {
         })
     }
 }
+class ArcSidedDisc extends MovingDisc {
+    constructor(
+        teeth = 84, rat = 0.7, nArc = 3, arcRat = 4 / 3, ring = false
+    ) {
+        super(teeth, rat);
+
+        this.thickness = 3 * pixPerTooth;
+        this.teeth = teeth;
+        this.circ = teeth * pixPerTooth;
+        this.arcRat = arcRat;
+        this.rad = this.circ / PI2; //radius of arcs
+
+
+        this.color = 'white';
+        this.lw = baseLW * 2;
+        this.out = 1;
+        this.ring = ring;
+        this.rat = rat / this.arcRat;
+
+        this.th0 = 0; //rotation angle at pair.th=0
+        this.th = 0; //current rotation angle
+        this.nArc = nArc; //number of arcs
+        this.n = 0; //current centre arc
+        this.updateShape();
+
+        // console.log(this.dxArc)
+        this.x = this.dxArc[this.n]; //current centre of rotation coords, pair object interacts with this.
+        this.y = this.dyArc[this.n];
+        this.x0 = 0; //current geo centre, need to update for drawing
+        this.y0 = 0;
+        this.updateGeoCentre();
+
+    }
+    updateShape() {
+        //call after changing nArcs or arc rad
+        this.radCont = this.rad / this.arcRat;//radius of containing circle
+        this.theta = PI2 / 2 / this.nArc; // half angle from geo centre to arc intersect points
+        this.phi = Math.asin(Math.sin(this.theta) / this.arcRat);// half angle from arc centre to arc intersect points
+        this.drArc = this.rad * (Math.cos(this.phi) - Math.cos(this.theta) / this.arcRat); //dist from geo centre to arc centre
+        this.dxArc = []; //offsets from geo centre to arc (rotation) centres
+        this.dyArc = [];
+        this.dxInt = []; // offsets from geocentre to arc intersection points
+        this.dyInt = [];
+        let theta0 = this.th;
+        for (let i = 0; i < this.nArc; i++) {
+            this.dxArc.push(this.drArc * (Math.cos(theta0 + PI2 / 2)));
+            this.dyArc.push(this.drArc * (Math.sin(theta0 + PI2 / 2)));
+            this.dxInt.push(this.rad * (Math.cos(theta0 + this.theta / 2)));
+            this.dyInt.push(this.rad * (Math.sin(theta0 + this.theta / 2)));
+            theta0 += this.theta * 2;
+        }
+    }
+    updateGeoCentre() {
+        this.x0 = this.x + this.drArc * Math.cos(this.th);
+        this.y0 = this.y + this.drArc * Math.sin(this.th);
+    }
+
+    draw() {
+        //set geo (drawing) centre from rotation centre
+        this.updateGeoCentre()
+
+        // // console.log(this.arcRat, this.nArc)
+        let theta0 = this.th;
+        let phi = this.phi
+        let drArc = this.drArc;
+
+        //stroke and fill disk
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = this.lw;
+        ctx.fillStyle = transCol;
+        ctx.beginPath();
+        for (let i = 0; i < this.nArc; i++) {
+            ctx.arc(
+                this.x0 + drArc * (Math.cos(theta0 + PI2 / 2)),
+                this.y0 + drArc * (Math.sin(theta0 + PI2 / 2)),
+                this.rad,
+                theta0 - phi,
+                theta0 + phi,
+            );
+            theta0 += (PI2 / this.nArc);
+        }
+        ctx.stroke();
+        ctx.fill();
+
+        //draw construction circs
+        ctx.lineWidth = this.lw / 2;
+        for (let i = 0; i < this.nArc; i++) {
+            ctx.beginPath();
+            ctx.arc(
+                this.x0 + drArc * (Math.cos(theta0 + PI2 / 2)),
+                this.y0 + drArc * (Math.sin(theta0 + PI2 / 2)),
+                this.rad,
+                0,
+                PI2,
+            );
+            ctx.stroke();
+            theta0 += (PI2 / this.nArc);
+        }
+
+        //containing circle
+        ctx.beginPath();
+        ctx.arc(
+            this.x0,
+            this.y0,
+            this.radCont,
+            0,
+            PI2,
+        );
+        ctx.stroke();
+
+
+        // // centre to edge
+        // ctx.strokeStyle = "rgb(200,0,0)"
+        // for (let thrad = 0; thrad < PI2; thrad += PI2 / 100) {
+        //     let r2a = this.rArc(thrad - this.th);
+        //     ctx.beginPath();
+        //     ctx.moveTo(this.x0, this.y0);
+        //     ctx.lineTo(
+        //         this.x0 + r2a * Math.cos(thrad),
+        //         this.y0 + r2a * Math.sin(thrad)
+        //     )
+        //     ctx.stroke();
+        // }
+
+
+        // geocentral point
+        ctx.beginPath();
+        ctx.fillStyle = this.color;
+        ctx.arc(
+            this.x0, this.y0,
+            3 * baseLW, 0, PI2);
+        ctx.fill();
+
+        // rotocentral point
+        ctx.beginPath();
+        ctx.fillStyle = "blue";
+        ctx.arc(
+            this.x, this.y,
+            3 * baseLW, 0, PI2);
+        ctx.fill();
+
+
+        // centre to pen
+        ctx.beginPath();
+        ctx.strokeStyle = transCol
+        ctx.moveTo(this.x0, this.y0);
+        ctx.lineTo(
+            this.x0 + this.rad * Math.cos(this.th) * this.rat,
+            this.y0 + this.rad * Math.sin(this.th) * this.rat
+        )
+        ctx.stroke();
+
+        // pen point
+        ctx.beginPath();
+        ctx.fillStyle = pair.color;
+        ctx.arc(
+            this.x0 + this.rad * Math.cos(this.th) * this.rat,
+            this.y0 + this.rad * Math.sin(this.th) * this.rat,
+            3 * baseLW, 0, PI2
+        )
+        ctx.fill();
+
+
+        // ctx.beginPath();
+
+        // ctx.arc(
+        //     this.x0 + this.rat * this.radCont * Math.cos(this.th),
+        //     this.y0 + this.rat * this.radCont * Math.sin(this.th),
+        //     3 * baseLW, 0, PI2);
+        // ctx.fill();
+    }
+    setRat(r) {
+        this.rat = r;
+    }
+    getRat() {
+        return (this.rat);
+    }
+    rArc(tha) {
+        let theta = this.theta;
+        // tha = ((tha+theta) % (theta*2))-theta;
+        tha = ((((tha + theta) % (theta * 2)) + (theta * 2)) % (theta * 2)) - theta
+        let phi = this.phi;
+        let A = this.drArc;
+        // let cosalphr = Math.cos((PI2 / 2) - tha);
+        // let rArc = A * cosalphr + Math.sqrt(0.5 * A * cosalphr ** 2 - (A ** 2 - this.arcRat ** 2 * this.rad ** 2));
+        let rArc = A * Math.cos(PI2 / 2 - tha) + Math.sqrt((this.rad) ** 2 - A ** 2 * Math.sin(PI2 / 2 - tha) ** 2)
+        return rArc;
+    }
+    contains(x, y) {
+        if (this.ring == 0) {
+            return (x - this.x0) ** 2 + (y - (this.y0)) ** 2 < (this.radCont) ** 2
+        }
+        else {
+            let d2CentreSq = (x - this.x0) ** 2 + (y - this.y0) ** 2
+            return (d2CentreSq - this.radCont ** 2) *
+                (d2CentreSq - (this.rad + this.thickness * this.ring) ** 2) < 0
+        }
+    }
+}
 class Pair {
     constructor(fixed, moving) {
         this.fixed = fixed;
@@ -168,13 +367,19 @@ class Pair {
         this.saturation = 100;
         this.lightness = 65;
         this.locked = true;
-
+        //conversion factor from angle to geo centre to angle to arc centre. based on linear extrapolation using analytic da/dg eval at 0.
+        this.g2a = 1 / (1 - this.moving.drArc * (this.fixed.rad / this.moving.rad) / (this.moving.drArc + this.fixed.rad - this.moving.rad)); 
+        console.log("g2a:", this.g2a,"a:",this.moving.drArc,"R:",this.fixed.rad,"r:",this.moving.rad)
         this.setColor();
         this.trace = new Trace(this);
         this.traces = [];
         this.tracing = true;
         this.move(this.th);
     }
+    updateg2a(){
+        this.g2a = 1 / (1 - this.moving.drArc * (this.fixed.rad / this.moving.rad) / (this.moving.drArc + this.fixed.rad - this.moving.rad)); 
+    }
+
     toggleLock() {
         this.locked = !this.locked
     }
@@ -303,15 +508,17 @@ class Pair {
     move(th) {
         let f = this.fixed;
         let m = this.moving;
+        let tha=th*this.g2a;
+        
         if (this.out) {
-            m.x = f.x + (f.rad + m.rad) * Math.cos(th);
-            m.y = f.y + (f.rad + m.rad) * Math.sin(th);
-            m.th = m.th0 + th * (f.rad / m.rad + 1)
+            m.x = f.x + (f.rad + m.rad) * Math.cos(tha);
+            m.y = f.y + (f.rad + m.rad) * Math.sin(tha);
+            m.th = m.th0 + tha * (f.rad / m.rad + 1)
         }
         if (!this.out) {
-            m.x = f.x + (f.rad - m.rad) * Math.cos(th);
-            m.y = f.y + (f.rad - m.rad) * Math.sin(th);
-            m.th = m.th0 - th * (f.rad / m.rad - 1)
+            m.x = f.x + (f.rad - m.rad) * Math.cos(tha);
+            m.y = f.y + (f.rad - m.rad) * Math.sin(tha);
+            m.th = m.th0 - tha * (f.rad / m.rad - 1)
         }
 
         this.th = th;
@@ -1183,6 +1390,7 @@ function createShapePanel() {
             pair.penUp();
             pair.moving.arcRat = Math.min(5, Math.max(-0.005 / pixRat * dy + yDragVar0, 1))
             pair.moving.updateShape();
+            pair.updateg2a();
             pair.penDown();
 
         }, [], [],
@@ -1207,6 +1415,7 @@ function createShapePanel() {
             //     pair.moving.teeth--;
             // }
             pair.moving.updateShape();
+            pair.updateg2a();
             pair.configRings()
 
             pair.move(pair.th);
@@ -1473,209 +1682,7 @@ var dDiff = 0;
 ringSizes = [96, 105]//,144,150]
 discSizes = [24, 30, 32, 40, 42, 45, 48, 52, 56, 60, 63, 72, 75, 80, 84]
 
-class ArcSidedDisc extends MovingDisc {
-    constructor(
-        teeth = 84, rat = 0.7, nArc = 3, arcRat = 4 / 3, ring = false
-    ) {
-        super(teeth, rat);
 
-        this.thickness = 3 * pixPerTooth;
-        this.teeth = teeth;
-        this.circ = teeth * pixPerTooth;
-        this.arcRat = arcRat;
-        this.rad = this.circ / PI2; //radius of arcs
-
-
-        this.color = 'white';
-        this.lw = baseLW * 2;
-        this.out = 1;
-        this.ring = ring;
-        this.rat = rat / this.arcRat;
-
-        this.th0 = 0; //rotation angle at pair.th=0
-        this.th = 0; //current rotation angle
-        this.nArc = nArc; //number of arcs
-        this.n = 0; //current centre arc
-        this.updateShape();
-
-        // console.log(this.dxArc)
-        this.x = this.dxArc[this.n]; //current centre of rotation coords, pair object interacts with this.
-        this.y = this.dyArc[this.n];
-        this.x0 = 0; //current geo centre, need to update for drawing
-        this.y0 = 0;
-        this.updateGeoCentre();
-
-    }
-    updateShape() {
-        //call after changing nArcs or arc rad
-        this.radCont = this.rad / this.arcRat;//radius of containing circle
-        this.theta = PI2 / 2 / this.nArc; // half angle from geo centre to arc intersect points
-        this.phi = Math.asin(Math.sin(this.theta) / this.arcRat);// half angle from arc centre to arc intersect points
-        this.drArc = this.rad * (Math.cos(this.phi) - Math.cos(this.theta) / this.arcRat); //dist from geo centre to arc centre
-
-        this.dxArc = []; //offsets from geo centre to arc (rotation) centres
-        this.dyArc = [];
-        this.dxInt = []; // offsets from geocentre to arc intersection points
-        this.dyInt = [];
-        let theta0 = this.th;
-        for (let i = 0; i < this.nArc; i++) {
-            this.dxArc.push(this.drArc * (Math.cos(theta0 + PI2 / 2)));
-            this.dyArc.push(this.drArc * (Math.sin(theta0 + PI2 / 2)));
-            this.dxInt.push(this.rad * (Math.cos(theta0 + this.theta / 2)));
-            this.dyInt.push(this.rad * (Math.sin(theta0 + this.theta / 2)));
-            theta0 += this.theta * 2;
-        }
-    }
-    updateGeoCentre() {
-        this.x0 = this.x + this.drArc * Math.cos(this.th);
-        this.y0 = this.y + this.drArc * Math.sin(this.th);
-    }
-
-    draw() {
-        //set geo (drawing) centre from rotation centre
-        this.updateGeoCentre()
-
-
-
-
-        // // console.log(this.arcRat, this.nArc)
-        let theta0 = this.th;
-        let phi = this.phi
-        let drArc = this.drArc;
-
-        //stroke and fill disk
-        ctx.strokeStyle = this.color;
-        ctx.lineWidth = this.lw;
-        ctx.fillStyle = transCol;
-        ctx.beginPath();
-        for (let i = 0; i < this.nArc; i++) {
-            ctx.arc(
-                this.x0 + drArc * (Math.cos(theta0 + PI2 / 2)),
-                this.y0 + drArc * (Math.sin(theta0 + PI2 / 2)),
-                this.rad,
-                theta0 - phi,
-                theta0 + phi,
-            );
-            theta0 += (PI2 / this.nArc);
-        }
-        ctx.stroke();
-        ctx.fill();
-
-        //draw construction circs
-        ctx.lineWidth = this.lw / 2;
-        for (let i = 0; i < this.nArc; i++) {
-            ctx.beginPath();
-            ctx.arc(
-                this.x0 + drArc * (Math.cos(theta0 + PI2 / 2)),
-                this.y0 + drArc * (Math.sin(theta0 + PI2 / 2)),
-                this.rad,
-                0,
-                PI2,
-            );
-            ctx.stroke();
-            theta0 += (PI2 / this.nArc);
-        }
-
-        //containing circle
-        ctx.beginPath();
-        ctx.arc(
-            this.x0,
-            this.y0,
-            this.radCont,
-            0,
-            PI2,
-        );
-        ctx.stroke();
-
-
-        // // centre to edge
-        // ctx.strokeStyle = "rgb(200,0,0)"
-        // for (let thrad = 0; thrad < PI2; thrad += PI2 / 100) {
-        //     let r2a = this.rArc(thrad - this.th);
-        //     ctx.beginPath();
-        //     ctx.moveTo(this.x0, this.y0);
-        //     ctx.lineTo(
-        //         this.x0 + r2a * Math.cos(thrad),
-        //         this.y0 + r2a * Math.sin(thrad)
-        //     )
-        //     ctx.stroke();
-        // }
-
-
-        // geocentral point
-        ctx.beginPath();
-        ctx.fillStyle = this.color;
-        ctx.arc(
-            this.x0, this.y0,
-            3 * baseLW, 0, PI2);
-        ctx.fill();
-
-        // rotocentral point
-        ctx.beginPath();
-        ctx.fillStyle = "blue";
-        ctx.arc(
-            this.x, this.y,
-            3 * baseLW, 0, PI2);
-        ctx.fill();
-
-
-        // centre to pen
-        ctx.beginPath();
-        ctx.strokeStyle = transCol
-        ctx.moveTo(this.x0, this.y0);
-        ctx.lineTo(
-            this.x0 + this.rad * Math.cos(this.th) * this.rat,
-            this.y0 + this.rad * Math.sin(this.th) * this.rat
-        )
-        ctx.stroke();
-
-        // pen point
-        ctx.beginPath();
-        ctx.fillStyle = pair.color;
-        ctx.arc(
-            this.x0 + this.rad * Math.cos(this.th) * this.rat,
-            this.y0 + this.rad * Math.sin(this.th) * this.rat,
-            3 * baseLW, 0, PI2
-        )
-        ctx.fill();
-
-
-        // ctx.beginPath();
-
-        // ctx.arc(
-        //     this.x0 + this.rat * this.radCont * Math.cos(this.th),
-        //     this.y0 + this.rat * this.radCont * Math.sin(this.th),
-        //     3 * baseLW, 0, PI2);
-        // ctx.fill();
-    }
-    setRat(r) {
-        this.rat = r;
-    }
-    getRat() {
-        return (this.rat);
-    }
-    rArc(tha) {
-        let theta = this.theta;
-        // tha = ((tha+theta) % (theta*2))-theta;
-        tha = ((((tha + theta) % (theta * 2)) + (theta * 2)) % (theta * 2)) - theta
-        let phi = this.phi;
-        let A = this.drArc;
-        // let cosalphr = Math.cos((PI2 / 2) - tha);
-        // let rArc = A * cosalphr + Math.sqrt(0.5 * A * cosalphr ** 2 - (A ** 2 - this.arcRat ** 2 * this.rad ** 2));
-        let rArc = A * Math.cos(PI2 / 2 - tha) + Math.sqrt((this.rad) ** 2 - A ** 2 * Math.sin(PI2 / 2 - tha) ** 2)
-        return rArc;
-    }
-    contains(x, y) {
-        if (this.ring == 0) {
-            return (x - this.x0) ** 2 + (y - (this.y0)) ** 2 < (this.radCont) ** 2
-        }
-        else {
-            let d2CentreSq = (x - this.x0) ** 2 + (y - this.y0) ** 2
-            return (d2CentreSq - this.radCont ** 2) *
-                (d2CentreSq - (this.rad + this.thickness * this.ring) ** 2) < 0
-        }
-    }
-}
 
 
 let uiSlidersX, uiSlidersY, uiSlidersWidth,pixRat, X, Y, scl, txtSize, baseLW, pixPerTooth, xOff, yOff, uiButtonsX, uiButtonsY, uiButtonsWidth, uiShapeX, uiShapeY, uiShapeWidth;
