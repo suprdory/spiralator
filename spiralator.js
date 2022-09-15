@@ -210,13 +210,13 @@ class ArcSidedDisc extends MovingDisc {
         }
     }
     updateGeoCentre() {
-        this.x0 = this.x + this.drArc * Math.cos(this.th);
-        this.y0 = this.y + this.drArc * Math.sin(this.th);
+        this.x0 = this.x + this.drArc * Math.cos(this.th - this.n * 2 * this.theta);
+        this.y0 = this.y + this.drArc * Math.sin(this.th - this.n * 2 * this.theta);
     }
 
     draw() {
         //set geo (drawing) centre from rotation centre
-        this.updateGeoCentre()
+        // this.updateGeoCentre()
 
         // // console.log(this.arcRat, this.nArc)
         let theta0 = this.th;
@@ -298,6 +298,21 @@ class ArcSidedDisc extends MovingDisc {
             3 * baseLW, 0, PI2);
         ctx.fill();
 
+        // // phi
+        // ctx.beginPath();
+        // ctx.strokeStyle = "red";
+        // ctx.moveTo(this.x, this.y);
+        // ctx.lineTo(
+        //     this.x + this.rad * Math.cos(this.th + this.phi),
+        //     this.y + this.rad * Math.sin(this.th + this.phi),
+        // )
+        // ctx.moveTo(this.x, this.y);
+        // ctx.lineTo(
+        //     this.x + this.rad * Math.cos(this.th - this.phi),
+        //     this.y + this.rad * Math.sin(this.th - this.phi),
+        // )
+        // ctx.stroke();
+
 
         // centre to pen
         ctx.beginPath();
@@ -367,17 +382,27 @@ class Pair {
         this.saturation = 100;
         this.lightness = 65;
         this.locked = true;
-        //conversion factor from angle to geo centre to angle to arc centre. based on linear extrapolation using analytic da/dg eval at 0.
-        this.g2a = 1 / (1 - this.moving.drArc * (this.fixed.rad / this.moving.rad) / (this.moving.drArc + this.fixed.rad - this.moving.rad)); 
-        console.log("g2a:", this.g2a,"a:",this.moving.drArc,"R:",this.fixed.rad,"r:",this.moving.rad)
+        this.updateGeom()
+        console.log("g2a:", this.g2a, "a:", this.moving.drArc, "R:", this.fixed.rad, "r:", this.moving.rad)
         this.setColor();
         this.trace = new Trace(this);
         this.traces = [];
         this.tracing = true;
         this.move(this.th);
     }
-    updateg2a(){
-        this.g2a = 1 / (1 - this.moving.drArc * (this.fixed.rad / this.moving.rad) / (this.moving.drArc + this.fixed.rad - this.moving.rad)); 
+    calc_thg(tha, R, r, a) {
+        let th = tha - Math.asin(a * Math.sin(tha * R / r) / ((R - r) ** 2 + a ** 2 + 2 * a * (R - r) * Math.cos(tha * R / r)) ** 0.5)
+        return th
+    }
+
+    updateGeom() {
+        let m = this.moving;
+        let f = this.fixed;
+        //conversion factor from angle to geo centre to angle to arc centre. based on linear extrapolation using analytic da/dg eval at 0.
+        this.g2a = 1 / (1 - m.drArc * (f.rad / m.rad) / (m.drArc + f.rad - m.rad));
+        //first angle at which to switch to pivot motion
+        this.tha_pp = (m.phi * m.rad / f.rad)
+        this.thg_pp = this.calc_thg(this.tha_pp, f.rad, m.rad, m.drArc)
     }
 
     toggleLock() {
@@ -505,27 +530,102 @@ class Pair {
         this.move(0);
         this.penDown()
     }
-    move(th) {
+    move(thg) {
         let f = this.fixed;
         let m = this.moving;
-        let tha=th*this.g2a;
-        
-        if (this.out) {
-            m.x = f.x + (f.rad + m.rad) * Math.cos(tha);
-            m.y = f.y + (f.rad + m.rad) * Math.sin(tha);
-            m.th = m.th0 + tha * (f.rad / m.rad + 1)
+
+        let alpha = this.thg_pp;
+        let beta = this.tha_pp;
+        let thg_delta = thg % (2 * beta);
+        let n = parseInt(thg / (2 * beta));
+        n = n + (thg_delta > beta);
+        let nSide = n % m.nArc;
+        m.n = nSide;
+        console.log('thg', thg, '\nn', n, '\nthg_delta', thg_delta, '\nalpha', alpha, '\n2a-b', 2 * beta - alpha)
+
+        // let tha = th * this.g2a;
+        // if (Math.abs(tha) < m.phi * m.rad / f.rad) {
+        if ((thg_delta < alpha) | (thg_delta > (2 * beta - alpha))) {
+            //set current arc centre and shape rotation
+            let arcCentre = 2 * beta * n;
+            let tha = arcCentre + (thg - arcCentre) * this.g2a;
+            // let tha = thg * this.g2a;
+            if (this.out) {
+                m.x = f.x + (f.rad + m.rad) * Math.cos(tha);
+                m.y = f.y + (f.rad + m.rad) * Math.sin(tha);
+                m.th = m.th0 + tha * (f.rad / m.rad + 1)
+            }
+            if (!this.out) {
+                m.x = f.x + (f.rad - m.rad) * Math.cos(tha);
+                m.y = f.y + (f.rad - m.rad) * Math.sin(tha);
+                m.th = m.th0 - tha * (f.rad / m.rad - 1)
+            }
+            this.moving.updateGeoCentre();
         }
-        if (!this.out) {
-            m.x = f.x + (f.rad - m.rad) * Math.cos(tha);
-            m.y = f.y + (f.rad - m.rad) * Math.sin(tha);
-            m.th = m.th0 - tha * (f.rad / m.rad - 1)
+        else {
+            //set shape centre directly
+            // this.tha_pp=this.tha_pp
+            this.th_d = this.tha_pp - thg;
+            // this.b = m.rad * Math.sin(m.phi);
+            this.b = m.radCont;
+            this.ohm = Math.PI - Math.asin(f.rad / this.b * Math.sin(this.th_d))
+            this.omg = Math.PI - this.ohm - (this.th_d)
+
+            this.c = f.rad * Math.sin(this.omg) / Math.sin(this.ohm)
+            // this.gam = Math.PI / 2 - this.tha_pp - this.omg
+            this.gam = Math.PI / m.nArc - this.tha_pp - this.omg
+
+            // console.log('r', m.rad, '\nR', f.rad, '\na', m.drArc, '\nb', this.b, '\nc', this.c,
+            //     '\nthapp', this.tha_pp * 57, '\nthg', thg * 57, '\nth_d', this.th_d * 57, '\nohm', this.ohm * 57, '\nomg', this.omg * 57, '\ngam', this.gam * 57)
+
+
+            if (!this.out) {
+                m.x0 = f.x + this.c * Math.cos(thg);
+                m.y0 = f.y + this.c * Math.sin(thg);
+                m.th = m.th0 - this.gam
+            }
         }
 
-        this.th = th;
-        this.moving.updateGeoCentre();
+        this.th = thg;
         if (this.tracing) {
             this.trace.points.push(this.tracePoint());
         }
+
+    }
+    draw() {
+        let f = this.fixed;
+        let m = this.moving;
+        // console.log('drawing')
+        ctx.beginPath();
+        ctx.strokeStyle = "red";
+        ctx.moveTo(f.x, f.y);
+        ctx.lineTo(
+            f.x + f.rad * Math.cos(this.tha_pp),
+            f.y + f.rad * Math.sin(this.tha_pp),
+        )
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.strokeStyle = "green";
+        ctx.moveTo(f.x, f.y);
+        ctx.lineTo(
+            m.x0,
+            m.y0,
+        )
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.strokeStyle = "blue";
+        ctx.moveTo(
+            f.x + f.rad * Math.cos(this.tha_pp),
+            f.y + f.rad * Math.sin(this.tha_pp),
+        )
+        ctx.lineTo(
+            f.x + f.rad * Math.cos(this.tha_pp) - this.b * Math.sin(this.gam),
+            f.y + f.rad * Math.sin(this.tha_pp) - this.b * Math.cos(this.gam),
+        )
+        ctx.stroke();
+
     }
     inOut() {
         this.penUp();
@@ -1390,7 +1490,7 @@ function createShapePanel() {
             pair.penUp();
             pair.moving.arcRat = Math.min(5, Math.max(-0.005 / pixRat * dy + yDragVar0, 1))
             pair.moving.updateShape();
-            pair.updateg2a();
+            pair.updateGeom();
             pair.penDown();
 
         }, [], [],
@@ -1415,7 +1515,7 @@ function createShapePanel() {
             //     pair.moving.teeth--;
             // }
             pair.moving.updateShape();
-            pair.updateg2a();
+            pair.updateGeom();
             pair.configRings()
 
             pair.move(pair.th);
@@ -1485,6 +1585,7 @@ function anim() {
     if (showWheels | showWheelsOverride) {
         pair.fixed.draw();
         pair.moving.draw();
+        pair.draw();
     }
 
 
@@ -1600,8 +1701,8 @@ function setSize() {
         orient = "wideandshort";
         uiHeight = 0.5 * Y;
         uiButtonsWidth = 0.333 * X;
-        uiSlidersWidth=uiButtonsWidth*5/7;
-        uiShapeWidth=uiButtonsWidth*2/7;
+        uiSlidersWidth = uiButtonsWidth * 5 / 7;
+        uiShapeWidth = uiButtonsWidth * 2 / 7;
         uiButtonsX = 0;
         uiButtonsY = 0;
         uiSlidersX = 0;
@@ -1617,16 +1718,16 @@ function setSize() {
         console.log('tall or squarish')
         orient = "tallorsquare"
         uiHeight = 0.2 * Y;
-        
+
         uiButtonsWidth = X;
-        uiSlidersWidth= X*(5/7);
-        uiShapeWidth = X*(2/7);
+        uiSlidersWidth = X * (5 / 7);
+        uiShapeWidth = X * (2 / 7);
 
         uiButtonsX = (X - 1 * uiButtonsWidth) / 2;
         uiButtonsY = 0;
         uiSlidersX = (X - 1 * uiButtonsWidth) / 2;
         uiSlidersY = Y - uiHeight;
-        uiShapeX = (X - 1 * uiButtonsWidth) / 2+(5/7)*uiButtonsWidth;
+        uiShapeX = (X - 1 * uiButtonsWidth) / 2 + (5 / 7) * uiButtonsWidth;
         uiShapeY = Y - uiHeight;
 
         xOff = X * .5;
@@ -1685,15 +1786,16 @@ discSizes = [24, 30, 32, 40, 42, 45, 48, 52, 56, 60, 63, 72, 75, 80, 84]
 
 
 
-let uiSlidersX, uiSlidersY, uiSlidersWidth,pixRat, X, Y, scl, txtSize, baseLW, pixPerTooth, xOff, yOff, uiButtonsX, uiButtonsY, uiButtonsWidth, uiShapeX, uiShapeY, uiShapeWidth;
+let uiSlidersX, uiSlidersY, uiSlidersWidth, pixRat, X, Y, scl, txtSize, baseLW, pixPerTooth, xOff, yOff, uiButtonsX, uiButtonsY, uiButtonsWidth, uiShapeX, uiShapeY, uiShapeWidth;
 setSize();
 let fixedDisc = new Disc(105, ring = 1)
-let movingDisc = new ArcSidedDisc(60, 0.5, nArc = 3, arcRat = 1.30, ring = 0);
+let movingDisc = new ArcSidedDisc(60, 0.2, nArc = 2, arcRat = 1.30, ring = 0);
 
 // let fixedDisc = new Disc(ringSizes.random(), ring = 1)
 // let movingDisc = new MovingDisc(discSizes.random(), Math.random() / 2 + 0.5, ring = 0);
 
 let pair = new Pair(fixedDisc, movingDisc)
+// pair.auto=1;
 
 wakeGalleryServer()
 setGallerySubmitHTML();
