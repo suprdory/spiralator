@@ -1858,7 +1858,7 @@ let uiSlidersX, uiSlidersY, uiSlidersWidth, pixRat, X, Y, scl, txtSize, baseLW, 
 setSize();
 let fixedDisc = new Disc(ringSizes.random(), ring = 1);
 let arcTeethInit=discSizes.random();
-let movingDisc = new ArcSidedDisc(arcTeethInit + Math.random() * (fixedDisc.teeth - arcTeethInit), 0.2, nArc = 2+Math.floor(Math.random() * 4), arcTeeth = arcTeethInit, ring = 0);
+let movingDisc = new ArcSidedDisc(arcTeethInit + Math.random() * (fixedDisc.teeth - arcTeethInit), Math.random() / 2 + 0.0, nArc = 2+Math.floor(Math.random() * 4), arcTeeth = arcTeethInit, ring = 0);
 
 // let movingDisc = new MovingDisc(discSizes.random(), Math.random() / 2 + 0.5, ring = 0);
 
