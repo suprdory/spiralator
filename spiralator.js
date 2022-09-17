@@ -159,44 +159,43 @@ class Trace {
 }
 class ArcSidedDisc extends MovingDisc {
     constructor(
-        teeth = 84, rat = 0.7, nArc = 3, arcRat = 4 / 3, ring = false
+        teeth = 84, rat = 0.7, nArc = 3, arcTeeth = 70, ring = false
     ) {
         super(teeth, rat);
 
         this.thickness = 3 * pixPerTooth;
-        this.teeth = teeth;
-        this.circ = teeth * pixPerTooth;
-        this.arcRat = arcRat;
+        this.teeth = teeth; //number of teeth in full circle of arc component
+        this.arcTeeth = arcTeeth; //number of teeth in shape circumference
+        this.circ = teeth * pixPerTooth; //full circumference of arc
         this.rad = this.circ / PI2; //radius of arcs
-
-
+        this.circArc = this.arcTeeth * pixPerTooth; //full circumference arc shape
+        this.nArc = nArc; //number of arcs
+        
+        this.updateShape();
+        
         this.color = 'white';
         this.lw = baseLW * 2;
         this.out = 1;
         this.ring = ring;
-        this.rat = rat / this.arcRat;
+        this.rat = rat;
+        this.drawAng=0;
 
-        this.th0 = 0; //rotation angle at pair.th=0
+        this.th0 = 0; //rotation angle at pair.th=0, shifted by nudging
         this.th = 0; //current rotation angle
-        this.nArc = nArc; //number of arcs
         this.n = 0; //current centre arc
-        this.updateShape();
-
-        // console.log(this.dxArc)
-        this.x = this.dxArc[this.n]; //current centre of rotation coords, pair object interacts with this.
-        this.y = this.dyArc[this.n];
-        //current geo centre, need to update for drawing
-        this.x0 = this.x + this.drArc * Math.cos(this.th - this.n * 2 * this.theta);
-        this.y0 = this.y + this.drArc * Math.sin(this.th - this.n * 2 * this.theta);
-
-
-
+        
     }
     updateShape() {
-        //call after changing nArcs or arc rad
-        this.radCont = this.rad / this.arcRat;//radius of containing circle
+        //call after changing shape params
+        this.circArc = this.arcTeeth * pixPerTooth;
+        this.phi=this.circArc/(this.rad*2*this.nArc);
         this.theta = PI2 / 2 / this.nArc; // half angle from geo centre to arc intersect points
-        this.phi = Math.asin(Math.sin(this.theta) / this.arcRat);// half angle from arc centre to arc intersect points
+        this.arcRat=Math.sin(this.theta)/Math.sin(this.phi);
+        this.radCont = this.rad / this.arcRat;//radius of containing circle
+
+        // console.log('phi',this.phi*rad2deg)
+       
+        // this.phi = Math.asin(Math.sin(this.theta) / this.arcRat);// half angle from arc centre to arc intersect points
         this.drArc = this.rad * (Math.cos(this.phi) - Math.cos(this.theta) / this.arcRat); //dist from geo centre to arc centre
         this.dxArc = []; //offsets from geo centre to arc (rotation) centres
         this.dyArc = [];
@@ -322,8 +321,8 @@ class ArcSidedDisc extends MovingDisc {
         ctx.strokeStyle = transCol
         ctx.moveTo(this.x0, this.y0);
         ctx.lineTo(
-            this.x0 + this.rad * Math.cos(this.th) * this.rat,
-            this.y0 + this.rad * Math.sin(this.th) * this.rat
+            this.x0 + this.rad * Math.cos(this.th+this.drawAng) * this.rat,
+            this.y0 + this.rad * Math.sin(this.th + this.drawAng) * this.rat
         )
         ctx.stroke();
 
@@ -331,8 +330,8 @@ class ArcSidedDisc extends MovingDisc {
         ctx.beginPath();
         ctx.fillStyle = pair.color;
         ctx.arc(
-            this.x0 + this.rad * Math.cos(this.th) * this.rat,
-            this.y0 + this.rad * Math.sin(this.th) * this.rat,
+            this.x0 + this.rad * Math.cos(this.th + this.drawAng) * this.rat,
+            this.y0 + this.rad * Math.sin(this.th + this.drawAng) * this.rat,
             3 * baseLW, 0, PI2
         )
         ctx.fill();
@@ -386,7 +385,7 @@ class Pair {
         this.lightness = 65;
         this.locked = true;
         this.updateGeom()
-        console.log("g2a:", this.g2a, "a:", this.moving.drArc, "R:", this.fixed.rad, "r:", this.moving.rad)
+        // console.log("g2a:", this.g2a, "a:", this.moving.drArc, "R:", this.fixed.rad, "r:", this.moving.rad)
         this.setColor();
         this.trace = new Trace(this);
         this.traces = [];
@@ -440,9 +439,14 @@ class Pair {
         ctx.textAlign = "center";
         ctx.font = txtSize + 'px sans-serif';
         ctx.textBaseline = "middle";
-        ctx.fillText(Math.round(this.moving.rat * this.moving.teeth), X / 2, Y / 2);
+        ctx.fillText(Math.round(this.moving.rat * this.moving.teeth), X / 2, Y / 2 + txtSize * 0.9);
         ctx.font = txtSize / 2 + 'px sans-serif';
-        ctx.fillText('Draw Radius', X / 2, Y / 2 - txtSize);
+        ctx.fillText('Pen Radius', X / 2, Y / 2 - txtSize + txtSize * 0.9);
+        
+        ctx.font = txtSize + 'px sans-serif';
+        ctx.fillText(Math.round(this.moving.drawAng * rad2deg), X / 2, Y / 2 - txtSize * 0.9);
+        ctx.font = txtSize / 2 + 'px sans-serif';
+        ctx.fillText('Pen Angle', X / 2, Y / 2 - txtSize - txtSize * 0.9);
 
     }
     drawArcInfo() {
@@ -457,13 +461,11 @@ class Pair {
 
         ctx.font = txtSize + 'px sans-serif';
         ctx.textBaseline = "middle";
-        ctx.fillText(Math.round(100 * this.moving.arcRat) / 100, X / 2, Y / 2 - txtSize * 1.8);
+        ctx.fillText(this.moving.arcTeeth, X / 2, Y / 2 - txtSize * 1.8);
         ctx.font = txtSize / 2 + 'px sans-serif';
-        ctx.fillText('Arc Ratio', X / 2, Y / 2 - txtSize - txtSize * 1.8);
+        ctx.fillText('Arc Circ', X / 2, Y / 2 - txtSize - txtSize * 1.8);
 
     }
-
-
     drawColInfo() {
         ctx.strokeStyle = this.color;
         ctx.fillStyle = this.color;
@@ -483,8 +485,8 @@ class Pair {
         ctx.font = txtSize + 'px sans-serif';
         ctx.textBaseline = "middle";
         ctx.fillText(this.fixed.teeth, X / 2 - txtSize * 1.5, Y / 2 - txtSize * 0.45);
-        ctx.fillText(this.moving.teeth, X / 2 - txtSize * 1.5, Y / 2 + txtSize * 0.60);
-        ctx.fillText(calcLCM(this.fixed.teeth, this.moving.teeth) / this.moving.teeth, X / 2 + 1.5 * txtSize, Y / 2);
+        ctx.fillText(this.moving.arcTeeth, X / 2 - txtSize * 1.5, Y / 2 + txtSize * 0.60);
+        ctx.fillText(calcLCM(this.fixed.teeth, this.moving.arcTeeth) / this.moving.arcTeeth, X / 2 + 1.5 * txtSize, Y / 2);
 
         ctx.beginPath();
         ctx.moveTo(X / 2 - txtSize * 2.5, Y / 2 - txtSize * 0.00);
@@ -705,15 +707,25 @@ class Pair {
         this.penUp();
         this.penDown();
         let startTh = this.th;
-        this.roll(this.th + PI2 * calcLCM(this.fixed.teeth, this.moving.teeth) / this.fixed.teeth);
-        this.move(startTh + PI2 * calcLCM(this.fixed.teeth, this.moving.teeth) / this.fixed.teeth)
+        this.roll(this.th + PI2 * calcLCM(this.fixed.teeth, this.moving.arcTeeth) / this.fixed.teeth);
+        this.move(startTh + PI2 * calcLCM(this.fixed.teeth, this.moving.arcTeeth) / this.fixed.teeth)
         this.penUp();
         this.penDown();
     }
+    oneTrace() {
+        this.penUp();
+        this.penDown();
+        let startTh = this.th;
+        this.roll(this.th + PI2);
+        this.move(startTh + PI2);
+        this.penUp();
+        this.penDown();
+    }
+
     tracePoint() {
         let m = this.moving;
-        let x = m.x0 + Math.cos(m.th) * (m.rad * m.rat)
-        let y = m.y0 + Math.sin(m.th) * (m.rad * m.rat)
+        let x = m.x0 + Math.cos(m.th+m.drawAng) * (m.rad * m.rat)
+        let y = m.y0 + Math.sin(m.th+m.drawAng) * (m.rad * m.rat)
         return (new Point(x, y));
     }
     drawTraces(ctx) {
@@ -1342,8 +1354,13 @@ function createTopPanel() {
 
 
     panel.buttonArray.push(
-        new PButton(panel, 0.75, .333, 0.25, 0.666, "Trace",
+        new PButton(panel, 0.75, .333, 0.125, 0.666, "Trace",
             function () { pair.fullTrace() })
+    );
+
+    panel.buttonArray.push(
+        new PButton(panel, 0.75+0.125, .333, 0.125, 0.666, "1-Trace",
+            function () { pair.oneTrace() })
     );
 
     return (panel)
@@ -1353,11 +1370,11 @@ function createBottomPanel() {
     let panel = new Panel(uiSlidersX + uiBorder, uiSlidersY + uiBorder, uiSlidersWidth - 2 * uiBorder, uiHeight - 2 * uiBorder);
     panel.anyClickActivates = true;
 
-    let ratButton = new PButton(panel, 0.0, 0, 0.2, 1, "Radius",
+    let ratButton = new PButton(panel, 0/6, 0, 1/6, 1, "Pen Radius",
         function (dy, yDragVar0) {
             showWheelsOverride = true;
             pair.penUp();
-            pair.moving.rat = Math.min(maxDrawRadiusRatio, Math.max(-0.001 / pixRat * dy + yDragVar0, 0))
+            pair.moving.rat = Math.min(maxDrawRadiusRatio, Math.max(-0.002 / pixRat * dy + yDragVar0, 0))
             pair.penDown();
 
         }, [], [],
@@ -1372,35 +1389,50 @@ function createBottomPanel() {
     ratButton.UDarrows = true;
     panel.buttonArray.push(ratButton)
 
-    let movRadButton = new PButton(panel, 0.20, 0, 0.2, 1, "Moving",
+    let angButton = new PButton(panel, 1 / 6, 0, 1 / 6, 1, "Pen Angle",
         function (dy, yDragVar0) {
-
             showWheelsOverride = true;
             pair.penUp();
-            pair.moving.teeth = Math.round(Math.min(maxWheelSize, Math.max(-0.1 / pixRat * dy + yDragVar0, minWheelSize)));
-            if (pair.moving.teeth == pair.fixed.teeth) {
-                pair.moving.teeth--;
-            }
-            pair.configRings()
-
-            pair.moving.circ = pair.moving.teeth * pixPerTooth;
-            pair.moving.rad = pair.moving.circ / PI2
-            pair.updateGeom();
-            pair.move(pair.th);
+            pair.moving.drawAng = Math.min(PI2, Math.max(-0.01 / pixRat * dy + yDragVar0, 0))
             pair.penDown();
+
         }, [], [],
         function () {
-            return pair.moving.teeth;
+            return pair.moving.drawAng;
         },
         function (isDepressed) {
-            showInfo = isDepressed;
-        }
+            showRadInfo = isDepressed;
+        },
     )
-    movRadButton.yDrag = true;
-    movRadButton.UDarrows = true;
-    panel.buttonArray.push(movRadButton)
+    angButton.yDrag = true;
+    angButton.UDarrows = true;
+    panel.buttonArray.push(angButton)
 
-    let fixRadButton = new PButton(panel, 0.4, 0, 0.2, 1, "Fixed",
+    let arcTeethButton = new PButton(panel, 2 / 6, 0, 1 / 6, 1, "Moving",
+        function (dy, yDragVar0) {
+            showWheelsOverride = true;
+            pair.penUp();
+            pair.moving.arcTeeth = Math.round(Math.min(pair.moving.teeth, Math.max(-0.05 / pixRat * dy + yDragVar0, 10)))
+            pair.updateGeom();
+            pair.penDown();
+
+        }, [], [],
+        function () {
+            return pair.moving.arcTeeth;
+        },
+        function (isDepressed) {
+            // showArcInfo = isDepressed;
+            showInfo = isDepressed;
+        },
+    )
+    arcTeethButton.yDrag = true;
+    arcTeethButton.UDarrows = true;
+    panel.buttonArray.push(arcTeethButton)
+
+
+
+
+    let fixRadButton = new PButton(panel, 3 / 6, 0, 1 / 6, 1, "Fixed",
         function (dy, yDragVar0) {
             showWheelsOverride = true;
             pair.penUp();
@@ -1426,7 +1458,7 @@ function createBottomPanel() {
     fixRadButton.UDarrows = true;
     panel.buttonArray.push(fixRadButton)
 
-    let hueButton = new PButton(panel, 0.6, 0, 0.2, 1, "Hue",
+    let hueButton = new PButton(panel, 4/ 6, 0, 1 / 6, 1, "Hue",
         function (dy, yDragVar0) {
 
             pair.move(pair.th);
@@ -1463,7 +1495,7 @@ function createBottomPanel() {
     // colButton.LRarrows = true;
     panel.buttonArray.push(hueButton)
 
-    let lightnessButton = new PButton(panel, 0.8, 0, 0.2, 1, "Lightness",
+    let lightnessButton = new PButton(panel, 5 / 6, 0, 1 / 6, 1, "Lightness",
         function (dy, yDragVar0) {
 
             pair.move(pair.th);
@@ -1510,26 +1542,35 @@ function createShapePanel() {
     let panel = new Panel(uiShapeX + uiBorder, uiShapeY + uiBorder, uiShapeWidth - 2 * uiBorder, uiHeight - 2 * uiBorder);
     panel.anyClickActivates = true;
 
-    let arcRatButton = new PButton(panel, 0.0, 0, 0.5, 1, "arcRat",
+    let movRadButton = new PButton(panel, 0.00, 0, 0.5, 1, "Arc Rad",
         function (dy, yDragVar0) {
+
             showWheelsOverride = true;
             pair.penUp();
-            pair.moving.arcRat = Math.min(5, Math.max(-0.005 / pixRat * dy + yDragVar0, 1))
-            pair.moving.updateShape();
-            pair.updateGeom();
-            pair.penDown();
+            pair.moving.teeth = Math.round(Math.min(pair.fixed.teeth, Math.max(-0.1 / pixRat * dy + yDragVar0, pair.moving.arcTeeth)));
+            if (pair.moving.teeth == pair.fixed.teeth) {
+                pair.moving.teeth--;
+            }
+            pair.configRings()
 
+            pair.moving.circ = pair.moving.teeth * pixPerTooth;
+            pair.moving.rad = pair.moving.circ / PI2
+            pair.updateGeom();
+            pair.move(pair.th);
+            pair.penDown();
         }, [], [],
         function () {
-            return pair.moving.arcRat;
+            return pair.moving.teeth;
         },
         function (isDepressed) {
-            showArcInfo = isDepressed;
-        },
+            showInfo = isDepressed;
+        }
     )
-    arcRatButton.yDrag = true;
-    arcRatButton.UDarrows = true;
-    panel.buttonArray.push(arcRatButton)
+    movRadButton.yDrag = true;
+    movRadButton.UDarrows = true;
+    panel.buttonArray.push(movRadButton)
+
+
 
     let nArcsButton = new PButton(panel, 0.50, 0, 0.5, 1, "nArcs",
         function (dy, yDragVar0) {
@@ -1540,7 +1581,6 @@ function createShapePanel() {
             // if (pair.moving.teeth == pair.fixed.teeth) {
             //     pair.moving.teeth--;
             // }
-            pair.moving.updateShape();
             pair.updateGeom();
             pair.configRings()
 
@@ -1741,7 +1781,7 @@ function setSize() {
     }
     else {
         //tall or squarish
-        console.log('tall or squarish')
+        // console.log('tall or squarish')
         orient = "tallorsquare"
         uiHeight = 0.2 * Y;
 
@@ -1770,6 +1810,8 @@ function setSize() {
 const canvas = document.getElementById("cw");
 const ctx = canvas.getContext("2d");
 const PI2 = Math.PI * 2;
+
+const rad2deg=180/Math.PI;
 
 let clickCase = null;
 let mouseDown = false;
@@ -1814,10 +1856,10 @@ discSizes = [24, 30, 32, 40, 42, 45, 48, 52, 56, 60, 63, 72, 75, 80, 84]
 
 let uiSlidersX, uiSlidersY, uiSlidersWidth, pixRat, X, Y, scl, txtSize, baseLW, pixPerTooth, xOff, yOff, uiButtonsX, uiButtonsY, uiButtonsWidth, uiShapeX, uiShapeY, uiShapeWidth;
 setSize();
-let fixedDisc = new Disc(105, ring = 1)
-let movingDisc = new ArcSidedDisc(90, 0.2, nArc = 3, arcRat = 1.2, ring = 0);
+let fixedDisc = new Disc(ringSizes.random(), ring = 1);
+let arcTeethInit=discSizes.random();
+let movingDisc = new ArcSidedDisc(arcTeethInit + Math.random() * (fixedDisc.teeth - arcTeethInit), 0.2, nArc = 2+Math.floor(Math.random() * 4), arcTeeth = arcTeethInit, ring = 0);
 
-// let fixedDisc = new Disc(ringSizes.random(), ring = 1)
 // let movingDisc = new MovingDisc(discSizes.random(), Math.random() / 2 + 0.5, ring = 0);
 
 let pair = new Pair(fixedDisc, movingDisc)
