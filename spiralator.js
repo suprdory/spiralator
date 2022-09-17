@@ -228,7 +228,7 @@ class ArcSidedDisc extends MovingDisc {
         //stroke and fill disk
         ctx.strokeStyle = this.color;
         ctx.lineWidth = this.lw;
-        ctx.lineCap="round";
+        ctx.lineCap = "round";
         ctx.fillStyle = transCol;
         ctx.beginPath();
         for (let i = 0; i < this.nArc; i++) {
@@ -408,7 +408,7 @@ class Pair {
         //first angle at which to switch to pivot motion
         this.tha_pp = (m.phi * m.rad / f.rad)
         this.thg_pp = this.calc_thg(this.tha_pp, f.rad, m.rad, m.drArc)
-        
+
         //updateGeoCentre
         m.x0 = m.x + m.drArc * Math.cos(m.th + m.n * 2 * m.theta);
         m.y0 = m.y + m.drArc * Math.sin(m.th + m.n * 2 * m.theta);
@@ -539,25 +539,27 @@ class Pair {
         this.move(0);
         this.penDown()
     }
-    move(thg) {
+    move(th) {
+
         let rad2deg = 180 / Math.PI;
         let f = this.fixed;
         let m = this.moving;
+        let thg = th - m.th0;
         this.b = m.radCont;
         let alpha = this.thg_pp;
         let beta = this.tha_pp;
         let thg_delta = thg % (2 * beta);
         let n = parseInt(thg / (2 * beta));
-        let nPiv=n-(thg<0);
-        let nRoll = n + Math.sign(thg)*(Math.abs(thg_delta) > beta);
+        let nPiv = n - (thg < 0);
+        let nRoll = n + Math.sign(thg) * (Math.abs(thg_delta) > beta);
         let nSide = nRoll % m.nArc;
-        let thPP=beta+2*beta*n
-        
-        if (thg<0){
-            thPP = beta + 2 * beta * (n-1);
+        let thPP = beta + 2 * beta * n
+
+        if (thg < 0) {
+            thPP = beta + 2 * beta * (n - 1);
         }
         let th_piv = thPP - thg;
-        
+
         let th_rollcentre = nRoll * 2 * beta;
         let tha_roll = (thg - th_rollcentre) * this.g2a;
         m.n = nSide;
@@ -575,8 +577,8 @@ class Pair {
             //     m.th = m.th0 + tha_rel * (f.rad / m.rad + 1)
             // }
             if (!this.out) {
-                m.x = f.x + (f.rad - m.rad) * Math.cos(th_rollcentre+ tha_roll);
-                m.y = f.y + (f.rad - m.rad) * Math.sin(th_rollcentre+ tha_roll);
+                m.x = f.x + (f.rad - m.rad) * Math.cos(m.th0 + th_rollcentre + tha_roll);
+                m.y = f.y + (f.rad - m.rad) * Math.sin(m.th0 + th_rollcentre + tha_roll);
                 m.th = m.th0 - (nSide * PI2 / m.nArc) + th_rollcentre - tha_roll * (f.rad / m.rad - 1);
             }
             //updateGeoCentre
@@ -593,8 +595,8 @@ class Pair {
             this.gam = nPiv * 2 * Math.PI / m.nArc - thPP - this.omg + Math.PI / m.nArc;
 
             if (!this.out) {
-                m.x0 = f.x + this.c * Math.cos(thg);
-                m.y0 = f.y + this.c * Math.sin(thg);
+                m.x0 = f.x + this.c * Math.cos(m.th0+thg);
+                m.y0 = f.y + this.c * Math.sin(m.th0+thg);
                 m.th = m.th0 - this.gam
             }
         }
@@ -608,7 +610,7 @@ class Pair {
         //     '\nalpha', alpha * rad2deg, '\nbeta', beta * rad2deg,
         //     '\ngamma', m.th * rad2deg)
 
-        this.th = thg;
+        this.th = th;
         if (this.tracing) {
             this.trace.points.push(this.tracePoint());
         }
