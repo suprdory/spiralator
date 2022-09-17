@@ -1804,7 +1804,7 @@ function setSize() {
     sharePanel = createSharePanel();
     bottomPanel = createBottomPanel();
     shapePanel = createShapePanel();
-    panelArray = [topPanel, bottomPanel, sharePanel, shapePanel];
+    panelArray = [topPanel, bottomPanel, shapePanel, sharePanel ];
 }
 
 const canvas = document.getElementById("cw");
