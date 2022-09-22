@@ -223,7 +223,7 @@ class ArcSidedDisc extends MovingDisc {
         // this.updateGeoCentre()
 
         // // console.log(this.arcRat, this.nArc)
-        let theta0 = this.th;
+        let theta0 = this.th % PI2;
         let phi = this.phi
         let drArc = this.drArc;
 
@@ -241,6 +241,7 @@ class ArcSidedDisc extends MovingDisc {
                 theta0 - phi,
                 theta0 + phi,
             );
+            // console.log(phi*rad2deg,theta0);
             theta0 += (PI2 / this.nArc);
         }
         ctx.fill();
