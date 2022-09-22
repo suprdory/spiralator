@@ -169,6 +169,7 @@ class ArcSidedDisc extends MovingDisc {
         this.circ = teeth * pixPerTooth; //full circumference of arc
         this.rad = this.circ / PI2; //radius of arcs
         this.circArc = this.arcTeeth * pixPerTooth; //full circumference arc shape
+        this.radArc = this.circArc/PI2;
         this.nArc = nArc; //number of arcs
 
         this.updateShape();
@@ -188,6 +189,7 @@ class ArcSidedDisc extends MovingDisc {
     updateShape() {
         //call after changing shape params
         this.circArc = this.arcTeeth * pixPerTooth;
+        this.radArc = this.circArc / PI2;
         this.phi = this.circArc / (this.rad * 2 * this.nArc);
         this.theta = PI2 / 2 / this.nArc; // half angle from geo centre to arc intersect points
         this.arcRat = Math.sin(this.theta) / Math.sin(this.phi);
@@ -322,8 +324,8 @@ class ArcSidedDisc extends MovingDisc {
         ctx.strokeStyle = transCol
         ctx.moveTo(this.x0, this.y0);
         ctx.lineTo(
-            this.x0 + this.rad * Math.cos(this.th + this.drawAng) * this.rat,
-            this.y0 + this.rad * Math.sin(this.th + this.drawAng) * this.rat
+            this.x0 + this.radArc * Math.cos(this.th + this.drawAng) * this.rat,
+            this.y0 + this.radArc * Math.sin(this.th + this.drawAng) * this.rat
         )
         ctx.stroke();
 
@@ -331,8 +333,8 @@ class ArcSidedDisc extends MovingDisc {
         ctx.beginPath();
         ctx.fillStyle = pair.color;
         ctx.arc(
-            this.x0 + this.rad * Math.cos(this.th + this.drawAng) * this.rat,
-            this.y0 + this.rad * Math.sin(this.th + this.drawAng) * this.rat,
+            this.x0 + this.radArc * Math.cos(this.th + this.drawAng) * this.rat,
+            this.y0 + this.radArc * Math.sin(this.th + this.drawAng) * this.rat,
             3 * baseLW, 0, PI2
         )
         ctx.fill();
@@ -522,7 +524,8 @@ class Pair {
         this.tracing = true;
     }
     update() {
-        this.roll(this.th + .05 / Math.max(Math.abs(1 - this.fixed.circ / this.moving.circ), .15) * this.auto);
+        this.roll(this.th + .1 * Math.max(Math.abs(this.moving.circArc/this.fixed.circ )) * this.auto);
+        // this.roll(this.th + .05 / Math.max(Math.abs(1 - this.fixed.circ / this.moving.circArc), .15) * this.auto);
     }
     nudge(n) {
         this.penUp()
@@ -725,8 +728,8 @@ class Pair {
 
     tracePoint() {
         let m = this.moving;
-        let x = m.x0 + Math.cos(m.th + m.drawAng) * (m.rad * m.rat)
-        let y = m.y0 + Math.sin(m.th + m.drawAng) * (m.rad * m.rat)
+        let x = m.x0 + Math.cos(m.th + m.drawAng) * (m.radArc * m.rat)
+        let y = m.y0 + Math.sin(m.th + m.drawAng) * (m.radArc * m.rat)
         return (new Point(x, y));
     }
     drawTraces(ctx) {
@@ -1424,6 +1427,7 @@ function createSliderPanel() {
             pair.penUp();
             pair.moving.arcTeeth = Math.round(Math.min(pair.moving.teeth, Math.max(-0.05 / pixRat * dy + yDragVar0, 10)))
             pair.updateGeom();
+            pair.move(pair.th);
             pair.penDown();
 
         }, [], [],
@@ -1866,21 +1870,21 @@ discSizes = [24, 30, 32, 40, 42, 45, 48, 52, 56, 60, 63, 72, 75, 80, 84]
 
 let uiSlidersX, uiSlidersY, uiSlidersWidth, pixRat, X, Y, scl, txtSize, baseLW, pixPerTooth, xOff, yOff, uiButtonsX, uiButtonsY, uiButtonsWidth, uiShapeX, uiShapeY, uiShapeWidth;
 setSize();
-let fixedDisc = new Disc(ringSizes.random(), ring = 1);
 let arcTeethInit = discSizes.random();
-let movingDisc = new ArcSidedDisc(arcTeethInit + Math.random() * (fixedDisc.teeth - arcTeethInit), Math.random() / 2 + 0.0, nArc = 2 + Math.floor(Math.random() * 4), arcTeeth = arcTeethInit, ring = 0);
-
-// let movingDisc = new MovingDisc(discSizes.random(), Math.random() / 2 + 0.5, ring = 0);
-
+let fixedDisc = new Disc(ringSizes.random(), ring = 1);
+let movingDisc = new ArcSidedDisc(arcTeethInit + Math.random() * (fixedDisc.teeth - arcTeethInit), Math.random(), nArc = 2 + Math.floor(Math.random() * 4), arcTeeth = arcTeethInit, ring = 0);
+// let fixedDisc = new Disc(165, ring = 1);
+// let movingDisc = new ArcSidedDisc(100, .5, nArc = 5, arcTeeth = 20, ring = 0);
 let pair = new Pair(fixedDisc, movingDisc)
+
 // pair.auto=1;
+// pair.nudge(6)
+// pair.oneTrace();
+// pair.oneTrace();
+// pair.oneTrace();
 
 wakeGalleryServer()
 setGallerySubmitHTML();
 addPointerListeners();
 
 anim();
-
-
-
-// pair.drawInfo();
