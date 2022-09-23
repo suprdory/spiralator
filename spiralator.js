@@ -1775,6 +1775,8 @@ function setSize() {
         xOff = X / 2;
         yOff = Y * 0.4;
 
+        scl=1.5
+
     }
     else if (window.innerHeight < 500 & window.innerWidth > 800) {
         // wide and short
