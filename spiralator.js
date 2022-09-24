@@ -169,7 +169,7 @@ class ArcSidedDisc extends MovingDisc {
         this.circ = teeth * pixPerTooth; //full circumference of arc
         this.rad = this.circ / PI2; //radius of arcs
         this.circArc = this.arcTeeth * pixPerTooth; //full circumference arc shape
-        this.radArc = this.circArc/PI2;
+        this.radArc = this.circArc / PI2;
         this.nArc = nArc; //number of arcs
 
         this.updateShape();
@@ -188,6 +188,16 @@ class ArcSidedDisc extends MovingDisc {
     }
     updateShape() {
         //call after changing shape params
+        if (this.nArc == 1) {
+            //special case for n=1, non-zero arcness is impossible
+            this.circ = this.arcTeeth * pixPerTooth;
+            this.rad = this.circ / PI2
+        }
+        else {
+            this.circ = this.teeth * pixPerTooth;
+            this.rad = this.circ / PI2
+        }
+
         this.circArc = this.arcTeeth * pixPerTooth;
         this.radArc = this.circArc / PI2;
         this.phi = this.circArc / (this.rad * 2 * this.nArc);
@@ -405,8 +415,8 @@ class Pair {
         let m = this.moving;
         let f = this.fixed;
         m.updateShape();
-        this.arcness=(m.teeth-m.arcTeeth)/(f.teeth-m.arcTeeth); // 0: circle, 1: arcRad = Fixed Rad
-        
+        this.arcness = (m.teeth - m.arcTeeth) / (f.teeth - m.arcTeeth-1); // 0: circle, 1: arcRad = Fixed Rad
+
         //conversion factor from angle to geo centre to angle to arc centre. based on linear extrapolation using analytic da/dg eval at 0.
         this.g2a = 1 / (1 - m.drArc * (f.rad / m.rad) / (m.drArc + f.rad - m.rad));
         //first angle at which to switch to pivot motion
@@ -465,7 +475,7 @@ class Pair {
         ctx.font = txtSize + 'px sans-serif';
         ctx.textBaseline = "middle";
         // ctx.fillText(this.moving.arcTeeth + " <= " + this.arcness.toFixed(3) + " < " + this.fixed.teeth, X / 2, Y / 2 - txtSize * 1.8);
-        ctx.fillText((100*this.arcness).toFixed(0) + "%", X / 2, Y / 2 - txtSize * 1.8);
+        ctx.fillText((100 * this.arcness).toFixed(0) + "%", X / 2, Y / 2 - txtSize * 1.8);
         ctx.font = txtSize / 2 + 'px sans-serif';
         ctx.fillText('Arcness', X / 2, Y / 2 - txtSize - txtSize * 1.8);
 
@@ -525,7 +535,7 @@ class Pair {
         this.tracing = true;
     }
     update() {
-        this.roll(this.th + .1 * Math.max(Math.abs(this.moving.circArc/this.fixed.circ )) * this.auto);
+        this.roll(this.th + .1 * Math.max(Math.abs(this.moving.circArc / this.fixed.circ)) * this.auto);
         // this.roll(this.th + .05 / Math.max(Math.abs(1 - this.fixed.circ / this.moving.circArc), .15) * this.auto);
     }
     nudge(n) {
@@ -819,7 +829,7 @@ class PButton {
             }
         }
         if (this.UDarrows) {
-            let hspace=.8*this.nTxtLines*txtSize/4;
+            let hspace = .8 * this.nTxtLines * txtSize / 4;
             drawArrow(ctx,
                 this.x + this.w / 2, this.y + this.h / 2 + hspace,
                 this.x + this.w / 2, this.y + this.h / 2 + hspace + this.UDarrLen,
@@ -852,8 +862,8 @@ class PButton {
             ctx.fillText(this.txt, this.x + this.w / 2, this.y + this.h / 2, this.w * 0.9);
         }
         if (this.nTxtLines == 2) {
-            ctx.fillText(this.txt[0], this.x + this.w / 2, this.y + this.h / 2 - .6*txtSize / 4, this.w * 0.9);
-            ctx.fillText(this.txt[1], this.x + this.w / 2, this.y + this.h / 2 + .6*txtSize / 4, this.w * 0.9);
+            ctx.fillText(this.txt[0], this.x + this.w / 2, this.y + this.h / 2 - .6 * txtSize / 4, this.w * 0.9);
+            ctx.fillText(this.txt[1], this.x + this.w / 2, this.y + this.h / 2 + .6 * txtSize / 4, this.w * 0.9);
         }
     }
     contains(x, y) {
@@ -1384,7 +1394,7 @@ function createSliderPanel() {
     let panel = new Panel(uiSlidersX + uiBorder, uiSlidersY + uiBorder, uiSlidersWidth - 2 * uiBorder, uiHeight - 2 * uiBorder);
     panel.anyClickActivates = true;
 
-    let ratButton = new PButton(panel, 0 / 6, 0, 1 / 6, 1, ["Pen","Radius"],
+    let ratButton = new PButton(panel, 0 / 6, 0, 1 / 6, 1, ["Pen", "Radius"],
         function (dy, yDragVar0) {
             showWheelsOverride = true;
             pair.penUp();
@@ -1403,11 +1413,11 @@ function createSliderPanel() {
     ratButton.UDarrows = true;
     panel.buttonArray.push(ratButton)
 
-    let angButton = new PButton(panel, 1 / 6, 0, 1 / 6, 1, ["Pen","Angle"],
+    let angButton = new PButton(panel, 1 / 6, 0, 1 / 6, 1, ["Pen", "Angle"],
         function (dy, yDragVar0) {
             showWheelsOverride = true;
             pair.penUp();
-            pair.moving.drawAng = Math.min(PI2/2, Math.max(-0.01 / pixRat * dy + yDragVar0, -PI2/2))
+            pair.moving.drawAng = Math.min(PI2 / 2, Math.max(-0.01 / pixRat * dy + yDragVar0, -PI2 / 2))
             pair.penDown();
 
         }, [], [],
@@ -1743,7 +1753,7 @@ function setSize() {
     X = canvas.width;
     Y = canvas.height;
 
-    scl = 1.0;
+    scl = 1.1;
     txtSize = 60 * pixRat;
     baseLW = 1 * pixRat;
     pixPerTooth = 9 * pixRat;
@@ -1775,7 +1785,7 @@ function setSize() {
         xOff = X / 2;
         yOff = Y * 0.4;
 
-        scl=1.5
+        scl = 1.5
 
     }
     else if (window.innerHeight < 500 & window.innerWidth > 800) {
@@ -1876,8 +1886,8 @@ setSize();
 let arcTeethInit = discSizes.random();
 let fixedDisc = new Disc(ringSizes.random(), ring = 1);
 let movingDisc = new ArcSidedDisc(arcTeethInit + Math.random() * (fixedDisc.teeth - arcTeethInit), Math.random(), nArc = 2 + Math.floor(Math.random() * 4), arcTeeth = arcTeethInit, ring = 0);
-// let fixedDisc = new Disc(165, ring = 1);
-// let movingDisc = new ArcSidedDisc(100, .5, nArc = 5, arcTeeth = 20, ring = 0);
+// let fixedDisc = new Disc(105, ring = 1);
+// let movingDisc = new ArcSidedDisc(100, .5, nArc = 1, arcTeeth = 40, ring = 0);
 let pair = new Pair(fixedDisc, movingDisc)
 
 // pair.auto=1;

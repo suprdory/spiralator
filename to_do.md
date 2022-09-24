@@ -1,10 +1,7 @@
 # to do
-
-* fix narcs=1
-* allow 'hanging' for ArcRad > fix Rad
-* allow arcRad inversion
-
-
+* check nArc=1 nudging, compare to standard fixed disc behaviour
+* allow 'hanging' for ArcRad > fix Rad - new geom required
+* allow arcRad inversion - new geom required
 
 # done
 * check scruffy arc rendering - fixed with module 2PI in draw theta
@@ -14,3 +11,4 @@
 * display arcness when slider depressed 
 * increase arcness slide rate
 * fix auto rate, proportional to teeth ratio?
+* fix narcs=1
