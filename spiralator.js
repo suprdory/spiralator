@@ -187,21 +187,22 @@ class ArcSidedDisc extends MovingDisc {
 
     }
     updateShape() {
+        this.circArc = this.arcTeeth * pixPerTooth;
+        this.radArc = this.circArc / PI2;
         //call after changing shape params
         if (this.nArc == 1) {
             //special case for n=1, non-zero arcness is impossible
             this.circ = this.arcTeeth * pixPerTooth;
             this.rad = this.circ / PI2
+            this.theta = PI2;
+            this.phi = PI2;
         }
         else {
             this.circ = this.teeth * pixPerTooth;
-            this.rad = this.circ / PI2
+            this.rad = this.circ / PI2;
+            this.theta = PI2 / 2 / this.nArc; // half angle from geo centre to arc intersect points
+            this.phi = this.circArc / (this.rad * 2 * this.nArc);
         }
-
-        this.circArc = this.arcTeeth * pixPerTooth;
-        this.radArc = this.circArc / PI2;
-        this.phi = this.circArc / (this.rad * 2 * this.nArc);
-        this.theta = PI2 / 2 / this.nArc; // half angle from geo centre to arc intersect points
         this.arcRat = Math.sin(this.theta) / Math.sin(this.phi);
         this.radCont = this.rad / this.arcRat;//radius of containing circle
 
@@ -407,6 +408,7 @@ class Pair {
         this.move(this.th);
     }
     calc_thg(tha, R, r, a) {
+        //thg is angle from fixed centre to moving centre, tha is angle from fixed entre to centre of currently rolling arc on moving shape.
         // when rolling multi arc shape, this is used for calculating the angle to the centre of shape (thg) at which shape starts pivoting on corner (at tha)
         let th = tha - Math.asin(a * Math.sin(tha * R / r) / ((R - r) ** 2 + a ** 2 + 2 * a * (R - r) * Math.cos(tha * R / r)) ** 0.5)
         return th
@@ -415,7 +417,7 @@ class Pair {
         let m = this.moving;
         let f = this.fixed;
         m.updateShape();
-        this.arcness = (m.teeth - m.arcTeeth) / (f.teeth - m.arcTeeth-1); // 0: circle, 1: arcRad = Fixed Rad
+        this.arcness = (m.teeth - m.arcTeeth) / (f.teeth - m.arcTeeth); // 0: circle, 1: arcRad = Fixed Rad
 
         //conversion factor from angle to geo centre to angle to arc centre. based on linear extrapolation using analytic da/dg eval at 0.
         this.g2a = 1 / (1 - m.drArc * (f.rad / m.rad) / (m.drArc + f.rad - m.rad));
@@ -426,6 +428,8 @@ class Pair {
         //updateGeoCentre
         m.x0 = m.x + m.drArc * Math.cos(m.th + m.n * 2 * m.theta);
         m.y0 = m.y + m.drArc * Math.sin(m.th + m.n * 2 * m.theta);
+
+        // console.log(m)
     }
     toggleLock() {
         this.locked = !this.locked
@@ -1436,7 +1440,9 @@ function createSliderPanel() {
         function (dy, yDragVar0) {
             showWheelsOverride = true;
             pair.penUp();
-            pair.moving.arcTeeth = Math.round(Math.min(pair.moving.teeth, Math.max(-0.05 / pixRat * dy + yDragVar0, 10)))
+            pair.moving.arcTeeth = Math.round(Math.min(pair.moving.teeth-1, Math.max(-0.05 / pixRat * dy + yDragVar0, 10)))
+            //need to use same definition of arcness to defin moving.teeth, as using in pair.updateGeom()
+            pair.moving.teeth=pair.arcness*(pair.fixed.teeth-pair.moving.arcTeeth)+pair.moving.arcTeeth
             pair.updateGeom();
             pair.move(pair.th);
             pair.penDown();
@@ -1572,9 +1578,10 @@ function createShapePanel() {
             showWheelsOverride = true;
             pair.penUp();
             pair.moving.teeth = Math.round(Math.min(pair.fixed.teeth, Math.max(-0.4 / pixRat * dy + yDragVar0, pair.moving.arcTeeth)));
-            if (pair.moving.teeth == pair.fixed.teeth) {
-                pair.moving.teeth--;
-            }
+            // enable to to prevent 100% arcness problems
+            // if (pair.moving.teeth == pair.fixed.teeth) {
+            //     pair.moving.teeth--;
+            // }
             pair.configRings()
 
             pair.moving.circ = pair.moving.teeth * pixPerTooth;
@@ -1883,17 +1890,17 @@ discSizes = [24, 30, 32, 40, 42, 45, 48, 52, 56, 60, 63, 72, 75, 80, 84]
 let uiSlidersX, uiSlidersY, uiSlidersWidth, pixRat, X, Y, scl, txtSize, baseLW, pixPerTooth, xOff, yOff, uiButtonsX, uiButtonsY, uiButtonsWidth, uiShapeX, uiShapeY, uiShapeWidth;
 setSize();
 let arcTeethInit = discSizes.random();
-// let fixedDisc = new Disc(ringSizes.random(), ring = 1);
-// let movingDisc = new ArcSidedDisc(arcTeethInit + Math.random() * (fixedDisc.teeth - arcTeethInit), Math.random(), nArc = 2 + Math.floor(Math.random() * 4), arcTeeth = arcTeethInit, ring = 0);
-let fixedDisc = new Disc(105, ring = 1);
-let movingDisc = new ArcSidedDisc(100, .5, nArc = 1, arcTeeth = 40, ring = 0);
+let fixedDisc = new Disc(ringSizes.random(), ring = 1);
+let movingDisc = new ArcSidedDisc(arcTeethInit + Math.random() * (fixedDisc.teeth - arcTeethInit), Math.random(), nArc = 2 + Math.floor(Math.random() * 4), arcTeeth = arcTeethInit, ring = 0);
+// let fixedDisc = new Disc(105, ring = 1);
+// let movingDisc = new ArcSidedDisc(105, .5, nArc = 2, arcTeeth = 75, ring = 0);
 let pair = new Pair(fixedDisc, movingDisc)
 
 // pair.auto=1;
-pair.nudge(6)
+// pair.nudge(6)
 // pair.oneTrace();
 // pair.oneTrace();
-// pair.oneTrace();
+// pair.fullTrace();
 
 
 
