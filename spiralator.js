@@ -542,7 +542,7 @@ class Pair {
         this.penUp()
         let thInc = -n * PI2 / this.fixed.teeth;
         if (!this.out) {
-            this.moving.th0 += thInc * this.fixed.rad / this.moving.rad;
+            this.moving.th0 += thInc;// * this.fixed.rad / this.moving.rad;
         }
         if (this.out) {
             this.moving.th0 -= thInc * this.fixed.rad / this.moving.rad;
@@ -1566,10 +1566,9 @@ function createShapePanel() {
 
     let panel = new Panel(uiShapeX + uiBorder, uiShapeY + uiBorder, uiShapeWidth - 2 * uiBorder, uiHeight - 2 * uiBorder);
     panel.anyClickActivates = true;
-
+    // let maxMovingTeeth = pair.fixed.teeth;
     let movRadButton = new PButton(panel, 0.00, 0, 0.5, 1, ["Arcness"],
         function (dy, yDragVar0) {
-
             showWheelsOverride = true;
             pair.penUp();
             pair.moving.teeth = Math.round(Math.min(pair.fixed.teeth, Math.max(-0.4 / pixRat * dy + yDragVar0, pair.moving.arcTeeth)));
@@ -1884,17 +1883,19 @@ discSizes = [24, 30, 32, 40, 42, 45, 48, 52, 56, 60, 63, 72, 75, 80, 84]
 let uiSlidersX, uiSlidersY, uiSlidersWidth, pixRat, X, Y, scl, txtSize, baseLW, pixPerTooth, xOff, yOff, uiButtonsX, uiButtonsY, uiButtonsWidth, uiShapeX, uiShapeY, uiShapeWidth;
 setSize();
 let arcTeethInit = discSizes.random();
-let fixedDisc = new Disc(ringSizes.random(), ring = 1);
-let movingDisc = new ArcSidedDisc(arcTeethInit + Math.random() * (fixedDisc.teeth - arcTeethInit), Math.random(), nArc = 2 + Math.floor(Math.random() * 4), arcTeeth = arcTeethInit, ring = 0);
-// let fixedDisc = new Disc(105, ring = 1);
-// let movingDisc = new ArcSidedDisc(100, .5, nArc = 1, arcTeeth = 40, ring = 0);
+// let fixedDisc = new Disc(ringSizes.random(), ring = 1);
+// let movingDisc = new ArcSidedDisc(arcTeethInit + Math.random() * (fixedDisc.teeth - arcTeethInit), Math.random(), nArc = 2 + Math.floor(Math.random() * 4), arcTeeth = arcTeethInit, ring = 0);
+let fixedDisc = new Disc(105, ring = 1);
+let movingDisc = new ArcSidedDisc(100, .5, nArc = 1, arcTeeth = 40, ring = 0);
 let pair = new Pair(fixedDisc, movingDisc)
 
 // pair.auto=1;
-// pair.nudge(6)
+pair.nudge(6)
 // pair.oneTrace();
 // pair.oneTrace();
 // pair.oneTrace();
+
+
 
 wakeGalleryServer()
 setGallerySubmitHTML();

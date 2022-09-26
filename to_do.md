@@ -1,5 +1,5 @@
 # to do
-* check nArc=1 nudging, compare to standard fixed disc behaviour
+* rearange sliders. group titles?
 * allow 'hanging' for ArcRad > fix Rad - new geom required
 * allow arcRad inversion - new geom required
 
@@ -12,3 +12,4 @@
 * increase arcness slide rate
 * fix auto rate, proportional to teeth ratio?
 * fix narcs=1
+* check nArc=1 nudging, compare to standard fixed disc behaviour
