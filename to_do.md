@@ -1,10 +1,10 @@
 # to do
 * force roll (and auto) to pass through roll discontinuities
-* rearange sliders. group titles?
 * allow 'hanging' for ArcRad > fix Rad - new geom required
 * allow arcRad inversion - new geom required
 
 # done
+* rearrange, rename sliders. add saturation.
 * maintain arcness while changing moving teeth
 * check scruffy arc rendering - fixed with module 2PI in draw theta
 * moving teeth slider should call pair.move(pair.th)

@@ -492,9 +492,14 @@ class Pair {
         ctx.textBaseline = "middle";
         ctx.fillText(Math.round(this.hue), X / 2 - txtSize, Y / 2);
         ctx.fillText(Math.round(this.lightness - 50), X / 2 + txtSize, Y / 2);
+        ctx.fillText(Math.round(this.saturation), X / 2 , Y / 2+2*txtSize);
+
         ctx.font = txtSize / 2 + 'px sans-serif';
         ctx.fillText('Hue', X / 2 - txtSize, Y / 2 - txtSize);
         ctx.fillText('Lightness', X / 2 + txtSize, Y / 2 - txtSize);
+        ctx.fillText('Saturation', X / 2, Y / 2 + txtSize);
+
+
     }
     drawInfo() {
         ctx.strokeStyle = this.fixed.color;
@@ -1394,76 +1399,10 @@ function createButtonsPanel() {
     return (panel)
 }
 function createSliderPanel() {
-
     let panel = new Panel(uiSlidersX + uiBorder, uiSlidersY + uiBorder, uiSlidersWidth - 2 * uiBorder, uiHeight - 2 * uiBorder);
     panel.anyClickActivates = true;
 
-    let ratButton = new PButton(panel, 0 / 6, 0, 1 / 6, 1, ["Pen", "Radius"],
-        function (dy, yDragVar0) {
-            showWheelsOverride = true;
-            pair.penUp();
-            pair.moving.rat = Math.min(maxDrawRadiusRatio, Math.max(-0.002 / pixRat * dy + yDragVar0, 0))
-            pair.penDown();
-
-        }, [], [],
-        function () {
-            return pair.moving.rat;
-        },
-        function (isDepressed) {
-            showRadInfo = isDepressed;
-        },
-    )
-    ratButton.yDrag = true;
-    ratButton.UDarrows = true;
-    panel.buttonArray.push(ratButton)
-
-    let angButton = new PButton(panel, 1 / 6, 0, 1 / 6, 1, ["Pen", "Angle"],
-        function (dy, yDragVar0) {
-            showWheelsOverride = true;
-            pair.penUp();
-            pair.moving.drawAng = Math.min(PI2 / 2, Math.max(-0.01 / pixRat * dy + yDragVar0, -PI2 / 2))
-            pair.penDown();
-
-        }, [], [],
-        function () {
-            return pair.moving.drawAng;
-        },
-        function (isDepressed) {
-            showRadInfo = isDepressed;
-        },
-    )
-    angButton.yDrag = true;
-    angButton.UDarrows = true;
-    panel.buttonArray.push(angButton)
-
-    let arcTeethButton = new PButton(panel, 2 / 6, 0, 1 / 6, 1, ["Moving", "Teeth"],
-        function (dy, yDragVar0) {
-            showWheelsOverride = true;
-            pair.penUp();
-            pair.moving.arcTeeth = Math.round(Math.min(pair.moving.teeth-1, Math.max(-0.05 / pixRat * dy + yDragVar0, 10)))
-            //need to use same definition of arcness to defin moving.teeth, as using in pair.updateGeom()
-            pair.moving.teeth=pair.arcness*(pair.fixed.teeth-pair.moving.arcTeeth)+pair.moving.arcTeeth
-            pair.updateGeom();
-            pair.move(pair.th);
-            pair.penDown();
-
-        }, [], [],
-        function () {
-            return pair.moving.arcTeeth;
-        },
-        function (isDepressed) {
-            // showArcInfo = isDepressed;
-            showInfo = isDepressed;
-        },
-    )
-    arcTeethButton.yDrag = true;
-    arcTeethButton.UDarrows = true;
-    panel.buttonArray.push(arcTeethButton)
-
-
-
-
-    let fixRadButton = new PButton(panel, 3 / 6, 0, 1 / 6, 1, ["Fixed", "Teeth"],
+    let fixRadButton = new PButton(panel, 0 / 6, 0, 1 / 6, 1, ["Fixed", "Size"],
         function (dy, yDragVar0) {
             showWheelsOverride = true;
             pair.penUp();
@@ -1489,7 +1428,135 @@ function createSliderPanel() {
     fixRadButton.UDarrows = true;
     panel.buttonArray.push(fixRadButton)
 
-    let hueButton = new PButton(panel, 4 / 6, 0, 1 / 6, 1, ["Hue"],
+    let arcTeethButton = new PButton(panel, 1 / 6, 0, 1 / 6, 1, ["Moving", "Size"],
+        function (dy, yDragVar0) {
+            showWheelsOverride = true;
+            pair.penUp();
+            pair.moving.arcTeeth = Math.round(Math.min(pair.moving.teeth-1, Math.max(-0.05 / pixRat * dy + yDragVar0, 10)))
+            //need to use same definition of arcness to defin moving.teeth, as using in pair.updateGeom()
+            pair.moving.teeth=pair.arcness*(pair.fixed.teeth-pair.moving.arcTeeth)+pair.moving.arcTeeth
+            pair.updateGeom();
+            pair.move(pair.th);
+            pair.penDown();
+
+        }, [], [],
+        function () {
+            return pair.moving.arcTeeth;
+        },
+        function (isDepressed) {
+            // showArcInfo = isDepressed;
+            showInfo = isDepressed;
+        },
+    )
+    arcTeethButton.yDrag = true;
+    arcTeethButton.UDarrows = true;
+    panel.buttonArray.push(arcTeethButton)
+
+    let ratButton = new PButton(panel, 4 / 6, 0, 1 / 6, 1, ["Pen", "Radius"],
+        function (dy, yDragVar0) {
+            showWheelsOverride = true;
+            pair.penUp();
+            pair.moving.rat = Math.min(maxDrawRadiusRatio, Math.max(-0.002 / pixRat * dy + yDragVar0, 0))
+            pair.penDown();
+
+        }, [], [],
+        function () {
+            return pair.moving.rat;
+        },
+        function (isDepressed) {
+            showRadInfo = isDepressed;
+        },
+    )
+    ratButton.yDrag = true;
+    ratButton.UDarrows = true;
+    panel.buttonArray.push(ratButton)
+
+    let angButton = new PButton(panel, 5 / 6, 0, 1 / 6, 1, ["Pen", "Angle"],
+        function (dy, yDragVar0) {
+            showWheelsOverride = true;
+            pair.penUp();
+            pair.moving.drawAng = Math.min(PI2 / 2, Math.max(-0.01 / pixRat * dy + yDragVar0, -PI2 / 2))
+            pair.penDown();
+
+        }, [], [],
+        function () {
+            return pair.moving.drawAng;
+        },
+        function (isDepressed) {
+            showRadInfo = isDepressed;
+        },
+    )
+    angButton.yDrag = true;
+    angButton.UDarrows = true;
+    panel.buttonArray.push(angButton)
+
+    let movRadButton = new PButton(panel, 3/6, 0, 1/6, 1, ["Arcness"],
+        function (dy, yDragVar0) {
+            showWheelsOverride = true;
+            pair.penUp();
+            pair.moving.teeth = Math.round(Math.min(pair.fixed.teeth, Math.max(-0.4 / pixRat * dy + yDragVar0, pair.moving.arcTeeth)));
+            // enable to to prevent 100% arcness problems
+            // if (pair.moving.teeth == pair.fixed.teeth) {
+            //     pair.moving.teeth--;
+            // }
+            pair.configRings()
+
+            pair.moving.circ = pair.moving.teeth * pixPerTooth;
+            pair.moving.rad = pair.moving.circ / PI2
+            pair.updateGeom();
+            pair.move(pair.th);
+            pair.penDown();
+        }, [], [],
+        function () {
+            return pair.moving.teeth;
+        },
+        function (isDepressed) {
+            showArcInfo = isDepressed;
+        }
+    )
+    movRadButton.yDrag = true;
+    movRadButton.UDarrows = true;
+    panel.buttonArray.push(movRadButton)
+
+
+
+    let nArcsButton = new PButton(panel, 2/6, 0, 1/6, 1, ["# Sides"],
+        function (dy, yDragVar0) {
+
+            showWheelsOverride = true;
+            pair.penUp();
+            pair.moving.nArc = Math.round(Math.min(7, Math.max(-0.05 / pixRat * dy + yDragVar0, 1)));
+            // if (pair.moving.teeth == pair.fixed.teeth) {
+            //     pair.moving.teeth--;
+            // }
+            pair.updateGeom();
+            pair.configRings()
+
+            pair.move(pair.th);
+            pair.penDown();
+        }, [], [],
+        function () {
+            return pair.moving.nArc;
+        },
+        function (isDepressed) {
+            showArcInfo = isDepressed;
+        }
+    )
+    nArcsButton.yDrag = true;
+    nArcsButton.UDarrows = true;
+    panel.buttonArray.push(nArcsButton)
+
+    return panel;
+
+
+}
+function createShapePanel() {
+    let nButs=3;
+
+    let panel = new Panel(uiShapeX + uiBorder, uiShapeY + uiBorder, uiShapeWidth - 2 * uiBorder, uiHeight - 2 * uiBorder);
+    panel.anyClickActivates = true;
+
+    let hueButton = new PButton(panel, 0 / nButs, 0, 1 / nButs, 1, ["Hue"],
         function (dy, yDragVar0) {
 
             pair.move(pair.th);
@@ -1526,20 +1593,11 @@ function createSliderPanel() {
     // colButton.LRarrows = true;
     panel.buttonArray.push(hueButton)
 
-    let lightnessButton = new PButton(panel, 5 / 6, 0, 1 / 6, 1, ["Lightness"],
+    let lightnessButton = new PButton(panel, 1 / nButs, 0, 1 / nButs, 1, ["Lightness"],
         function (dy, yDragVar0) {
 
             pair.move(pair.th);
             pair.penUpCont();
-
-            // pair.hue = yDragVar0 - 0.5/pixRat * dy;
-            // if (pair.hue > 360) {
-            //     pair.hue -= 360;
-            // }
-            // if (pair.hue < 0) {
-            //     pair.hue += 360;
-            // }
-            // console.log(dy, yDragVar0, dx, xdragVar0)
 
             pair.lightness = Math.max(00, Math.min(100, yDragVar0 + dy * -0.25 / pixRat));
 
@@ -1564,72 +1622,39 @@ function createSliderPanel() {
     // colButton.LRarrows = true;
     panel.buttonArray.push(lightnessButton)
 
+    let satButton = new PButton(panel, 2 / nButs, 0, 1 / nButs, 1, ["Saturation"],
+        function (dy, yDragVar0) {
+
+            pair.move(pair.th);
+            pair.penUpCont();
+
+            pair.saturation = Math.max(00, Math.min(100, yDragVar0 + dy * -0.25 / pixRat));
+
+            pair.setColor();
+            pair.fixed.color = pair.color;
+            pair.moving.color = pair.color;
+            document.querySelector(':root').style.setProperty('--fgColor', pair.color)
+            pair.move(pair.th);
+            pair.penDown();
+
+        }, [], [],
+        function () {
+            return pair.saturation;
+        },
+        function (isDepressed) {
+            showColInfo = isDepressed;
+        }
+    )
+    satButton.yDrag = true;
+    // colButton.xDrag = true;
+    satButton.UDarrows = true;
+    // colButton.LRarrows = true;
+    panel.buttonArray.push(satButton)
 
 
     return panel;
-}
-function createShapePanel() {
 
-    let panel = new Panel(uiShapeX + uiBorder, uiShapeY + uiBorder, uiShapeWidth - 2 * uiBorder, uiHeight - 2 * uiBorder);
-    panel.anyClickActivates = true;
-    // let maxMovingTeeth = pair.fixed.teeth;
-    let movRadButton = new PButton(panel, 0.00, 0, 0.5, 1, ["Arcness"],
-        function (dy, yDragVar0) {
-            showWheelsOverride = true;
-            pair.penUp();
-            pair.moving.teeth = Math.round(Math.min(pair.fixed.teeth, Math.max(-0.4 / pixRat * dy + yDragVar0, pair.moving.arcTeeth)));
-            // enable to to prevent 100% arcness problems
-            // if (pair.moving.teeth == pair.fixed.teeth) {
-            //     pair.moving.teeth--;
-            // }
-            pair.configRings()
-
-            pair.moving.circ = pair.moving.teeth * pixPerTooth;
-            pair.moving.rad = pair.moving.circ / PI2
-            pair.updateGeom();
-            pair.move(pair.th);
-            pair.penDown();
-        }, [], [],
-        function () {
-            return pair.moving.teeth;
-        },
-        function (isDepressed) {
-            showArcInfo = isDepressed;
-        }
-    )
-    movRadButton.yDrag = true;
-    movRadButton.UDarrows = true;
-    panel.buttonArray.push(movRadButton)
-
-
-
-    let nArcsButton = new PButton(panel, 0.50, 0, 0.5, 1, ["# Arcs"],
-        function (dy, yDragVar0) {
-
-            showWheelsOverride = true;
-            pair.penUp();
-            pair.moving.nArc = Math.round(Math.min(7, Math.max(-0.05 / pixRat * dy + yDragVar0, 1)));
-            // if (pair.moving.teeth == pair.fixed.teeth) {
-            //     pair.moving.teeth--;
-            // }
-            pair.updateGeom();
-            pair.configRings()
-
-            pair.move(pair.th);
-            pair.penDown();
-        }, [], [],
-        function () {
-            return pair.moving.nArc;
-        },
-        function (isDepressed) {
-            showArcInfo = isDepressed;
-        }
-    )
-    nArcsButton.yDrag = true;
-    nArcsButton.UDarrows = true;
-    panel.buttonArray.push(nArcsButton)
-
-    return panel;
+   
 }
 function submitToGallery() {
     let name = document.getElementById('name').value;
@@ -1764,7 +1789,7 @@ function setSize() {
     baseLW = 1 * pixRat;
     pixPerTooth = 9 * pixRat;
 
-    nOscButtons = 11;
+    nOscButtons = 13;
     minPanelWidth = 60 * pixRat
     uiBorder = 5 * pixRat;
 
@@ -1777,8 +1802,8 @@ function setSize() {
         uiHeight = 0.2 * Y;
 
         uiButtonsWidth = minPanelWidth * 4;
-        uiSlidersWidth = minPanelWidth * 5;
-        uiShapeWidth = minPanelWidth * 2;
+        uiSlidersWidth = minPanelWidth * 6;
+        uiShapeWidth = minPanelWidth * 3;
 
         uiButtonsX = (X - nOscButtons * minPanelWidth) / 2;
         uiSlidersX = uiButtonsX + uiButtonsWidth;
@@ -1800,8 +1825,8 @@ function setSize() {
         orient = "wideandshort";
         uiHeight = 0.5 * Y;
         uiButtonsWidth = 0.333 * X;
-        uiSlidersWidth = uiButtonsWidth * 5 / 7;
-        uiShapeWidth = uiButtonsWidth * 2 / 7;
+        uiSlidersWidth = uiButtonsWidth * 6 / 9;
+        uiShapeWidth = uiButtonsWidth * 3 / 9;
         uiButtonsX = 0;
         uiButtonsY = 0;
         uiSlidersX = 0;
@@ -1819,14 +1844,14 @@ function setSize() {
         uiHeight = 0.2 * Y;
 
         uiButtonsWidth = X;
-        uiSlidersWidth = X * (5 / 7);
-        uiShapeWidth = X * (2 / 7);
+        uiSlidersWidth = X * (6 / 9);
+        uiShapeWidth = X * (3 / 9);
 
         uiButtonsX = (X - 1 * uiButtonsWidth) / 2;
         uiButtonsY = 0;
         uiSlidersX = (X - 1 * uiButtonsWidth) / 2;
         uiSlidersY = Y - uiHeight;
-        uiShapeX = (X - 1 * uiButtonsWidth) / 2 + (5 / 7) * uiButtonsWidth;
+        uiShapeX = (X - 1 * uiButtonsWidth) / 2 + (6 / 9) * uiButtonsWidth;
         uiShapeY = Y - uiHeight;
 
         xOff = X * .5;
@@ -1891,7 +1916,7 @@ let uiSlidersX, uiSlidersY, uiSlidersWidth, pixRat, X, Y, scl, txtSize, baseLW, 
 setSize();
 let arcTeethInit = discSizes.random();
 let fixedDisc = new Disc(ringSizes.random(), ring = 1);
-let movingDisc = new ArcSidedDisc(arcTeethInit + Math.random() * (fixedDisc.teeth - arcTeethInit), Math.random(), nArc = 2 + Math.floor(Math.random() * 4), arcTeeth = arcTeethInit, ring = 0);
+let movingDisc = new ArcSidedDisc(arcTeethInit + Math.random() * (fixedDisc.teeth - arcTeethInit), Math.random(), nArc = 1 + Math.floor(Math.random() * 5), arcTeeth = arcTeethInit, ring = 0);
 // let fixedDisc = new Disc(105, ring = 1);
 // let movingDisc = new ArcSidedDisc(105, .5, nArc = 2, arcTeeth = 75, ring = 0);
 let pair = new Pair(fixedDisc, movingDisc)
