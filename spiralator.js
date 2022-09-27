@@ -1436,10 +1436,10 @@ function createSliderPanel() {
         function (dy, yDragVar0) {
             showWheelsOverride = true;
             pair.penUp();
-            pair.fixed.teeth = Math.round(Math.min(maxWheelSize, Math.max(-0.1 / pixRat * dy + yDragVar0, minWheelSize)));
-            if (pair.fixed.teeth == pair.moving.teeth) {
-                pair.fixed.teeth--;
-            }
+            pair.fixed.teeth = Math.round(Math.min(maxWheelSize, Math.max(-0.1 / pixRat * dy + yDragVar0, pair.moving.teeth+1)));
+            // if (pair.fixed.teeth == pair.moving.teeth) {
+            //     pair.fixed.teeth--;
+            // }
             pair.configRings()
             pair.fixed.circ = pair.fixed.teeth * pixPerTooth;
             pair.fixed.rad = pair.fixed.circ / PI2
