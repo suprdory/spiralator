@@ -1724,7 +1724,7 @@ function wakeGalleryServer() {
 }
 function anim() {
     if (pair.auto) { requestAnimationFrame(anim); }
-    if (pair.auto & !showColInfo & !showInfo & !showRadInfo) {
+    if (pair.auto & !showColInfo & !showInfo & !showRadInfo & !showArcInfo) {
         pair.update();
     }
 
