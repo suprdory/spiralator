@@ -58,7 +58,7 @@ const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
 const dispID = urlParams.get('id');
 
-let imageWidth = Math.min(window.innerWidth, 1080)
+let imageWidth = Math.min(window.innerWidth, 1080,window.innerHeight*0.95)
 document.querySelector(':root').style.setProperty('--nameSize', 10 + 'pt')
 document.querySelector(':root').style.setProperty('--commentSize', 10 + 'pt')
 
