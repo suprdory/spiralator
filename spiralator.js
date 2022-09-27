@@ -1488,7 +1488,7 @@ function createSliderPanel() {
         function (dy, yDragVar0) {
             showWheelsOverride = true;
             pair.penUp();
-            pair.moving.teeth = Math.round(Math.min(pair.fixed.teeth, Math.max(-0.4 / pixRat * dy + yDragVar0, pair.moving.arcTeeth)));
+            pair.moving.teeth = Math.round(Math.min(pair.fixed.teeth-5, Math.max(-0.4 / pixRat * dy + yDragVar0, pair.moving.arcTeeth)));
             // enable to to prevent 100% arcness problems
             if (pair.moving.teeth == pair.fixed.teeth) {
                 pair.moving.teeth--;
