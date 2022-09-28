@@ -735,7 +735,7 @@ class Pair {
     // }
 
     roll(th) {
-        // this.move(this.th)
+        this.move(this.th)
         if (Math.abs(th - this.th) < dth) {
             // normal move, increment is safely small
             this.move(th)
@@ -766,7 +766,7 @@ class Pair {
         let startTh = this.th;
         let traceTh=PI2*calcLCM(this.fixed.teeth, this.moving.arcTeeth) / this.fixed.teeth
         this.roll(this.th + traceTh);
-        this.move(startTh + traceTh);
+        // this.move(startTh + traceTh);
         this.penUp();
         this.penDown();
     }
@@ -1466,9 +1466,9 @@ function createSliderPanel() {
         function (dy, yDragVar0) {
             showWheelsOverride = true;
             pair.penUp();
-            pair.moving.arcTeeth = Math.round(Math.min(pair.moving.teeth - 1, Math.max(-0.05 / pixRat * dy + yDragVar0, 10)))
-            //need to use same definition of arcness to defin moving.teeth, as using in pair.updateGeom()
-            pair.moving.teeth = pair.arcness * (pair.fixed.teeth - pair.moving.arcTeeth) + pair.moving.arcTeeth
+            pair.moving.arcTeeth = Math.round(Math.min(pair.fixed.teeth-1, Math.max(-0.05 / pixRat * dy + yDragVar0, 10)))
+            //need to use same definition of arcness to define moving.teeth, as using in pair.updateGeom()
+            pair.moving.teeth =pair.arcness * (pair.fixed.teeth - pair.moving.arcTeeth) + pair.moving.arcTeeth
             pair.updateGeom();
             pair.move(pair.th);
             pair.penDown();
@@ -1487,7 +1487,6 @@ function createSliderPanel() {
     panel.buttonArray.push(arcTeethButton)
 
     
-
     let movRadButton = new PButton(panel, 3 / 6, 0, 1 / 6, 1, ["Arcness"],
         function (dy, yDragVar0) {
             showWheelsOverride = true;
@@ -1951,10 +1950,12 @@ let uiSlidersX, uiSlidersY, uiSlidersWidth, pixRat, X, Y, scl, txtSize, baseLW, 
 setSize();
 
 let arcTeethInit = discSizes.random();
-let nArcs= (Math.random() < 0.5) ? 1 : 2 + Math.floor(Math.random() * 3)
+let fixedTeeth=ringSizes.random()
+let nArcs= (Math.random() < 0.5) ? 1 : 2 + Math.floor(Math.random() * 3);
+let movingTeeth=arcTeethInit + (0.2+Math.random()*0.6) * (fixedTeeth - arcTeethInit);
 
-let fixedDisc = new Disc(ringSizes.random(), ring = 1);
-let movingDisc = new ArcSidedDisc(arcTeethInit + (0.5+Math.random()/2) * (fixedDisc.teeth - arcTeethInit), Math.random(), nArcs, arcTeeth = arcTeethInit, ring = 0);
+let fixedDisc = new Disc(fixedTeeth, ring = 1);
+let movingDisc = new ArcSidedDisc(movingTeeth, Math.random(), nArcs, arcTeeth = arcTeethInit, ring = 0);
 // let fixedDisc = new Disc(105, ring = 1);
 // let movingDisc = new ArcSidedDisc(84, .5, nArc = 1, arcTeeth = 84, ring = 0);
 let pair = new Pair(fixedDisc, movingDisc)
@@ -1981,8 +1982,9 @@ addPointerListeners();
 // let startTh=pair.th;
 // pair.roll(pair.th + traceTh);
 // console.log(startTh,calcLCM(pair.fixed.teeth, pair.moving.arcTeeth) / pair.fixed.teeth)
-
 // pair.move(4*PI2);
 
+// showWheels = false;
+// panelArray.forEach(panel => panel.active = false)
 anim();
 
