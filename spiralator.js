@@ -599,7 +599,7 @@ class Pair {
 
         // let tha = th * this.g2a;
         // if (Math.abs(tha) < m.phi * m.rad / f.rad) {
-        if ((Math.abs(thg_delta) < alpha) | (Math.abs(thg_delta) > (2 * beta - alpha))) {
+        if ((Math.abs(thg_delta) <= alpha) | (Math.abs(thg_delta) >= (2 * beta - alpha))) {
             // console.log('rolling, n:', nSide,'th:',th*rad2deg)
             // console.log(beta, alpha)
             //set current arc centre and shape rotation
@@ -764,8 +764,9 @@ class Pair {
         this.penUp();
         this.penDown();
         let startTh = this.th;
-        this.roll(this.th + PI2 * calcLCM(this.fixed.teeth, this.moving.arcTeeth) / this.fixed.teeth);
-        this.move(startTh + PI2 * calcLCM(this.fixed.teeth, this.moving.arcTeeth) / this.fixed.teeth)
+        let traceTh=PI2*calcLCM(this.fixed.teeth, this.moving.arcTeeth) / this.fixed.teeth
+        this.roll(this.th + traceTh);
+        this.move(startTh + traceTh);
         this.penUp();
         this.penDown();
     }
@@ -1955,7 +1956,7 @@ let nArcs= (Math.random() < 0.5) ? 1 : 2 + Math.floor(Math.random() * 3)
 let fixedDisc = new Disc(ringSizes.random(), ring = 1);
 let movingDisc = new ArcSidedDisc(arcTeethInit + (0.5+Math.random()/2) * (fixedDisc.teeth - arcTeethInit), Math.random(), nArcs, arcTeeth = arcTeethInit, ring = 0);
 // let fixedDisc = new Disc(105, ring = 1);
-// let movingDisc = new ArcSidedDisc(83, .5, nArc = 2, arcTeeth = 63, ring = 0);
+// let movingDisc = new ArcSidedDisc(84, .5, nArc = 1, arcTeeth = 84, ring = 0);
 let pair = new Pair(fixedDisc, movingDisc)
 
 // pair.auto=1;
@@ -1964,15 +1965,24 @@ let pair = new Pair(fixedDisc, movingDisc)
 // pair.oneTrace();
 pair.fullTrace();
 // pair.penUp()
-// pair.move(13* PI2 / 100)
+// pair.roll(PI2*4)
+
 // pair.penDown()
 // pair.move(14* PI2 / 100)
 // pair.move(15* PI2 / 100)
 // pair.move(16* PI2 / 100)
 
-
 wakeGalleryServer()
 setGallerySubmitHTML();
 addPointerListeners();
 
+
+// let traceTh=PI2*calcLCM(pair.fixed.teeth, pair.moving.arcTeeth) / pair.fixed.teeth
+// let startTh=pair.th;
+// pair.roll(pair.th + traceTh);
+// console.log(startTh,calcLCM(pair.fixed.teeth, pair.moving.arcTeeth) / pair.fixed.teeth)
+
+// pair.move(4*PI2);
+
 anim();
+
