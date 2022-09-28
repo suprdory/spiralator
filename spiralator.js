@@ -600,7 +600,7 @@ class Pair {
         // let tha = th * this.g2a;
         // if (Math.abs(tha) < m.phi * m.rad / f.rad) {
         if ((Math.abs(thg_delta) < alpha) | (Math.abs(thg_delta) > (2 * beta - alpha))) {
-            console.log('rolling, n:', nSide,'th:',th*rad2deg)
+            // console.log('rolling, n:', nSide,'th:',th*rad2deg)
             // console.log(beta, alpha)
             //set current arc centre and shape rotation
 
@@ -635,9 +635,9 @@ class Pair {
                 m.y0 = f.y + this.c * Math.sin(m.th0 + thg);
                 m.th = m.th0 - this.gam
             }
-            console.log('pivoting nPiv:', nPiv,'\nn:', nSide,'\nth:',th*rad2deg,'\nm.th:',m.th*rad2deg,'\nc:',this.c,
-            '\nohm',this.ohm,'\nomg:',this.omg,
-            '\nsin(ohm)',Math.sin(this.ohm),'\nsin(omg):',Math.sin(this.omg))
+            // console.log('pivoting nPiv:', nPiv,'\nn:', nSide,'\nth:',th*rad2deg,'\nm.th:',m.th*rad2deg,'\nc:',this.c,
+            // '\nohm',this.ohm,'\nomg:',this.omg,
+            // '\nsin(ohm)',Math.sin(this.ohm),'\nsin(omg):',Math.sin(this.omg))
         }
         // console.log('r', m.rad, '\nR', f.rad, '\na', m.drArc, '\nb', this.b, '\nc', this.c,
         // '\nthapp', this.tha_pp * 57, '\nthg', thg * 57, '\nth_d', this.th_d * 57, '\nohm', this.ohm * 57, '\nomg', this.omg * 57, '\ngam', this.gam * 57)
@@ -1948,9 +1948,12 @@ discSizes = [24, 30, 32, 40, 42, 45, 48, 52, 56, 60, 63, 72, 75, 80, 84]
 
 let uiSlidersX, uiSlidersY, uiSlidersWidth, pixRat, X, Y, scl, txtSize, baseLW, pixPerTooth, xOff, yOff, uiButtonsX, uiButtonsY, uiButtonsWidth, uiShapeX, uiShapeY, uiShapeWidth;
 setSize();
+
 let arcTeethInit = discSizes.random();
+let nArcs= (Math.random() < 0.5) ? 1 : 2 + Math.floor(Math.random() * 3)
+
 let fixedDisc = new Disc(ringSizes.random(), ring = 1);
-let movingDisc = new ArcSidedDisc(arcTeethInit + Math.random() * (fixedDisc.teeth - arcTeethInit), Math.random(), nArc = 1 + Math.floor(Math.random() * 5), arcTeeth = arcTeethInit, ring = 0);
+let movingDisc = new ArcSidedDisc(arcTeethInit + (0.5+Math.random()/2) * (fixedDisc.teeth - arcTeethInit), Math.random(), nArcs, arcTeeth = arcTeethInit, ring = 0);
 // let fixedDisc = new Disc(105, ring = 1);
 // let movingDisc = new ArcSidedDisc(83, .5, nArc = 2, arcTeeth = 63, ring = 0);
 let pair = new Pair(fixedDisc, movingDisc)
@@ -1959,7 +1962,7 @@ let pair = new Pair(fixedDisc, movingDisc)
 // pair.nudge(6)
 // pair.oneTrace();
 // pair.oneTrace();
-// pair.fullTrace();git add     
+pair.fullTrace();
 // pair.penUp()
 // pair.move(13* PI2 / 100)
 // pair.penDown()
