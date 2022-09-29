@@ -453,7 +453,7 @@ class Pair {
     }
     setColor() {
         this.color = "hsl(" + this.hue + "," + this.saturation + "%," + this.lightness + "%)"
-        this.transCol = "hsla(" + this.hue + "," + this.saturation + "%," + this.lightness + "%, 0.2)"
+        this.transCol = "hsla(" + this.hue + "," + this.saturation + "%," + this.lightness + "%, 0.3)"
     }
     drawRadInfo() {
         ctx.strokeStyle = this.fixed.color;
@@ -1210,6 +1210,7 @@ function doubleClickHandler(clickCase) {
     if (showWheels) {
         if ((clickCase == "autoCCW" || clickCase == "autoCW") & pair.auto != 0) {
             pair.auto = 0;
+            playDemo=0;
         }
         else if (clickCase == "autoCCW") {
             pair.auto = -1;
@@ -1372,11 +1373,11 @@ function createButtonsPanel() {
     panel.anyClickActivates = true;
 
     panel.buttonArray.push(
-        new PButton(panel, 0.0, 0.0, 0.25, 0.333, ["Share"],
+        new PButton(panel, 0.25, 0.0, 0.25, 0.333, ["Share"],
             function () { sharePanel.active = true; })
     );
     panel.buttonArray.push(
-        new PButton(panel, 0.0, 0.333, 0.25, 0.333, ["Hide"],
+        new PButton(panel, 0.25, 0.333, 0.25, 0.333, ["Hide","UI"],
             function () {
                 // showUI = false;
                 showWheels = false;
@@ -1385,14 +1386,14 @@ function createButtonsPanel() {
     );
 
     panel.buttonArray.push(
-        new PButton(panel, 0.125, 0.666, 0.125, 0.333, ["Init"],
+        new PButton(panel, .25+0.125, 0.666, 0.125, 0.333, ["Init"],
             function () {
                 init()
 
             })
     );
 
-    let demoButton = new PButton(panel, 0.0, 0.666, 0.125, 0.333, ["Demo"],
+    let demoButton = new PButton(panel, .25+0.0, 0.666, 0.125, 0.333, ["Demo"],
         function () { return toggleDemo(); },
         [], [], [], null,
         function () { return playDemo; })
@@ -1402,11 +1403,11 @@ function createButtonsPanel() {
 
 
     panel.buttonArray.push(
-        new PButton(panel, 0.25, .0, 0.25, 0.333, ["Clear All"],
+        new PButton(panel, 0.0, .0, 0.25, 0.333, ["Clear", "All"],
             function () { pair.clearAll() })
     );
     panel.buttonArray.push(
-        new PButton(panel, 0.25, .333, 0.25, 0.666, ["Clear"],
+        new PButton(panel, 0.0, .333, 0.25, 0.666, ["Undo"],
             function () { pair.clear(); })
     );
 
@@ -1430,7 +1431,7 @@ function createButtonsPanel() {
             function () { return pair.reset(); })
     );
 
-    let lockButton = new PButton(panel, 0.875, 0, 0.125, 0.333, ["Lock"],
+    let lockButton = new PButton(panel, 0.875, 0, 0.125, 0.333, ["Lock","Ring"],
         function () { return pair.toggleLock(); },
         [], [], [], null,
         function () { return pair.locked; })
@@ -1439,12 +1440,12 @@ function createButtonsPanel() {
 
 
     panel.buttonArray.push(
-        new PButton(panel, 0.75, .6666, 0.25, 0.3333, ["Trace"],
+        new PButton(panel, 0.75, .6666, 0.25, 0.3333, ["Complete"],
             function () { pair.fullTrace() })
     );
 
     panel.buttonArray.push(
-        new PButton(panel, 0.75, .3333, 0.25, 0.3333, ["1-Trace"],
+        new PButton(panel, 0.75, .3333, 0.25, 0.3333, ["Trace 360°"],
             function () { pair.oneTrace() })
     );
 
@@ -1981,7 +1982,7 @@ setSize();
 function init() {
     hueInit = Math.random() * 360
     bgFillStyle = "hsl(" + hueInit + ",100%,5%)";
-    bgFillStyleAlpha = "hsla(" + hueInit + ",100%,5%,.80)"
+    bgFillStyleAlpha = "hsla(" + hueInit + ",100%,5%,.8)"
     fgFillStyle = "hsl(" + hueInit + ",100%,50%)"
     setGallerySubmitHTML();
     canvas.style.backgroundColor = bgFillStyle
