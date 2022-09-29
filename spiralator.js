@@ -1964,7 +1964,7 @@ let pair = new Pair(fixedDisc, movingDisc)
 // pair.nudge(6)
 // pair.oneTrace();
 // pair.oneTrace();
-pair.fullTrace();
+// pair.fullTrace();
 // pair.penUp()
 // pair.roll(PI2*4)
 
