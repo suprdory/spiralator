@@ -417,6 +417,7 @@ class Pair {
         let m = this.moving;
         let f = this.fixed;
         m.updateShape();
+        this.fullTraceTh=PI2 * calcLCM(this.fixed.teeth, this.moving.arcTeeth) / this.fixed.teeth;
         this.arcness = (m.teeth - m.arcTeeth) / (f.teeth - m.arcTeeth); // 0: circle, 1: arcRad = Fixed Rad
 
         //conversion factor from angle to geo centre to angle to arc centre. based on linear extrapolation using analytic da/dg eval at 0.
@@ -627,7 +628,7 @@ class Pair {
             this.ohm = Math.PI - Math.asin(f.rad / this.b * Math.sin(th_piv))
             this.omg = Math.PI - this.ohm - th_piv
             // this.c = f.rad * Math.sin(this.omg) / Math.sin(this.ohm)
-            this.c = ((f.rad-this.b*Math.cos(this.omg))**2+(this.b*Math.sin(this.omg))**2)**0.5
+            this.c = ((f.rad - this.b * Math.cos(this.omg)) ** 2 + (this.b * Math.sin(this.omg)) ** 2) ** 0.5
             this.gam = nPiv * 2 * Math.PI / m.nArc - thPP - this.omg + Math.PI / m.nArc;
 
             if (!this.out) {
@@ -763,10 +764,10 @@ class Pair {
     fullTrace() {
         this.penUp();
         this.penDown();
-        let startTh = this.th;
-        let traceTh=PI2*calcLCM(this.fixed.teeth, this.moving.arcTeeth) / this.fixed.teeth
-        this.roll(this.th + traceTh);
-        // this.move(startTh + traceTh);
+        // let startTh = this.th;
+        // let traceTh = PI2 * calcLCM(this.fixed.teeth, this.moving.arcTeeth) / this.fixed.teeth
+        this.roll(this.th + this.fullTraceTh);
+        // this.move(startTh + this.fullTraceTh);
         this.penUp();
         this.penDown();
     }
@@ -1375,13 +1376,30 @@ function createButtonsPanel() {
             function () { sharePanel.active = true; })
     );
     panel.buttonArray.push(
-        new PButton(panel, 0.0, 0.333, 0.25, 0.666, ["Hide"],
+        new PButton(panel, 0.0, 0.333, 0.25, 0.333, ["Hide"],
             function () {
                 // showUI = false;
                 showWheels = false;
                 panelArray.forEach(panel => panel.active = false)
             })
     );
+
+    panel.buttonArray.push(
+        new PButton(panel, 0.125, 0.666, 0.125, 0.333, ["Init"],
+            function () {
+                init()
+
+            })
+    );
+
+    let demoButton = new PButton(panel, 0.0, 0.666, 0.125, 0.333, ["Demo"],
+        function () { return toggleDemo(); },
+        [], [], [], null,
+        function () { return playDemo; })
+    demoButton.toggle = true;
+    panel.buttonArray.push(demoButton);
+
+
 
     panel.buttonArray.push(
         new PButton(panel, 0.25, .0, 0.25, 0.333, ["Clear All"],
@@ -1440,7 +1458,7 @@ function createSliderPanel() {
         function (dy, yDragVar0) {
             showWheelsOverride = true;
             pair.penUp();
-            pair.fixed.teeth = Math.round(Math.min(maxWheelSize, Math.max(-0.1 / pixRat * dy + yDragVar0, pair.moving.teeth+1)));
+            pair.fixed.teeth = Math.round(Math.min(maxWheelSize, Math.max(-0.1 / pixRat * dy + yDragVar0, pair.moving.teeth + 1)));
             // if (pair.fixed.teeth == pair.moving.teeth) {
             //     pair.fixed.teeth--;
             // }
@@ -1466,9 +1484,9 @@ function createSliderPanel() {
         function (dy, yDragVar0) {
             showWheelsOverride = true;
             pair.penUp();
-            pair.moving.arcTeeth = Math.round(Math.min(pair.fixed.teeth-1, Math.max(-0.05 / pixRat * dy + yDragVar0, 10)))
+            pair.moving.arcTeeth = Math.round(Math.min(pair.fixed.teeth - 1, Math.max(-0.05 / pixRat * dy + yDragVar0, 10)))
             //need to use same definition of arcness to define moving.teeth, as using in pair.updateGeom()
-            pair.moving.teeth =pair.arcness * (pair.fixed.teeth - pair.moving.arcTeeth) + pair.moving.arcTeeth
+            pair.moving.teeth = pair.arcness * (pair.fixed.teeth - pair.moving.arcTeeth) + pair.moving.arcTeeth
             pair.updateGeom();
             pair.move(pair.th);
             pair.penDown();
@@ -1486,12 +1504,12 @@ function createSliderPanel() {
     arcTeethButton.UDarrows = true;
     panel.buttonArray.push(arcTeethButton)
 
-    
+
     let movRadButton = new PButton(panel, 3 / 6, 0, 1 / 6, 1, ["Arcness"],
         function (dy, yDragVar0) {
             showWheelsOverride = true;
             pair.penUp();
-            pair.moving.teeth = Math.round(Math.min(pair.fixed.teeth-5, Math.max(-0.4 / pixRat * dy + yDragVar0, pair.moving.arcTeeth)));
+            pair.moving.teeth = Math.round(Math.min(pair.fixed.teeth - 5, Math.max(-0.4 / pixRat * dy + yDragVar0, pair.moving.arcTeeth)));
             // enable to to prevent 100% arcness problems
             if (pair.moving.teeth == pair.fixed.teeth) {
                 pair.moving.teeth--;
@@ -1713,7 +1731,7 @@ function toggleGalleryForm() {
 }
 function setGallerySubmitHTML() {
     document.querySelector(':root').style.setProperty('--bgColor', bgFillStyle)
-    document.querySelector(':root').style.setProperty('--fgColor', pair.color)
+    document.querySelector(':root').style.setProperty('--fgColor', fgFillStyle)
     document.querySelector(':root').style.setProperty('--textSize', 12 + 'pt')
     document.getElementById("submit").addEventListener("click", submitToGallery, { passive: true })
     document.getElementById("close").addEventListener("click", toggleGalleryForm, { passive: true })
@@ -1725,8 +1743,23 @@ function wakeGalleryServer() {
         .then(data => console.log(data));
 
 }
+function toggleDemo() {
+    playDemo = !playDemo;
+    pair.auto = playDemo;
+    if (playDemo){
+    requestAnimationFrame(anim);
+    }
+    console.log(playDemo);
+
+}
 function anim() {
     if (pair.auto) { requestAnimationFrame(anim); }
+
+    if (playDemo & Math.abs(pair.th) > (pair.fullTraceTh+PI2)){
+        init();
+        pair.auto=1;
+    }
+
     if (pair.auto & !showColInfo & !showInfo & !showRadInfo & !showArcInfo) {
         pair.update();
     }
@@ -1916,16 +1949,12 @@ let showRadInfo = false;
 let showColInfo = false;
 let showgalleryForm = false;
 let showArcInfo = false;
+let playDemo = false;
 
 const shareBorderfrac = 0.15;
-const hueInit = Math.random() * 360
-const bgFillStyle = "hsl(" + hueInit + ",100%,5%)";
-const bgFillStyleAlpha = "hsla(" + hueInit + ",100%,5%,.80)";
 const transCol = "rgb(128,128,128,0.3)"
 const wheelColor = "white"
 const uiTextColor = "white"
-canvas.style.backgroundColor = bgFillStyle
-
 const maxWheelSize = 300;
 const minWheelSize = 10;
 const maxDrawRadiusRatio = 2;
@@ -1933,6 +1962,7 @@ const maxDrawRadiusRatio = 2;
 const galleryLW = 1;
 const galleryRes = 1920;
 const shareRes = 1920;
+
 
 const dth = PI2 / 200; // PI2/200 default
 
@@ -1945,20 +1975,27 @@ ringSizes = [96, 105]//,144,150]
 discSizes = [24, 30, 32, 40, 42, 45, 48, 52, 56, 60, 63, 72, 75, 80, 84]
 
 
-
-let uiSlidersX, uiSlidersY, uiSlidersWidth, pixRat, X, Y, scl, txtSize, baseLW, pixPerTooth, xOff, yOff, uiButtonsX, uiButtonsY, uiButtonsWidth, uiShapeX, uiShapeY, uiShapeWidth;
+let fgFillStyle,bgFillStyleAlpha,bgFillStyle,hueInit,pair, uiSlidersX, uiSlidersY, uiSlidersWidth, pixRat, X, Y, scl, txtSize, baseLW, pixPerTooth, xOff, yOff, uiButtonsX, uiButtonsY, uiButtonsWidth, uiShapeX, uiShapeY, uiShapeWidth;
 setSize();
 
-let arcTeethInit = discSizes.random();
-let fixedTeeth=ringSizes.random()
-let nArcs= (Math.random() < 0.5) ? 1 : 2 + Math.floor(Math.random() * 3);
-let movingTeeth=arcTeethInit + (0.2+Math.random()*0.6) * (fixedTeeth - arcTeethInit);
+function init() {
+    hueInit = Math.random() * 360
+    bgFillStyle = "hsl(" + hueInit + ",100%,5%)";
+    bgFillStyleAlpha = "hsla(" + hueInit + ",100%,5%,.80)"
+    fgFillStyle = "hsl(" + hueInit + ",100%,50%)"
+    setGallerySubmitHTML();
+    canvas.style.backgroundColor = bgFillStyle
+    let arcTeethInit = discSizes.random();
+    let fixedTeeth = ringSizes.random()
+    let nArcs = (Math.random() < 0.5) ? 1 : 2 + Math.floor(Math.random() * 3);
+    let movingTeeth = arcTeethInit + (0.2 + Math.random() * 0.6) * (fixedTeeth - arcTeethInit);
 
-let fixedDisc = new Disc(fixedTeeth, ring = 1);
-let movingDisc = new ArcSidedDisc(movingTeeth, Math.random(), nArcs, arcTeeth = arcTeethInit, ring = 0);
-// let fixedDisc = new Disc(105, ring = 1);
-// let movingDisc = new ArcSidedDisc(84, .5, nArc = 1, arcTeeth = 84, ring = 0);
-let pair = new Pair(fixedDisc, movingDisc)
+    let fixedDisc = new Disc(fixedTeeth, ring = 1);
+    let movingDisc = new ArcSidedDisc(movingTeeth, Math.random(), nArcs, arcTeeth = arcTeethInit, ring = 0);
+    // let fixedDisc = new Disc(105, ring = 1);
+    // let movingDisc = new ArcSidedDisc(84, .5, nArc = 1, arcTeeth = 84, ring = 0);
+    pair = new Pair(fixedDisc, movingDisc)
+}
 
 // pair.auto=1;
 // pair.nudge(6)
@@ -1974,9 +2011,7 @@ let pair = new Pair(fixedDisc, movingDisc)
 // pair.move(16* PI2 / 100)
 
 wakeGalleryServer()
-setGallerySubmitHTML();
 addPointerListeners();
-
 
 // let traceTh=PI2*calcLCM(pair.fixed.teeth, pair.moving.arcTeeth) / pair.fixed.teeth
 // let startTh=pair.th;
@@ -1986,5 +2021,7 @@ addPointerListeners();
 
 // showWheels = false;
 // panelArray.forEach(panel => panel.active = false)
+
+init()
 anim();
 
