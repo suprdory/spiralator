@@ -159,7 +159,7 @@ class Trace {
 }
 class ArcSidedDisc extends MovingDisc {
     constructor(
-        teeth = 84, rat = 0.7, nArc = 3, arcTeeth = 70, ring = false
+        teeth = 84, rat = 0.7, nArc = 3, arcTeeth = 70,penAngle=0, ring = false
     ) {
         super(teeth, rat);
 
@@ -179,7 +179,7 @@ class ArcSidedDisc extends MovingDisc {
         // this.out = 1;
         this.ring = ring;
         this.rat = rat;
-        this.drawAng = 0;
+        this.drawAng = penAngle;
 
         this.th0 = 0; //rotation angle at pair.th=0, shifted by nudging
         this.th = 0; //current rotation angle
@@ -1953,7 +1953,7 @@ let showArcInfo = false;
 let playDemo = false;
 
 const shareBorderfrac = 0.15;
-const transCol = "rgb(128,128,128,0.3)"
+const transCol = "rgb(128,128,128,0.1)"
 const wheelColor = "white"
 const uiTextColor = "white"
 const maxWheelSize = 300;
@@ -1990,9 +1990,9 @@ function init() {
     let fixedTeeth = ringSizes.random()
     let nArcs = (Math.random() < 0.5) ? 1 : 2 + Math.floor(Math.random() * 3);
     let movingTeeth = arcTeethInit + (0.2 + Math.random() * 0.6) * (fixedTeeth - arcTeethInit);
-
+    let penAngle = (Math.random() < 0.5) ? (Math.random()<0.5? 0:0.5*PI2/nArcs) : Math.random()*PI2;
     let fixedDisc = new Disc(fixedTeeth, ring = 1);
-    let movingDisc = new ArcSidedDisc(movingTeeth, Math.random(), nArcs, arcTeeth = arcTeethInit, ring = 0);
+    let movingDisc = new ArcSidedDisc(movingTeeth, Math.random(), nArcs, arcTeeth = arcTeethInit,penAngle=penAngle, ring = 0);
     // let fixedDisc = new Disc(105, ring = 1);
     // let movingDisc = new ArcSidedDisc(84, .5, nArc = 1, arcTeeth = 84, ring = 0);
     pair = new Pair(fixedDisc, movingDisc)
