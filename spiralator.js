@@ -159,7 +159,7 @@ class Trace {
 }
 class ArcSidedDisc extends MovingDisc {
     constructor(
-        teeth = 84, rat = 0.7, nArc = 3, arcTeeth = 70,penAngle=0, ring = false
+        teeth = 84, rat = 0.7, nArc = 3, arcTeeth = 70, penAngle = 0, ring = false
     ) {
         super(teeth, rat);
 
@@ -417,7 +417,7 @@ class Pair {
         let m = this.moving;
         let f = this.fixed;
         m.updateShape();
-        this.fullTraceTh=PI2 * calcLCM(this.fixed.teeth, this.moving.arcTeeth) / this.fixed.teeth;
+        this.fullTraceTh = PI2 * calcLCM(this.fixed.teeth, this.moving.arcTeeth) / this.fixed.teeth;
         this.arcness = (m.teeth - m.arcTeeth) / (f.teeth - m.arcTeeth); // 0: circle, 1: arcRad = Fixed Rad
 
         //conversion factor from angle to geo centre to angle to arc centre. based on linear extrapolation using analytic da/dg eval at 0.
@@ -1207,10 +1207,10 @@ function pointerUpHandler(xc, yc) {
     if (!pair.auto) { requestAnimationFrame(anim); }
 }
 function doubleClickHandler(clickCase) {
-    if (showWheels) {
+    if (topPanel.active) {
         if ((clickCase == "autoCCW" || clickCase == "autoCW") & pair.auto != 0) {
             pair.auto = 0;
-            playDemo=0;
+            playDemo = 0;
         }
         else if (clickCase == "autoCCW") {
             pair.auto = -1;
@@ -1221,10 +1221,17 @@ function doubleClickHandler(clickCase) {
             anim();
         }
     }
-    topPanel.active = true;
-    bottomPanel.active = true;
-    shapePanel.active = true;
-    showWheels = true;
+    if (!showWheels) {
+        showWheels = true;
+    }
+    else {
+        topPanel.active = true;
+        bottomPanel.active = true;
+        shapePanel.active = true;
+    }
+
+
+
 
 }
 function zoomHandler(dW, xc, yc) {
@@ -1377,7 +1384,7 @@ function createButtonsPanel() {
             function () { sharePanel.active = true; })
     );
     panel.buttonArray.push(
-        new PButton(panel, 0.25, 0.333, 0.25, 0.333, ["Hide","UI"],
+        new PButton(panel, 0.25, 0.333, 0.25, 0.333, ["Hide", "UI"],
             function () {
                 // showUI = false;
                 showWheels = false;
@@ -1386,14 +1393,14 @@ function createButtonsPanel() {
     );
 
     panel.buttonArray.push(
-        new PButton(panel, .25+0.125, 0.666, 0.125, 0.333, ["Init"],
+        new PButton(panel, .25 + 0.125, 0.666, 0.125, 0.333, ["Init"],
             function () {
                 init()
 
             })
     );
 
-    let demoButton = new PButton(panel, .25+0.0, 0.666, 0.125, 0.333, ["Demo"],
+    let demoButton = new PButton(panel, .25 + 0.0, 0.666, 0.125, 0.333, ["Demo"],
         function () { return toggleDemo(); },
         [], [], [], null,
         function () { return playDemo; })
@@ -1431,7 +1438,7 @@ function createButtonsPanel() {
             function () { return pair.reset(); })
     );
 
-    let lockButton = new PButton(panel, 0.875, 0, 0.125, 0.333, ["Lock","Ring"],
+    let lockButton = new PButton(panel, 0.875, 0, 0.125, 0.333, ["Lock", "Ring"],
         function () { return pair.toggleLock(); },
         [], [], [], null,
         function () { return pair.locked; })
@@ -1746,9 +1753,12 @@ function wakeGalleryServer() {
 }
 function toggleDemo() {
     playDemo = !playDemo;
-    pair.auto = playDemo;
-    if (playDemo){
-    requestAnimationFrame(anim);
+    if (pair.auto == 0) {
+        pair.auto = playDemo;
+        requestAnimationFrame(anim);
+    }
+    else {
+        pair.auto = playDemo;
     }
     console.log(playDemo);
 
@@ -1756,9 +1766,9 @@ function toggleDemo() {
 function anim() {
     if (pair.auto) { requestAnimationFrame(anim); }
 
-    if (playDemo & Math.abs(pair.th) > (pair.fullTraceTh+PI2)){
+    if (playDemo & Math.abs(pair.th) > (pair.fullTraceTh + PI2)) {
         init();
-        pair.auto=1;
+        pair.auto = 1;
     }
 
     if (pair.auto & !showColInfo & !showInfo & !showRadInfo & !showArcInfo) {
@@ -1953,7 +1963,7 @@ let showArcInfo = false;
 let playDemo = false;
 
 const shareBorderfrac = 0.15;
-const transCol = "rgb(128,128,128,0.1)"
+const transCol = "rgb(128,128,128,0.2)"
 const wheelColor = "white"
 const uiTextColor = "white"
 const maxWheelSize = 300;
@@ -1976,7 +1986,7 @@ ringSizes = [96, 105]//,144,150]
 discSizes = [24, 30, 32, 40, 42, 45, 48, 52, 56, 60, 63, 72, 75, 80, 84]
 
 
-let fgFillStyle,bgFillStyleAlpha,bgFillStyle,hueInit,pair, uiSlidersX, uiSlidersY, uiSlidersWidth, pixRat, X, Y, scl, txtSize, baseLW, pixPerTooth, xOff, yOff, uiButtonsX, uiButtonsY, uiButtonsWidth, uiShapeX, uiShapeY, uiShapeWidth;
+let fgFillStyle, bgFillStyleAlpha, bgFillStyle, hueInit, pair, uiSlidersX, uiSlidersY, uiSlidersWidth, pixRat, X, Y, scl, txtSize, baseLW, pixPerTooth, xOff, yOff, uiButtonsX, uiButtonsY, uiButtonsWidth, uiShapeX, uiShapeY, uiShapeWidth;
 setSize();
 
 function init() {
@@ -1990,9 +2000,9 @@ function init() {
     let fixedTeeth = ringSizes.random()
     let nArcs = (Math.random() < 0.5) ? 1 : 2 + Math.floor(Math.random() * 3);
     let movingTeeth = arcTeethInit + (0.2 + Math.random() * 0.6) * (fixedTeeth - arcTeethInit);
-    let penAngle = (Math.random() < 0.5) ? (Math.random()<0.5? 0:0.5*PI2/nArcs) : Math.random()*PI2;
+    let penAngle = (Math.random() < 0.5) ? (Math.random() < 0.5 ? 0 : 0.5 * PI2 / nArcs) : Math.random() * PI2;
     let fixedDisc = new Disc(fixedTeeth, ring = 1);
-    let movingDisc = new ArcSidedDisc(movingTeeth, Math.random(), nArcs, arcTeeth = arcTeethInit,penAngle=penAngle, ring = 0);
+    let movingDisc = new ArcSidedDisc(movingTeeth, Math.random(), nArcs, arcTeeth = arcTeethInit, penAngle = penAngle, ring = 0);
     // let fixedDisc = new Disc(105, ring = 1);
     // let movingDisc = new ArcSidedDisc(84, .5, nArc = 1, arcTeeth = 84, ring = 0);
     pair = new Pair(fixedDisc, movingDisc)
