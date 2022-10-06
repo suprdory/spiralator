@@ -1380,11 +1380,11 @@ function createButtonsPanel() {
     panel.anyClickActivates = true;
 
     panel.buttonArray.push(
-        new PButton(panel, 0.25, 0.0, 0.25, 0.333, ["Share"],
+        new PButton(panel, 0.0, 0.0, 0.25, 0.333, ["Share"],
             function () { sharePanel.active = true; })
     );
     panel.buttonArray.push(
-        new PButton(panel, 0.25, 0.333, 0.25, 0.333, ["Hide", "UI"],
+        new PButton(panel, 0.0, 0.333, 0.25, 0.333, ["Hide", "UI"],
             function () {
                 // showUI = false;
                 showWheels = false;
@@ -1393,14 +1393,14 @@ function createButtonsPanel() {
     );
 
     panel.buttonArray.push(
-        new PButton(panel, .25 + 0.125, 0.666, 0.125, 0.333, ["Init"],
+        new PButton(panel, .0 + 0.125, 0.666, 0.125, 0.333, ["Init"],
             function () {
                 init()
 
             })
     );
 
-    let demoButton = new PButton(panel, .25 + 0.0, 0.666, 0.125, 0.333, ["Demo"],
+    let demoButton = new PButton(panel, .0 + 0.0, 0.666, 0.125, 0.333, ["Demo"],
         function () { return toggleDemo(); },
         [], [], [], null,
         function () { return playDemo; })
@@ -1410,11 +1410,11 @@ function createButtonsPanel() {
 
 
     panel.buttonArray.push(
-        new PButton(panel, 0.0, .0, 0.25, 0.333, ["Clear", "All"],
+        new PButton(panel, 0.25, .0, 0.25, 0.333, ["Clear", "All"],
             function () { pair.clearAll() })
     );
     panel.buttonArray.push(
-        new PButton(panel, 0.0, .333, 0.25, 0.666, ["Undo"],
+        new PButton(panel, 0.25, .333, 0.25, 0.666, ["Undo"],
             function () { pair.clear(); })
     );
 
