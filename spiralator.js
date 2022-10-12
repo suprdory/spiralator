@@ -407,12 +407,19 @@ class Pair {
         this.tracing = true;
         this.move(this.th);
     }
-    calc_thg(tha, R, r, a) {
+    calc_thg_in(tha, R, r, a) {
         //thg is angle from fixed centre to moving centre, tha is angle from fixed entre to centre of currently rolling arc on moving shape.
         // when rolling multi arc shape, this is used for calculating the angle to the centre of shape (thg) at which shape starts pivoting on corner (at tha)
         let th = tha - Math.asin(a * Math.sin(tha * R / r) / ((R - r) ** 2 + a ** 2 + 2 * a * (R - r) * Math.cos(tha * R / r)) ** 0.5)
         return th
     }
+    calc_thg_out(tha, R, r, a) {
+        //thg is angle from fixed centre to moving centre, tha is angle from fixed entre to centre of currently rolling arc on moving shape.
+        // when rolling multi arc shape, this is used for calculating the angle to the centre of shape (thg) at which shape starts pivoting on corner (at tha)
+        let th = tha - Math.asin(a * Math.sin(tha * (R / r )) / ((R + r) ** 2 + a ** 2 + 2 * a * (R + r) * Math.cos(tha * (R / r ))) ** 0.5)
+        return th
+    }
+
     updateGeom() {
         let m = this.moving;
         let f = this.fixed;
@@ -420,16 +427,30 @@ class Pair {
         this.fullTraceTh = PI2 * calcLCM(this.fixed.teeth, this.moving.arcTeeth) / this.fixed.teeth;
         this.arcness = (m.teeth - m.arcTeeth) / (f.teeth - m.arcTeeth); // 0: circle, 1: arcRad = Fixed Rad
 
-        //conversion factor from angle to geo centre to angle to arc centre. based on linear extrapolation using analytic da/dg eval at 0.
-        this.g2a = 1 / (1 - m.drArc * (f.rad / m.rad) / (m.drArc + f.rad - m.rad));
-
         this.tha_pp = (m.phi * m.rad / f.rad) //first pivot point
+        //conversion factor from angle to geo centre to angle to arc centre. based on linear extrapolation using analytic da/dg eval at 0.
+        if (!this.out) {
+            this.g2a = 1 / (1 - m.drArc * (f.rad / m.rad) / (m.drArc + f.rad - m.rad)); //in
+        }
+        else {
+            this.g2a = 1 / (1 - m.drArc * (f.rad / m.rad ) / (m.drArc + f.rad + m.rad)); //out
+        }
+
         if (m.rad == f.rad) {
             this.thg_pp = 0;// always pivot
         }
         else {
-            this.thg_pp = this.calc_thg(this.tha_pp, f.rad, m.rad, m.drArc) //first angle to switch to pivoting
+            if (!this.out) {
+                //in
+                this.thg_pp = this.calc_thg_in(this.tha_pp, f.rad, m.rad, m.drArc) //first angle to switch to pivoting
+            }
+            else {
+                //out
+                // console.log("Setting out")
+                this.thg_pp = this.calc_thg_out(this.tha_pp, f.rad, m.rad, m.drArc) //first angle to switch to pivoting
+            }
         }
+        console.log(this.g2a, this.thg_pp)
         //updateGeoCentre
         m.x0 = m.x + m.drArc * Math.cos(m.th + m.n * 2 * m.theta);
         m.y0 = m.y + m.drArc * Math.sin(m.th + m.n * 2 * m.theta);
@@ -714,6 +735,7 @@ class Pair {
         this.configRings();
         // this.fixed.out=-this.fixed.out;
         // this.moving.th0 += PI2 / 2;
+        this.updateGeom();
         this.move(pair.th);
         this.penDown();
     }
@@ -1434,10 +1456,10 @@ function createButtonsPanel() {
 
 
     let invertButton = new PButton(panel, 0.5, 0, 0.25, 0.333, ["Invert"],
-        function () { pair.inOut(); }, 
+        function () { pair.inOut(); },
         [], [], [], null,
         function () { return pair.out; });
-    invertButton.toggle=true;
+    invertButton.toggle = true;
     panel.buttonArray.push(invertButton);
 
 
