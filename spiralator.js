@@ -2015,15 +2015,15 @@ function init() {
     canvas.style.backgroundColor = bgFillStyle
     let arcTeethInit = discSizes.random();
     let fixedTeeth = ringSizes.random()
-    // let nArcs = (Math.random() < 0.5) ? 1 : 2 + Math.floor(Math.random() * 3);
-    // let movingTeeth = arcTeethInit + (0.2 + Math.random() * 0.6) * (fixedTeeth - arcTeethInit);
-    // let penAngle = (Math.random() < 0.5) ? (Math.random() < 0.5 ? 0 : 0.5 * PI2 / nArcs) : Math.random() * PI2;
-    // let fixedDisc = new Disc(fixedTeeth, ring = 1);
-    // let movingDisc = new ArcSidedDisc(movingTeeth, Math.random(), nArcs, arcTeeth = arcTeethInit, penAngle = penAngle, ring = 0);
-    let fixedDisc = new Disc(80, ring = 1);
-    let movingDisc = new ArcSidedDisc(50, .5, nArc = 2, arcTeeth = 40, ring = 0);
+    let nArcs = (Math.random() < 0.5) ? 1 : 2 + Math.floor(Math.random() * 3);
+    let movingTeeth = arcTeethInit + (0.2 + Math.random() * 0.6) * (fixedTeeth - arcTeethInit);
+    let penAngle = (Math.random() < 0.5) ? (Math.random() < 0.5 ? 0 : 0.5 * PI2 / nArcs) : Math.random() * PI2;
+    let fixedDisc = new Disc(fixedTeeth, ring = 1);
+    let movingDisc = new ArcSidedDisc(movingTeeth, Math.random(), nArcs, arcTeeth = arcTeethInit, penAngle = penAngle, ring = 0);
+    // let fixedDisc = new Disc(80, ring = 1);
+    // let movingDisc = new ArcSidedDisc(50, .5, nArc = 2, arcTeeth = 40, ring = 0);
     pair = new Pair(fixedDisc, movingDisc)
-    pair.inOut();
+    // pair.inOut();
 }
 
 // pair.auto=1;
