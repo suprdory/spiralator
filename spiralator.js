@@ -602,40 +602,56 @@ class Pair {
         // if (Math.abs(tha) < m.phi * m.rad / f.rad) {
         if ((Math.abs(thg_delta) <= alpha) | (Math.abs(thg_delta) >= (2 * beta - alpha))) {
             // console.log('rolling, n:', nSide,'th:',th*rad2deg)
-            // console.log(beta, alpha)
+            // console.log(beta, alpha,this.g2a)
             //set current arc centre and shape rotation
 
             // let tha = th_rollCentre + (thg - arcCentre) * this.g2a;
-            // if (this.out) {
-            //     m.x = f.x + (f.rad + m.rad) * Math.cos(tha);
-            //     m.y = f.y + (f.rad + m.rad) * Math.sin(tha);
-            //     m.th = m.th0 + tha_rel * (f.rad / m.rad + 1)
-            // }
+            if (this.out) {
+                m.x = f.x + (f.rad + m.rad) * Math.cos(m.th0 + th_rollcentre + tha_roll);
+                m.y = f.y + (f.rad + m.rad) * Math.sin(m.th0 + th_rollcentre + tha_roll);
+                m.th = m.th0 + (nSide * PI2 / m.nArc) + th_rollcentre + tha_roll * (f.rad / m.rad + 1) + PI2 / 2;
+                //updateGeoCentre
+                m.x0 = m.x + m.drArc * Math.cos(m.th + nSide * 2 * m.theta);
+                m.y0 = m.y + m.drArc * Math.sin(m.th + nSide * 2 * m.theta);
+            }
             if (!this.out) {
                 m.x = f.x + (f.rad - m.rad) * Math.cos(m.th0 + th_rollcentre + tha_roll);
                 m.y = f.y + (f.rad - m.rad) * Math.sin(m.th0 + th_rollcentre + tha_roll);
                 m.th = m.th0 - (nSide * PI2 / m.nArc) + th_rollcentre - tha_roll * (f.rad / m.rad - 1);
                 // console.log(thg - th_rollcentre, this.g2a)
                 // console.log(m.x, m.y, m.th)
+
+                //updateGeoCentre
+                m.x0 = m.x + m.drArc * Math.cos(m.th + nSide * 2 * m.theta);
+                m.y0 = m.y + m.drArc * Math.sin(m.th + nSide * 2 * m.theta);
             }
-            //updateGeoCentre
-            m.x0 = m.x + m.drArc * Math.cos(m.th + nSide * 2 * m.theta);
-            m.y0 = m.y + m.drArc * Math.sin(m.th + nSide * 2 * m.theta);
+
 
         }
         else {
-            //set shape centre directly
-            this.ohm = Math.PI - Math.asin(f.rad / this.b * Math.sin(th_piv))
-            this.omg = Math.PI - this.ohm - th_piv
-            // this.c = f.rad * Math.sin(this.omg) / Math.sin(this.ohm)
-            this.c = ((f.rad - this.b * Math.cos(this.omg)) ** 2 + (this.b * Math.sin(this.omg)) ** 2) ** 0.5
-            this.gam = nPiv * 2 * Math.PI / m.nArc - thPP - this.omg + Math.PI / m.nArc;
-
+            //pivoting, set shape centre directly
             if (!this.out) {
+                this.ohm = Math.PI - Math.asin(f.rad / this.b * Math.sin(th_piv))
+                this.omg = Math.PI - this.ohm - th_piv
+                this.c = ((f.rad - this.b * Math.cos(this.omg)) ** 2 + (this.b * Math.sin(this.omg)) ** 2) ** 0.5
+                this.gam = nPiv * 2 * Math.PI / m.nArc - thPP - this.omg + Math.PI / m.nArc;
                 m.x0 = f.x + this.c * Math.cos(m.th0 + thg);
                 m.y0 = f.y + this.c * Math.sin(m.th0 + thg);
                 m.th = m.th0 - this.gam
             }
+
+
+            if (this.out) {
+                //inverted
+                // this.ohm = Math.PI - Math.asin(f.rad / this.b * Math.sin(th_piv))
+                // this.omg = Math.PI - this.ohm - th_piv
+                // this.c = ((f.rad + this.b * Math.cos(this.omg)) ** 2 + (this.b * Math.sin(this.omg)) ** 2) ** 0.5
+                // this.gam = -nPiv * 2 * Math.PI / m.nArc - thPP + this.omg + Math.PI / m.nArc;                
+                // m.x0 = f.x + this.c * Math.cos(m.th0 + thg);
+                // m.y0 = f.y + this.c * Math.sin(m.th0 + thg);
+                // m.th = m.th0 - this.gam
+            }
+
             // console.log('pivoting nPiv:', nPiv,'\nn:', nSide,'\nth:',th*rad2deg,'\nm.th:',m.th*rad2deg,'\nc:',this.c,
             // '\nohm',this.ohm,'\nomg:',this.omg,
             // '\nsin(ohm)',Math.sin(this.ohm),'\nsin(omg):',Math.sin(this.omg))
@@ -697,7 +713,7 @@ class Pair {
         this.out = !pair.out;
         this.configRings();
         // this.fixed.out=-this.fixed.out;
-        this.moving.th0 += PI2 / 2;
+        // this.moving.th0 += PI2 / 2;
         this.move(pair.th);
         this.penDown();
     }
@@ -1391,7 +1407,6 @@ function createButtonsPanel() {
                 panelArray.forEach(panel => panel.active = false)
             })
     );
-
     panel.buttonArray.push(
         new PButton(panel, .0 + 0.125, 0.666, 0.125, 0.333, ["Init"],
             function () {
@@ -1407,8 +1422,6 @@ function createButtonsPanel() {
     demoButton.toggle = true;
     panel.buttonArray.push(demoButton);
 
-
-
     panel.buttonArray.push(
         new PButton(panel, 0.25, .0, 0.25, 0.333, ["Clear", "All"],
             function () { pair.clearAll() })
@@ -1420,10 +1433,14 @@ function createButtonsPanel() {
 
 
 
-    panel.buttonArray.push(
-        new PButton(panel, 0.5, 0, 0.25, 0.333, ["Invert"],
-            function () { pair.inOut(); })
-    );
+    let invertButton = new PButton(panel, 0.5, 0, 0.25, 0.333, ["Invert"],
+        function () { pair.inOut(); }, 
+        [], [], [], null,
+        function () { return pair.out; });
+    invertButton.toggle=true;
+    panel.buttonArray.push(invertButton);
+
+
     panel.buttonArray.push(
         new PButton(panel, 0.5, .333, 0.25, 0.333, ["Nudge +"],
             function () { return pair.nudge(1); })
@@ -1998,14 +2015,15 @@ function init() {
     canvas.style.backgroundColor = bgFillStyle
     let arcTeethInit = discSizes.random();
     let fixedTeeth = ringSizes.random()
-    let nArcs = (Math.random() < 0.5) ? 1 : 2 + Math.floor(Math.random() * 3);
-    let movingTeeth = arcTeethInit + (0.2 + Math.random() * 0.6) * (fixedTeeth - arcTeethInit);
-    let penAngle = (Math.random() < 0.5) ? (Math.random() < 0.5 ? 0 : 0.5 * PI2 / nArcs) : Math.random() * PI2;
-    let fixedDisc = new Disc(fixedTeeth, ring = 1);
-    let movingDisc = new ArcSidedDisc(movingTeeth, Math.random(), nArcs, arcTeeth = arcTeethInit, penAngle = penAngle, ring = 0);
-    // let fixedDisc = new Disc(105, ring = 1);
-    // let movingDisc = new ArcSidedDisc(84, .5, nArc = 1, arcTeeth = 84, ring = 0);
+    // let nArcs = (Math.random() < 0.5) ? 1 : 2 + Math.floor(Math.random() * 3);
+    // let movingTeeth = arcTeethInit + (0.2 + Math.random() * 0.6) * (fixedTeeth - arcTeethInit);
+    // let penAngle = (Math.random() < 0.5) ? (Math.random() < 0.5 ? 0 : 0.5 * PI2 / nArcs) : Math.random() * PI2;
+    // let fixedDisc = new Disc(fixedTeeth, ring = 1);
+    // let movingDisc = new ArcSidedDisc(movingTeeth, Math.random(), nArcs, arcTeeth = arcTeethInit, penAngle = penAngle, ring = 0);
+    let fixedDisc = new Disc(80, ring = 1);
+    let movingDisc = new ArcSidedDisc(50, .5, nArc = 2, arcTeeth = 40, ring = 0);
     pair = new Pair(fixedDisc, movingDisc)
+    pair.inOut();
 }
 
 // pair.auto=1;
@@ -2033,6 +2051,8 @@ addPointerListeners();
 // showWheels = false;
 // panelArray.forEach(panel => panel.active = false)
 
-init()
+init();
 anim();
+
+
 
