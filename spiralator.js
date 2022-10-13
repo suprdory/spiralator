@@ -416,7 +416,7 @@ class Pair {
     calc_thg_out(tha, R, r, a) {
         //thg is angle from fixed centre to moving centre, tha is angle from fixed entre to centre of currently rolling arc on moving shape.
         // when rolling multi arc shape, this is used for calculating the angle to the centre of shape (thg) at which shape starts pivoting on corner (at tha)
-        let th = tha - Math.asin(a * Math.sin(tha * (R / r )) / ((R + r) ** 2 + a ** 2 + 2 * a * (R + r) * Math.cos(tha * (R / r ))) ** 0.5)
+        let th = tha - Math.asin(a * Math.sin(tha * (R / r)) / ((R + r) ** 2 + a ** 2 + 2 * a * (R + r) * Math.cos(tha * (R / r))) ** 0.5)
         return th
     }
 
@@ -433,7 +433,7 @@ class Pair {
             this.g2a = 1 / (1 - m.drArc * (f.rad / m.rad) / (m.drArc + f.rad - m.rad)); //in
         }
         else {
-            this.g2a = 1 / (1 - m.drArc * (f.rad / m.rad ) / (m.drArc + f.rad + m.rad)); //out
+            this.g2a = 1 / (1 - m.drArc * (f.rad / m.rad) / (m.drArc + f.rad + m.rad)); //out
         }
 
         if (m.rad == f.rad) {
@@ -605,8 +605,11 @@ class Pair {
         let thg_delta = thg % (2 * beta);
         let n = parseInt(thg / (2 * beta));
         let nPiv = n - (thg < 0);
+        // let nPiv = nPiv_in;
         let nRoll = n + Math.sign(thg) * (Math.abs(thg_delta) > beta);
-        let nSide = nRoll % m.nArc;
+        // let nRoll= nRoll_in;
+        let nSide = (nRoll) % m.nArc;
+
         let thPP = beta + 2 * beta * n
         this.nRoll = nRoll;
         if (thg < 0) {
@@ -622,7 +625,7 @@ class Pair {
         // let tha = th * this.g2a;
         // if (Math.abs(tha) < m.phi * m.rad / f.rad) {
         if ((Math.abs(thg_delta) <= alpha) | (Math.abs(thg_delta) >= (2 * beta - alpha))) {
-            // console.log('rolling, n:', nSide,'th:',th*rad2deg)
+            console.log('rolling, n:', nSide,'th:',th*rad2deg)
             // console.log(beta, alpha,this.g2a)
             //set current arc centre and shape rotation
 
@@ -632,8 +635,8 @@ class Pair {
                 m.y = f.y + (f.rad + m.rad) * Math.sin(m.th0 + th_rollcentre + tha_roll);
                 m.th = m.th0 + (nSide * PI2 / m.nArc) + th_rollcentre + tha_roll * (f.rad / m.rad + 1) + PI2 / 2;
                 //updateGeoCentre
-                m.x0 = m.x + m.drArc * Math.cos(m.th + nSide * 2 * m.theta);
-                m.y0 = m.y + m.drArc * Math.sin(m.th + nSide * 2 * m.theta);
+                m.x0 = m.x + m.drArc * Math.cos(m.th + (m.nArc-nSide) * 2 * m.theta);
+                m.y0 = m.y + m.drArc * Math.sin(m.th + (m.nArc - nSide) * 2 * m.theta);
             }
             if (!this.out) {
                 m.x = f.x + (f.rad - m.rad) * Math.cos(m.th0 + th_rollcentre + tha_roll);
@@ -664,16 +667,17 @@ class Pair {
 
             if (this.out) {
                 //inverted
-                // this.ohm = Math.PI - Math.asin(f.rad / this.b * Math.sin(th_piv))
-                // this.omg = Math.PI - this.ohm - th_piv
-                // this.c = ((f.rad + this.b * Math.cos(this.omg)) ** 2 + (this.b * Math.sin(this.omg)) ** 2) ** 0.5
-                // this.gam = -nPiv * 2 * Math.PI / m.nArc - thPP + this.omg + Math.PI / m.nArc;                
-                // m.x0 = f.x + this.c * Math.cos(m.th0 + thg);
-                // m.y0 = f.y + this.c * Math.sin(m.th0 + thg);
-                // m.th = m.th0 - this.gam
+                this.ohm = Math.asin(f.rad / this.b * Math.sin(th_piv))
+                this.omg = Math.PI - this.ohm - th_piv
+                this.c = ((f.rad - this.b * Math.cos(this.omg)) ** 2 + (this.b * Math.sin(this.omg)) ** 2) ** 0.5
+                this.gam = (m.nArc-nPiv) * 2 * Math.PI / m.nArc - thPP - this.omg - 1*Math.PI / m.nArc;
+                m.x0 = f.x + this.c * Math.cos(m.th0 + thg);
+                m.y0 = f.y + this.c * Math.sin(m.th0 + thg);
+                m.th = m.th0 - this.gam
             }
 
-            // console.log('pivoting nPiv:', nPiv,'\nn:', nSide,'\nth:',th*rad2deg,'\nm.th:',m.th*rad2deg,'\nc:',this.c,
+            console.log('pivoting nPiv:', nPiv,'\nn:', nSide,'\nth:',th*rad2deg,'\nm.th:',
+            m.th*rad2deg,'\nc:',this.c)
             // '\nohm',this.ohm,'\nomg:',this.omg,
             // '\nsin(ohm)',Math.sin(this.ohm),'\nsin(omg):',Math.sin(this.omg))
         }
@@ -2043,7 +2047,7 @@ function init() {
     // let fixedDisc = new Disc(fixedTeeth, ring = 1);
     // let movingDisc = new ArcSidedDisc(movingTeeth, Math.random(), nArcs, arcTeeth = arcTeethInit, penAngle = penAngle, ring = 0);
     let fixedDisc = new Disc(80, ring = 1);
-    let movingDisc = new ArcSidedDisc(50, .5, nArc = 2, arcTeeth = 40, ring = 0);
+    let movingDisc = new ArcSidedDisc(50, .5, nArc = 3, arcTeeth = 40, ring = 0);
     pair = new Pair(fixedDisc, movingDisc)
     pair.inOut();
 }
