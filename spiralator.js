@@ -625,7 +625,7 @@ class Pair {
         // let tha = th * this.g2a;
         // if (Math.abs(tha) < m.phi * m.rad / f.rad) {
         if ((Math.abs(thg_delta) <= alpha) | (Math.abs(thg_delta) >= (2 * beta - alpha))) {
-            console.log('rolling, n:', nSide,'th:',th*rad2deg)
+            // console.log('rolling, n:', nSide,'th:',th*rad2deg)
             // console.log(beta, alpha,this.g2a)
             //set current arc centre and shape rotation
 
@@ -676,8 +676,9 @@ class Pair {
                 m.th = m.th0 - this.gam
             }
 
-            console.log('pivoting nPiv:', nPiv,'\nn:', nSide,'\nth:',th*rad2deg,'\nm.th:',
-            m.th*rad2deg,'\nc:',this.c)
+            // console.log('pivoting nPiv:', nPiv,'\nn:', nSide,'\nth:',th*rad2deg,'\nm.th:',
+            // m.th*rad2deg,'\nc:',this.c)
+            
             // '\nohm',this.ohm,'\nomg:',this.omg,
             // '\nsin(ohm)',Math.sin(this.ohm),'\nsin(omg):',Math.sin(this.omg))
         }
