@@ -428,13 +428,14 @@ class Pair {
         this.arcness = (m.teeth - m.arcTeeth) / (f.teeth - m.arcTeeth); // 0: circle, 1: arcRad = Fixed Rad
 
         this.tha_pp = (m.phi * m.rad / f.rad) //first pivot point
+        
         //conversion factor from angle to geo centre to angle to arc centre. based on linear extrapolation using analytic da/dg eval at 0.
-        if (!this.out) {
-            this.g2a = 1 / (1 - m.drArc * (f.rad / m.rad) / (m.drArc + f.rad - m.rad)); //in
-        }
-        else {
-            this.g2a = 1 / (1 - m.drArc * (f.rad / m.rad) / (m.drArc + f.rad + m.rad)); //out
-        }
+        // if (!this.out) {
+        //     this.g2a = 1 / (1 - m.drArc * (f.rad / m.rad) / (m.drArc + f.rad - m.rad)); //in
+        // }
+        // else {
+        //     this.g2a = 1 / (1 - m.drArc * (f.rad / m.rad) / (m.drArc + f.rad + m.rad)); //out
+        // }
 
         if (m.rad == f.rad) {
             this.thg_pp = 0;// always pivot
@@ -448,14 +449,18 @@ class Pair {
                 //out
                 // console.log("Setting out")
                 this.thg_pp = this.calc_thg_out(this.tha_pp, f.rad, m.rad, m.drArc) //first angle to switch to pivoting
+                
             }
         }
-        console.log(this.g2a, this.thg_pp)
+        // console.log(this.g2a, this.tha_pp / this.thg_pp)
+
+        // new method of calculating g to a ratio based on ration of first pivot point, 
+        // now no need for constant gradiant from zero approach
+        this.g2a = this.tha_pp / this.thg_pp
+        
         //updateGeoCentre
         m.x0 = m.x + m.drArc * Math.cos(m.th + m.n * 2 * m.theta);
         m.y0 = m.y + m.drArc * Math.sin(m.th + m.n * 2 * m.theta);
-
-        // console.log(m)
     }
     toggleLock() {
         this.locked = !this.locked
@@ -678,7 +683,7 @@ class Pair {
 
             // console.log('pivoting nPiv:', nPiv,'\nn:', nSide,'\nth:',th*rad2deg,'\nm.th:',
             // m.th*rad2deg,'\nc:',this.c)
-            
+
             // '\nohm',this.ohm,'\nomg:',this.omg,
             // '\nsin(ohm)',Math.sin(this.ohm),'\nsin(omg):',Math.sin(this.omg))
         }
