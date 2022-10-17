@@ -259,19 +259,19 @@ class ArcSidedDisc extends MovingDisc {
         ctx.stroke();
 
         // //draw construction circs
-        ctx.lineWidth = this.lw / 2;
-        for (let i = 0; i < this.nArc; i++) {
-            ctx.beginPath();
-            ctx.arc(
-                this.x0 + drArc * (Math.cos(theta0 + PI2 / 2)),
-                this.y0 + drArc * (Math.sin(theta0 + PI2 / 2)),
-                this.rad,
-                0,
-                PI2,
-            );
-            ctx.stroke();
-            theta0 += (PI2 / this.nArc);
-        }
+        // ctx.lineWidth = this.lw / 2;
+        // for (let i = 0; i < this.nArc; i++) {
+        //     ctx.beginPath();
+        //     ctx.arc(
+        //         this.x0 + drArc * (Math.cos(theta0 + PI2 / 2)),
+        //         this.y0 + drArc * (Math.sin(theta0 + PI2 / 2)),
+        //         this.rad,
+        //         0,
+        //         PI2,
+        //     );
+        //     ctx.stroke();
+        //     theta0 += (PI2 / this.nArc);
+        // }
 
         // //containing circle
         // ctx.beginPath();
@@ -1996,13 +1996,13 @@ function init() {
     let nArcs = (Math.random() < 0.5) ? 1 : 2 + Math.floor(Math.random() * 3);
     let movingTeeth = arcTeethInit + (0.2 + Math.random() * 0.6) * (fixedTeeth - arcTeethInit);
     let penAngle = (Math.random() < 0.5) ? (Math.random() < 0.5 ? 0 : 0.5 * PI2 / nArcs) : Math.random() * PI2;
-    // let fixedDisc = new Disc(fixedTeeth, ring = 1);
-    // let movingDisc = new ArcSidedDisc(movingTeeth, Math.random(), nArcs, arcTeeth = arcTeethInit, penAngle = penAngle, ring = 0);
-    let fixedDisc = new Disc(80, ring = 1);
-    let movingDisc = new ArcSidedDisc(150, .5, nArc = 2, arcTeeth = 40, ring = 0);
+    let fixedDisc = new Disc(fixedTeeth, ring = 1);
+    let movingDisc = new ArcSidedDisc(movingTeeth, Math.random(), nArcs, arcTeeth = arcTeethInit, penAngle = penAngle, ring = 0);
+    // let fixedDisc = new Disc(80, ring = 1);
+    // let movingDisc = new ArcSidedDisc(150, .5, nArc = 2, arcTeeth = 40, ring = 0);
     pair = new Pair(fixedDisc, movingDisc)
-    pair.inOut();
-    pair.move(-20.09 / 360 * PI2)
+    // pair.inOut();
+    // pair.move(-20.09 / 360 * PI2)
 }
 
 const canvas = document.getElementById("cw");
