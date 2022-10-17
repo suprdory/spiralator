@@ -259,19 +259,19 @@ class ArcSidedDisc extends MovingDisc {
         ctx.stroke();
 
         // //draw construction circs
-        // ctx.lineWidth = this.lw / 2;
-        // for (let i = 0; i < this.nArc; i++) {
-        //     ctx.beginPath();
-        //     ctx.arc(
-        //         this.x0 + drArc * (Math.cos(theta0 + PI2 / 2)),
-        //         this.y0 + drArc * (Math.sin(theta0 + PI2 / 2)),
-        //         this.rad,
-        //         0,
-        //         PI2,
-        //     );
-        //     ctx.stroke();
-        //     theta0 += (PI2 / this.nArc);
-        // }
+        ctx.lineWidth = this.lw / 2;
+        for (let i = 0; i < this.nArc; i++) {
+            ctx.beginPath();
+            ctx.arc(
+                this.x0 + drArc * (Math.cos(theta0 + PI2 / 2)),
+                this.y0 + drArc * (Math.sin(theta0 + PI2 / 2)),
+                this.rad,
+                0,
+                PI2,
+            );
+            ctx.stroke();
+            theta0 += (PI2 / this.nArc);
+        }
 
         // //containing circle
         // ctx.beginPath();
@@ -416,7 +416,7 @@ class Pair {
     calc_thg_out(tha, R, r, a) {
         //thg is angle from fixed centre to moving centre, tha is angle from fixed entre to centre of currently rolling arc on moving shape.
         // when rolling multi arc shape, this is used for calculating the angle to the centre of shape (thg) at which shape starts pivoting on corner (at tha)
-        let th = tha - Math.asin(a * Math.sin(tha * (R / r)) / ((R + r) ** 2 + a ** 2 + 2 * a * (R + r) * Math.cos(tha * (R / r))) ** 0.5)
+        let th = tha - Math.asin(a * Math.sin(tha * (R / r + 1)) / ((R + r) ** 2 + a ** 2 + 2 * a * (R + r) * Math.cos(tha * (R / r + 1))) ** 0.5)
         return th
     }
 
@@ -427,9 +427,7 @@ class Pair {
         this.fullTraceTh = PI2 * calcLCM(this.fixed.teeth, this.moving.arcTeeth) / this.fixed.teeth;
         this.arcness = (m.teeth - m.arcTeeth) / (f.teeth - m.arcTeeth); // 0: circle, 1: arcRad = Fixed Rad
 
-        this.tha_pp = (m.phi * m.rad / f.rad) //first pivot point
-        
-        //conversion factor from angle to geo centre to angle to arc centre. based on linear extrapolation using analytic da/dg eval at 0.
+        // //conversion factor from angle to geo centre to angle to arc centre. based on linear extrapolation using analytic da/dg eval at 0.
         // if (!this.out) {
         //     this.g2a = 1 / (1 - m.drArc * (f.rad / m.rad) / (m.drArc + f.rad - m.rad)); //in
         // }
@@ -439,17 +437,20 @@ class Pair {
 
         if (m.rad == f.rad) {
             this.thg_pp = 0;// always pivot
+            this.tha_pp = 0; //first pivot point
         }
         else {
             if (!this.out) {
                 //in
+                this.tha_pp = (m.phi * m.rad / f.rad) //first pivot point
                 this.thg_pp = this.calc_thg_in(this.tha_pp, f.rad, m.rad, m.drArc) //first angle to switch to pivoting
             }
             else {
                 //out
                 // console.log("Setting out")
+                this.tha_pp = (m.phi * m.rad / f.rad) //first pivot point
                 this.thg_pp = this.calc_thg_out(this.tha_pp, f.rad, m.rad, m.drArc) //first angle to switch to pivoting
-                
+
             }
         }
         // console.log(this.g2a, this.tha_pp / this.thg_pp)
@@ -457,7 +458,7 @@ class Pair {
         // new method of calculating g to a ratio based on ration of first pivot point, 
         // now no need for constant gradiant from zero approach
         this.g2a = this.tha_pp / this.thg_pp
-        
+
         //updateGeoCentre
         m.x0 = m.x + m.drArc * Math.cos(m.th + m.n * 2 * m.theta);
         m.y0 = m.y + m.drArc * Math.sin(m.th + m.n * 2 * m.theta);
@@ -603,62 +604,55 @@ class Pair {
         let rad2deg = 180 / Math.PI;
         let f = this.fixed;
         let m = this.moving;
-        let thg = th - m.th0;
-        this.b = m.radCont;
-        let alpha = this.thg_pp;
-        let beta = this.tha_pp;
-        let thg_delta = thg % (2 * beta);
-        let n = parseInt(thg / (2 * beta));
-        let nPiv = n - (thg < 0);
-        // let nPiv = nPiv_in;
-        let nRoll = n + Math.sign(thg) * (Math.abs(thg_delta) > beta);
-        // let nRoll= nRoll_in;
-        let nSide = (nRoll) % m.nArc;
-
-        let thPP = beta + 2 * beta * n
+        let thg = th - m.th0; //angle to geocentre of arcshape (minis nudge offset)
+        this.b = m.radCont; // radius of arcShape containing circle
+        let alpha = this.thg_pp; // angle to geocentre of first transition to pivoting;
+        let beta = this.tha_pp; // angle to first pivot point
+        let thg_delta = thg % (2 * beta); //angle relative to last roll centre (first roll centre at 0)
+        let n = parseInt(thg / (2 * beta)); //number of roll centres passed
+        let nPiv = n - (thg < 0); // pivot centre number
+        let nRoll = n + Math.sign(thg) * (Math.abs(thg_delta) > beta);// roll centre number
         this.nRoll = nRoll;
-        if (thg < 0) {
+        let nSide = (nRoll) % m.nArc; //side number rolling;
+        let thPP; //current pivot point angle
+        if (thg <= 0) {
             thPP = beta + 2 * beta * (n - 1);
         }
+        else {
+            thPP = beta + 2 * beta * n;
+        }
         this.thPP = thPP;
-        let th_piv = thPP - thg;
 
-        let th_rollcentre = nRoll * 2 * beta;
-        let tha_roll = (thg - th_rollcentre) * this.g2a;
+        let th_piv = thPP - thg; //angle relative to current pivot point
+
+        let th_rollcentre = nRoll * 2 * beta; //current roll centre angle
+        let tha_roll = (thg - th_rollcentre) * this.g2a; //angle to centre of current rolling arc from current roll centre 
         m.n = nSide;
 
-        // let tha = th * this.g2a;
-        // if (Math.abs(tha) < m.phi * m.rad / f.rad) {
         if ((Math.abs(thg_delta) <= alpha) | (Math.abs(thg_delta) >= (2 * beta - alpha))) {
-            // console.log('rolling, n:', nSide,'th:',th*rad2deg)
-            // console.log(beta, alpha,this.g2a)
-            //set current arc centre and shape rotation
+            console.log('rolling, n:', nSide, 'th:', th * rad2deg)
 
-            // let tha = th_rollCentre + (thg - arcCentre) * this.g2a;
             if (this.out) {
+                //set current arc centre and shape rotation
                 m.x = f.x + (f.rad + m.rad) * Math.cos(m.th0 + th_rollcentre + tha_roll);
                 m.y = f.y + (f.rad + m.rad) * Math.sin(m.th0 + th_rollcentre + tha_roll);
                 m.th = m.th0 + (nSide * PI2 / m.nArc) + th_rollcentre + tha_roll * (f.rad / m.rad + 1) + PI2 / 2;
                 //updateGeoCentre
-                m.x0 = m.x + m.drArc * Math.cos(m.th + (m.nArc-nSide) * 2 * m.theta);
+                m.x0 = m.x + m.drArc * Math.cos(m.th + (m.nArc - nSide) * 2 * m.theta);
                 m.y0 = m.y + m.drArc * Math.sin(m.th + (m.nArc - nSide) * 2 * m.theta);
             }
             if (!this.out) {
+                //set current arc centre and shape rotation
                 m.x = f.x + (f.rad - m.rad) * Math.cos(m.th0 + th_rollcentre + tha_roll);
                 m.y = f.y + (f.rad - m.rad) * Math.sin(m.th0 + th_rollcentre + tha_roll);
                 m.th = m.th0 - (nSide * PI2 / m.nArc) + th_rollcentre - tha_roll * (f.rad / m.rad - 1);
-                // console.log(thg - th_rollcentre, this.g2a)
-                // console.log(m.x, m.y, m.th)
-
                 //updateGeoCentre
                 m.x0 = m.x + m.drArc * Math.cos(m.th + nSide * 2 * m.theta);
                 m.y0 = m.y + m.drArc * Math.sin(m.th + nSide * 2 * m.theta);
             }
-
-
         }
         else {
-            //pivoting, set shape centre directly
+            //pivoting, set geo centre directly
             if (!this.out) {
                 this.ohm = Math.PI - Math.asin(f.rad / this.b * Math.sin(th_piv))
                 this.omg = Math.PI - this.ohm - th_piv
@@ -668,20 +662,18 @@ class Pair {
                 m.y0 = f.y + this.c * Math.sin(m.th0 + thg);
                 m.th = m.th0 - this.gam
             }
-
-
             if (this.out) {
                 //inverted
                 this.ohm = Math.asin(f.rad / this.b * Math.sin(th_piv))
                 this.omg = Math.PI - this.ohm - th_piv
                 this.c = ((f.rad - this.b * Math.cos(this.omg)) ** 2 + (this.b * Math.sin(this.omg)) ** 2) ** 0.5
-                this.gam = (m.nArc-nPiv) * 2 * Math.PI / m.nArc - thPP - this.omg - 1*Math.PI / m.nArc;
+                this.gam = (m.nArc - nPiv) * 2 * Math.PI / m.nArc - thPP - this.omg - 1 * Math.PI / m.nArc;
                 m.x0 = f.x + this.c * Math.cos(m.th0 + thg);
                 m.y0 = f.y + this.c * Math.sin(m.th0 + thg);
                 m.th = m.th0 - this.gam
             }
 
-            // console.log('pivoting nPiv:', nPiv,'\nn:', nSide,'\nth:',th*rad2deg,'\nm.th:',
+            console.log('pivoting nPiv:', nPiv, '\nn:', nSide, '\nth:', th * rad2deg)//,'\nm.th:',
             // m.th*rad2deg,'\nc:',this.c)
 
             // '\nohm',this.ohm,'\nomg:',this.omg,
@@ -1992,6 +1984,26 @@ function setSize() {
     shapePanel = createShapePanel();
     panelArray = [topPanel, bottomPanel, shapePanel, sharePanel];
 }
+function init() {
+    hueInit = Math.random() * 360
+    bgFillStyle = "hsl(" + hueInit + ",100%,5%)";
+    bgFillStyleAlpha = "hsla(" + hueInit + ",100%,5%,.8)"
+    fgFillStyle = "hsl(" + hueInit + ",100%,50%)"
+    setGallerySubmitHTML();
+    canvas.style.backgroundColor = bgFillStyle
+    let arcTeethInit = discSizes.random();
+    let fixedTeeth = ringSizes.random()
+    let nArcs = (Math.random() < 0.5) ? 1 : 2 + Math.floor(Math.random() * 3);
+    let movingTeeth = arcTeethInit + (0.2 + Math.random() * 0.6) * (fixedTeeth - arcTeethInit);
+    let penAngle = (Math.random() < 0.5) ? (Math.random() < 0.5 ? 0 : 0.5 * PI2 / nArcs) : Math.random() * PI2;
+    // let fixedDisc = new Disc(fixedTeeth, ring = 1);
+    // let movingDisc = new ArcSidedDisc(movingTeeth, Math.random(), nArcs, arcTeeth = arcTeethInit, penAngle = penAngle, ring = 0);
+    let fixedDisc = new Disc(80, ring = 1);
+    let movingDisc = new ArcSidedDisc(150, .5, nArc = 2, arcTeeth = 40, ring = 0);
+    pair = new Pair(fixedDisc, movingDisc)
+    pair.inOut();
+    pair.move(-20.09 / 360 * PI2)
+}
 
 const canvas = document.getElementById("cw");
 const ctx = canvas.getContext("2d");
@@ -2038,25 +2050,7 @@ discSizes = [24, 30, 32, 40, 42, 45, 48, 52, 56, 60, 63, 72, 75, 80, 84]
 let fgFillStyle, bgFillStyleAlpha, bgFillStyle, hueInit, pair, uiSlidersX, uiSlidersY, uiSlidersWidth, pixRat, X, Y, scl, txtSize, baseLW, pixPerTooth, xOff, yOff, uiButtonsX, uiButtonsY, uiButtonsWidth, uiShapeX, uiShapeY, uiShapeWidth;
 setSize();
 
-function init() {
-    hueInit = Math.random() * 360
-    bgFillStyle = "hsl(" + hueInit + ",100%,5%)";
-    bgFillStyleAlpha = "hsla(" + hueInit + ",100%,5%,.8)"
-    fgFillStyle = "hsl(" + hueInit + ",100%,50%)"
-    setGallerySubmitHTML();
-    canvas.style.backgroundColor = bgFillStyle
-    let arcTeethInit = discSizes.random();
-    let fixedTeeth = ringSizes.random()
-    let nArcs = (Math.random() < 0.5) ? 1 : 2 + Math.floor(Math.random() * 3);
-    let movingTeeth = arcTeethInit + (0.2 + Math.random() * 0.6) * (fixedTeeth - arcTeethInit);
-    let penAngle = (Math.random() < 0.5) ? (Math.random() < 0.5 ? 0 : 0.5 * PI2 / nArcs) : Math.random() * PI2;
-    let fixedDisc = new Disc(fixedTeeth, ring = 1);
-    let movingDisc = new ArcSidedDisc(movingTeeth, Math.random(), nArcs, arcTeeth = arcTeethInit, penAngle = penAngle, ring = 0);
-    // let fixedDisc = new Disc(80, ring = 1);
-    // let movingDisc = new ArcSidedDisc(50, .5, nArc = 2, arcTeeth = 40, ring = 0);
-    pair = new Pair(fixedDisc, movingDisc)
-    // pair.inOut();
-}
+
 
 // pair.auto=1;
 // pair.nudge(6)
