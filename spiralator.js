@@ -416,7 +416,7 @@ class Pair {
     calc_thg_out(tha, R, r, a) {
         //thg is angle from fixed centre to moving centre, tha is angle from fixed entre to centre of currently rolling arc on moving shape.
         // when rolling multi arc shape, this is used for calculating the angle to the centre of shape (thg) at which shape starts pivoting on corner (at tha)
-        let th = tha - Math.asin(a * Math.sin(tha * (R / r + 1)) / ((R + r) ** 2 + a ** 2 + 2 * a * (R + r) * Math.cos(tha * (R / r + 1))) ** 0.5)
+        let th = tha - Math.asin(a * Math.sin(tha * (R / r + 1.0)) / ((R + r) ** 2 + a ** 2 + 2 * a * (R + r) * Math.cos(tha * (R / r + 1.0))) ** 0.5)
         return th
     }
 
