@@ -307,28 +307,28 @@ class ArcSidedDisc extends MovingDisc {
             3 * baseLW, 0, PI2);
         ctx.fill();
 
-        // // rotocentral point
-        // ctx.beginPath();
-        // ctx.fillStyle = "blue";
-        // ctx.arc(
-        //     this.x, this.y,
-        //     3 * baseLW, 0, PI2);
-        // ctx.fill();
+        // rotocentral point
+        ctx.beginPath();
+        ctx.fillStyle = "blue";
+        ctx.arc(
+            this.x, this.y,
+            3 * baseLW, 0, PI2);
+        ctx.fill();
 
-        // // phi
-        // ctx.beginPath();
-        // ctx.strokeStyle = "red";
-        // ctx.moveTo(this.x, this.y);
-        // ctx.lineTo(
-        //     this.x + this.rad * Math.cos(this.th + this.phi),
-        //     this.y + this.rad * Math.sin(this.th + this.phi),
-        // )
-        // ctx.moveTo(this.x, this.y);
-        // ctx.lineTo(
-        //     this.x + this.rad * Math.cos(this.th - this.phi),
-        //     this.y + this.rad * Math.sin(this.th - this.phi),
-        // )
-        // ctx.stroke();
+        // phi
+        ctx.beginPath();
+        ctx.strokeStyle = "red";
+        ctx.moveTo(this.x, this.y);
+        ctx.lineTo(
+            this.x + 3 * this.rad * Math.cos(this.th + this.phi),
+            this.y + 3 * this.rad * Math.sin(this.th + this.phi),
+        )
+        ctx.moveTo(this.x, this.y);
+        ctx.lineTo(
+            this.x + 3 * this.rad * Math.cos(this.th - this.phi),
+            this.y + 3 * this.rad * Math.sin(this.th - this.phi),
+        )
+        ctx.stroke();
 
 
         // centre to pen
@@ -370,7 +370,7 @@ class ArcSidedDisc extends MovingDisc {
         let theta = this.theta;
         // tha = ((tha+theta) % (theta*2))-theta;
         tha = ((((tha + theta) % (theta * 2)) + (theta * 2)) % (theta * 2)) - theta
-        let phi = this.phi;
+        // let phi = this.phi;
         let A = this.drArc;
         // let cosalphr = Math.cos((PI2 / 2) - tha);
         // let rArc = A * cosalphr + Math.sqrt(0.5 * A * cosalphr ** 2 - (A ** 2 - this.arcRat ** 2 * this.rad ** 2));
@@ -416,7 +416,8 @@ class Pair {
     calc_thg_out(tha, R, r, a) {
         //thg is angle from fixed centre to moving centre, tha is angle from fixed entre to centre of currently rolling arc on moving shape.
         // when rolling multi arc shape, this is used for calculating the angle to the centre of shape (thg) at which shape starts pivoting on corner (at tha)
-        let th = tha - Math.asin(a * Math.sin(tha * (R / r + 1.0)) / ((R + r) ** 2 + a ** 2 + 2 * a * (R + r) * Math.cos(tha * (R / r + 1.0))) ** 0.5)
+        let th = tha - Math.asin(a * Math.sin(tha * 1) /
+            ((R + r) ** 2 + a ** 2 + 2 * a * (R + r) * Math.cos(tha * 1)) ** 0.5)
         return th
     }
 
@@ -442,15 +443,14 @@ class Pair {
         else {
             if (!this.out) {
                 //in
-                this.tha_pp = (m.phi * m.rad / f.rad) //first pivot point
+                this.tha_pp = (m.phi * m.rad / f.rad) //first pivot switch point
                 this.thg_pp = this.calc_thg_in(this.tha_pp, f.rad, m.rad, m.drArc) //first angle to switch to pivoting
             }
             else {
                 //out
                 // console.log("Setting out")
-                this.tha_pp = (m.phi * m.rad / f.rad) //first pivot point
+                this.tha_pp = (m.phi * m.rad / f.rad) //first pivot switch point
                 this.thg_pp = this.calc_thg_out(this.tha_pp, f.rad, m.rad, m.drArc) //first angle to switch to pivoting
-
             }
         }
         // console.log(this.g2a, this.tha_pp / this.thg_pp)
@@ -622,9 +622,7 @@ class Pair {
             thPP = beta + 2 * beta * n;
         }
         this.thPP = thPP;
-
         let th_piv = thPP - thg; //angle relative to current pivot point
-
         let th_rollcentre = nRoll * 2 * beta; //current roll centre angle
         let tha_roll = (thg - th_rollcentre) * this.g2a; //angle to centre of current rolling arc from current roll centre 
         m.n = nSide;
@@ -661,6 +659,9 @@ class Pair {
                 m.x0 = f.x + this.c * Math.cos(m.th0 + thg);
                 m.y0 = f.y + this.c * Math.sin(m.th0 + thg);
                 m.th = m.th0 - this.gam
+                //updateRollCentre (not required, for sketching only)
+                m.x = m.x0 - m.drArc * Math.cos(m.th + nSide * 2 * m.theta);
+                m.y = m.y0 - m.drArc * Math.sin(m.th + nSide * 2 * m.theta);
             }
             if (this.out) {
                 //inverted
@@ -670,7 +671,11 @@ class Pair {
                 this.gam = (m.nArc - nPiv) * 2 * Math.PI / m.nArc - thPP - this.omg - 1 * Math.PI / m.nArc;
                 m.x0 = f.x + this.c * Math.cos(m.th0 + thg);
                 m.y0 = f.y + this.c * Math.sin(m.th0 + thg);
-                m.th = m.th0 - this.gam
+                m.th = m.th0 - this.gam;
+
+                //updateRollCentre (not required, for sketching only)
+                m.x = m.x0 - m.drArc * Math.cos(m.th + (m.nArc - nSide) * 2 * m.theta);
+                m.y = m.y0 - m.drArc * Math.sin(m.th + (m.nArc - nSide) * 2 * m.theta);
             }
 
             console.log('pivoting nPiv:', nPiv, '\nn:', nSide, '\nth:', th * rad2deg)//,'\nm.th:',
