@@ -407,13 +407,13 @@ class Pair {
         this.tracing = true;
         this.move(this.th);
     }
-    calc_thg_in(tha, R, r, a) {
-        //thg is angle from fixed centre to moving centre, tha is angle from fixed entre to centre of currently rolling arc on moving shape.
-        // when rolling multi arc shape, this is used for calculating the angle to the centre of shape (thg) at which shape starts pivoting on corner (at tha)
-        let th = tha - Math.asin(a * Math.sin(tha * R / r) /
-            ((R - r) ** 2 + a ** 2 + 2 * a * (R - r) * Math.cos(tha * R / r)) ** 0.5)
-        return th
-    }
+    // calc_thg_in(tha, R, r, a) {
+    //     //thg is angle from fixed centre to moving centre, tha is angle from fixed entre to centre of currently rolling arc on moving shape.
+    //     // when rolling multi arc shape, this is used for calculating the angle to the centre of shape (thg) at which shape starts pivoting on corner (at tha)
+    //     let th = tha - Math.asin(a * Math.sin(tha * R / r) /
+    //         ((R - r) ** 2 + a ** 2 + 2 * a * (R - r) * Math.cos(tha * R / r)) ** 0.5)
+    //     return th
+    // }
     // calc_thg_out(tha, R, r, a) {
     //     // as above but for inverted (out) config
     //     let th = tha - Math.asin(a * Math.sin(tha * (R / r + 1.2)) /
@@ -444,7 +444,9 @@ class Pair {
             if (!this.out) {
                 //in
                 this.tha_pp = (m.phi * m.rad / f.rad) //first pivot switch point
-                this.thg_pp = this.calc_thg_in(this.tha_pp, f.rad, m.rad, m.drArc) //first angle to switch to pivoting
+                // this.thg_pp = this.calc_thg_in(this.tha_pp, f.rad, m.rad, m.drArc) //first angle to switch to pivoting
+                this.thg_pp = m.phi * m.rad / f.rad - Math.asin(m.drArc * Math.sin(m.phi) /
+                ((f.rad - m.rad) ** 2 + m.drArc ** 2 + 2 * m.drArc * (f.rad - m.rad) * Math.cos(m.phi)) ** 0.5)
             }
             else {
                 //out
