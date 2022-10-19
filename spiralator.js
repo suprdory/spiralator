@@ -258,77 +258,77 @@ class ArcSidedDisc extends MovingDisc {
         ctx.fill();
         ctx.stroke();
 
-        // //draw construction circs
-        ctx.lineWidth = this.lw / 2;
-        for (let i = 0; i < this.nArc; i++) {
-            ctx.beginPath();
-            ctx.arc(
-                this.x0 + drArc * (Math.cos(theta0 + PI2 / 2)),
-                this.y0 + drArc * (Math.sin(theta0 + PI2 / 2)),
-                this.rad,
-                0,
-                PI2,
-            );
-            ctx.stroke();
-            theta0 += (PI2 / this.nArc);
-        }
-
-        // //containing circle
-        // ctx.beginPath();
-        // ctx.arc(
-        //     this.x0,
-        //     this.y0,
-        //     this.radCont,
-        //     0,
-        //     PI2,
-        // );
-        // ctx.stroke();
-
-
-        // // centre to edge
-        // ctx.strokeStyle = "rgb(200,0,0)"
-        // for (let thrad = 0; thrad < PI2; thrad += PI2 / 100) {
-        //     let r2a = this.rArc(thrad - this.th);
+        // // //draw construction circs
+        // ctx.lineWidth = this.lw / 2;
+        // for (let i = 0; i < this.nArc; i++) {
         //     ctx.beginPath();
-        //     ctx.moveTo(this.x0, this.y0);
-        //     ctx.lineTo(
-        //         this.x0 + r2a * Math.cos(thrad),
-        //         this.y0 + r2a * Math.sin(thrad)
-        //     )
+        //     ctx.arc(
+        //         this.x0 + drArc * (Math.cos(theta0 + PI2 / 2)),
+        //         this.y0 + drArc * (Math.sin(theta0 + PI2 / 2)),
+        //         this.rad,
+        //         0,
+        //         PI2,
+        //     );
         //     ctx.stroke();
+        //     theta0 += (PI2 / this.nArc);
         // }
 
+        // // //containing circle
+        // // ctx.beginPath();
+        // // ctx.arc(
+        // //     this.x0,
+        // //     this.y0,
+        // //     this.radCont,
+        // //     0,
+        // //     PI2,
+        // // );
+        // // ctx.stroke();
 
-        // geocentral point
-        ctx.beginPath();
-        ctx.fillStyle = this.color;
-        ctx.arc(
-            this.x0, this.y0,
-            3 * baseLW, 0, PI2);
-        ctx.fill();
 
-        // rotocentral point
-        ctx.beginPath();
-        ctx.fillStyle = "blue";
-        ctx.arc(
-            this.x, this.y,
-            3 * baseLW, 0, PI2);
-        ctx.fill();
+        // // // centre to edge
+        // // ctx.strokeStyle = "rgb(200,0,0)"
+        // // for (let thrad = 0; thrad < PI2; thrad += PI2 / 100) {
+        // //     let r2a = this.rArc(thrad - this.th);
+        // //     ctx.beginPath();
+        // //     ctx.moveTo(this.x0, this.y0);
+        // //     ctx.lineTo(
+        // //         this.x0 + r2a * Math.cos(thrad),
+        // //         this.y0 + r2a * Math.sin(thrad)
+        // //     )
+        // //     ctx.stroke();
+        // // }
 
-        // phi
-        ctx.beginPath();
-        ctx.strokeStyle = "red";
-        ctx.moveTo(this.x, this.y);
-        ctx.lineTo(
-            this.x + 3 * this.rad * Math.cos(this.th + this.phi),
-            this.y + 3 * this.rad * Math.sin(this.th + this.phi),
-        )
-        ctx.moveTo(this.x, this.y);
-        ctx.lineTo(
-            this.x + 3 * this.rad * Math.cos(this.th - this.phi),
-            this.y + 3 * this.rad * Math.sin(this.th - this.phi),
-        )
-        ctx.stroke();
+
+        // // geocentral point
+        // ctx.beginPath();
+        // ctx.fillStyle = this.color;
+        // ctx.arc(
+        //     this.x0, this.y0,
+        //     3 * baseLW, 0, PI2);
+        // ctx.fill();
+
+        // // rotocentral point
+        // ctx.beginPath();
+        // ctx.fillStyle = "blue";
+        // ctx.arc(
+        //     this.x, this.y,
+        //     3 * baseLW, 0, PI2);
+        // ctx.fill();
+
+        // // phi
+        // ctx.beginPath();
+        // ctx.strokeStyle = "red";
+        // ctx.moveTo(this.x, this.y);
+        // ctx.lineTo(
+        //     this.x + 3 * this.rad * Math.cos(this.th + this.phi),
+        //     this.y + 3 * this.rad * Math.sin(this.th + this.phi),
+        // )
+        // ctx.moveTo(this.x, this.y);
+        // ctx.lineTo(
+        //     this.x + 3 * this.rad * Math.cos(this.th - this.phi),
+        //     this.y + 3 * this.rad * Math.sin(this.th - this.phi),
+        // )
+        // ctx.stroke();
 
 
         // centre to pen
@@ -410,16 +410,16 @@ class Pair {
     calc_thg_in(tha, R, r, a) {
         //thg is angle from fixed centre to moving centre, tha is angle from fixed entre to centre of currently rolling arc on moving shape.
         // when rolling multi arc shape, this is used for calculating the angle to the centre of shape (thg) at which shape starts pivoting on corner (at tha)
-        let th = tha - Math.asin(a * Math.sin(tha * R / r) / ((R - r) ** 2 + a ** 2 + 2 * a * (R - r) * Math.cos(tha * R / r)) ** 0.5)
+        let th = tha - Math.asin(a * Math.sin(tha * R / r) /
+            ((R - r) ** 2 + a ** 2 + 2 * a * (R - r) * Math.cos(tha * R / r)) ** 0.5)
         return th
     }
-    calc_thg_out(tha, R, r, a) {
-        //thg is angle from fixed centre to moving centre, tha is angle from fixed entre to centre of currently rolling arc on moving shape.
-        // when rolling multi arc shape, this is used for calculating the angle to the centre of shape (thg) at which shape starts pivoting on corner (at tha)
-        let th = tha - Math.asin(a * Math.sin(tha * 1) /
-            ((R + r) ** 2 + a ** 2 + 2 * a * (R + r) * Math.cos(tha * 1)) ** 0.5)
-        return th
-    }
+    // calc_thg_out(tha, R, r, a) {
+    //     // as above but for inverted (out) config
+    //     let th = tha - Math.asin(a * Math.sin(tha * (R / r + 1.2)) /
+    //         ((R + r) ** 2 + a ** 2 + 2 * a * (R + r) * Math.cos(tha * (R / r + 1.2))) ** 0.5)
+    //     return th
+    // }
 
     updateGeom() {
         let m = this.moving;
@@ -448,9 +448,9 @@ class Pair {
             }
             else {
                 //out
-                // console.log("Setting out")
-                this.tha_pp = (m.phi * m.rad / f.rad) //first pivot switch point
-                this.thg_pp = this.calc_thg_out(this.tha_pp, f.rad, m.rad, m.drArc) //first angle to switch to pivoting
+                this.tha_pp = (m.phi * m.rad / f.rad) //first pivot switch point (when tha is at pivot angle)
+                this.thg_pp = m.phi * m.rad / f.rad - Math.asin(m.drArc * Math.sin(m.phi) /
+                    ((f.rad + m.rad) ** 2 + m.drArc ** 2 - 2 * m.drArc * (f.rad + m.rad) * Math.cos(m.phi)) ** 0.5)
             }
         }
         // console.log(this.g2a, this.tha_pp / this.thg_pp)
@@ -626,6 +626,8 @@ class Pair {
         let th_rollcentre = nRoll * 2 * beta; //current roll centre angle
         let tha_roll = (thg - th_rollcentre) * this.g2a; //angle to centre of current rolling arc from current roll centre 
         m.n = nSide;
+        this.gamma =
+            this.sigma = Math.asin(m.radCont * Math.sin())
 
         if ((Math.abs(thg_delta) <= alpha) | (Math.abs(thg_delta) >= (2 * beta - alpha))) {
             console.log('rolling, n:', nSide, 'th:', th * rad2deg)
@@ -684,6 +686,11 @@ class Pair {
             // '\nohm',this.ohm,'\nomg:',this.omg,
             // '\nsin(ohm)',Math.sin(this.ohm),'\nsin(omg):',Math.sin(this.omg))
         }
+
+        this.th = th;
+        if (this.tracing) {
+            this.trace.points.push(this.tracePoint());
+        }
         // console.log('r', m.rad, '\nR', f.rad, '\na', m.drArc, '\nb', this.b, '\nc', this.c,
         // '\nthapp', this.tha_pp * 57, '\nthg', thg * 57, '\nth_d', this.th_d * 57, '\nohm', this.ohm * 57, '\nomg', this.omg * 57, '\ngam', this.gam * 57)
         // console.log('thg', thg * rad2deg, '\nn', n, '\nthg_delta', thg_delta * rad2deg,
@@ -694,11 +701,6 @@ class Pair {
         //     '\nalpha', alpha * rad2deg, '\nbeta', beta * rad2deg,
         //     '\ngamma', m.th * rad2deg)
         // console.log(this)
-
-        this.th = th;
-        if (this.tracing) {
-            this.trace.points.push(this.tracePoint());
-        }
 
     }
     draw() {
@@ -2001,13 +2003,13 @@ function init() {
     let nArcs = (Math.random() < 0.5) ? 1 : 2 + Math.floor(Math.random() * 3);
     let movingTeeth = arcTeethInit + (0.2 + Math.random() * 0.6) * (fixedTeeth - arcTeethInit);
     let penAngle = (Math.random() < 0.5) ? (Math.random() < 0.5 ? 0 : 0.5 * PI2 / nArcs) : Math.random() * PI2;
-    // let fixedDisc = new Disc(fixedTeeth, ring = 1);
-    // let movingDisc = new ArcSidedDisc(movingTeeth, Math.random(), nArcs, arcTeeth = arcTeethInit, penAngle = penAngle, ring = 0);
-    let fixedDisc = new Disc(80, ring = 1);
-    let movingDisc = new ArcSidedDisc(150, .5, nArc = 2, arcTeeth = 40, ring = 0);
+    let fixedDisc = new Disc(fixedTeeth, ring = 1);
+    let movingDisc = new ArcSidedDisc(movingTeeth, Math.random(), nArcs, arcTeeth = arcTeethInit, penAngle = penAngle, ring = 0);
+    // let fixedDisc = new Disc(80, ring = 1);
+    // let movingDisc = new ArcSidedDisc(150, .5, nArc = 2, arcTeeth = 40, ring = 0);
     pair = new Pair(fixedDisc, movingDisc)
-    pair.inOut();
-    pair.move(-20.09 / 360 * PI2)
+    // pair.inOut();
+    // pair.move(-20.09 / 360 * PI2)
 }
 
 const canvas = document.getElementById("cw");
