@@ -443,21 +443,21 @@ class Pair {
         else {
             if (!this.out) {
                 //in
-                this.tha_pp = (m.phi * m.rad / f.rad) //first pivot switch point
-                // this.thg_pp = this.calc_thg_in(this.tha_pp, f.rad, m.rad, m.drArc) //first angle to switch to pivoting
+                this.tha_pp = (m.phi * m.rad / f.rad) //first pivot switch point (when tha is at pivot angle)
+                //angle to geocentre (thg) at which tha_pp occurs
                 this.thg_pp = m.phi * m.rad / f.rad - Math.asin(m.drArc * Math.sin(m.phi) /
                 ((f.rad - m.rad) ** 2 + m.drArc ** 2 + 2 * m.drArc * (f.rad - m.rad) * Math.cos(m.phi)) ** 0.5)
             }
             else {
-                //out
-                this.tha_pp = (m.phi * m.rad / f.rad) //first pivot switch point (when tha is at pivot angle)
+                //out (inverted)
+                this.tha_pp = (m.phi * m.rad / f.rad)
                 this.thg_pp = m.phi * m.rad / f.rad - Math.asin(m.drArc * Math.sin(m.phi) /
                     ((f.rad + m.rad) ** 2 + m.drArc ** 2 - 2 * m.drArc * (f.rad + m.rad) * Math.cos(m.phi)) ** 0.5)
             }
         }
         // console.log(this.g2a, this.tha_pp / this.thg_pp)
 
-        // new method of calculating g to a ratio based on ration of first pivot point, 
+        // new method of calculating g to a ratio based on ratio of first pivot point, 
         // now no need for constant gradiant from zero approach
         this.g2a = this.tha_pp / this.thg_pp
 
