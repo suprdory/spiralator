@@ -1,13 +1,13 @@
 # to do
-
-* fix glitch at th=0 for m.teeth >f.teeth
-* prevent m.arcTeeth > m.teeth, scale m.teeth with m.arcTeeth?
-* fix tha_pp thg_pp for arc size > fized size.
++ move updateShape() function to pair as it now requires pair info
+* handle oversize non-inverted arcs
 * force roll (and auto) to pass through roll discontinuities
-* allow 'hanging' for ArcRad > fix Rad - new geom required
-
 
 # done
+* allow 'hanging' for ArcRad > fix Rad - new geom required - decided to just pivot instead
+* prevent m.arcTeeth > m.teeth, scale m.teeth with m.arcTeeth? - does not occur with new arness def
+* fix tha_pp thg_pp for arc size > fized size - all pivoting beviour mode sorted
+* fix glitch at th=0 for m.teeth >f.teeth - addded small offset at 0
 * allow arcRad inversion - new geom required - sorted.
 * rearrange, rename sliders. add saturation.
 * maintain arcness while changing moving teeth

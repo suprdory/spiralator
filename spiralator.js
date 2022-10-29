@@ -260,18 +260,18 @@ class ArcSidedDisc {
         // }
 
         // //containing circle
-        ctx.beginPath();
-        ctx.lineWidth = this.lw / 2;
-        ctx.setLineDash([10, 7]);
-        ctx.arc(
-            this.x0,
-            this.y0,
-            this.radCont,
-            0,
-            PI2,
-        );
-        ctx.stroke();
-        ctx.setLineDash([]);
+        // ctx.beginPath();
+        // ctx.lineWidth = this.lw / 2;
+        // ctx.setLineDash([10, 7]);
+        // ctx.arc(
+        //     this.x0,
+        //     this.y0,
+        //     this.radCont,
+        //     0,
+        //     PI2,
+        // );
+        // ctx.stroke();
+        // ctx.setLineDash([]);
 
         // // centre to edge
         // ctx.strokeStyle = "rgb(200,0,0)"
@@ -1968,14 +1968,15 @@ function init() {
     canvas.style.backgroundColor = bgFillStyle
     let perimTeethInit = discSizes.random();
     let fixedTeeth = ringSizes.random()
-    let arcnessInit = Math.random() - 0.5
+    let arcnessInit = Math.random() * 0.6
     let nArc = (Math.random() < 0.5) ? 1 : 2 + Math.floor(Math.random() * 3);
-    // let movingTeeth = perimTeethInit + (0.2 + Math.random() * 0.6) * (fixedTeeth - perimTeethInit);
+    let rat=Math.random()*0.5+0.5
     let penAngle = (Math.random() < 0.5) ? (Math.random() < 0.5 ? 0 : 0.5 * PI2 / nArc) : Math.random() * PI2;
-    // let fixedDisc = new Disc(fixedTeeth, ring = 1);
+    let fixedDisc = new Disc(fixedTeeth, ring = 1);
     // let movingDisc = new ArcSidedDisc(movingTeeth, Math.random(), nArc, perimTeeth = perimTeethInit, penAngle = penAngle, ring = 0);
-    let fixedDisc = new Disc(105);
-    let movingDisc = new ArcSidedDisc(perimTeeth = 70, arcness = 0.2, rat = .5, nArc = 2);
+    // let fixedDisc = new Disc(105);
+    // let movingDisc = new ArcSidedDisc(perimTeeth = 70, arcness = 0.2, rat = .5, nArc = 2);
+    let movingDisc = new ArcSidedDisc(perimTeeth = perimTeethInit,arcness=arcnessInit,rat=rat,nArc=nArc,penAngle=penAngle,ring=false)
     pair = new Pair(fixedDisc, movingDisc)
     // // pair.inOut();
     // // pair.move(-20.09 / 360 * PI2)
