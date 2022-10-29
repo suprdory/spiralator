@@ -112,14 +112,11 @@ class Trace {
 }
 class ArcSidedDisc {
     constructor(
-        perimTeeth = 70, arcness = 0.2, rat = 0.7, nArc = 3,  penAngle = 0, ring = false
+        perimTeeth = 70, arcness = 0.2, rat = 0.7, nArc = 3, penAngle = 0, ring = false
     ) {
         this.x = 0;
         this.y = 0;
         this.thickness = 3 * pixPerTooth;
-        // this.teeth = teeth;
-        // this.circ = teeth * pixPerTooth;
-        this.rad = this.circ / PI2;
         this.color = 'white';
         this.ring = ring;
         this.rat = rat;
@@ -127,12 +124,11 @@ class ArcSidedDisc {
         this.lw = baseLW * 2;
 
         this.th0 = 0; //rotation angle at pair.th=0, shifted by nudging
-        this.th = 0; //current rotation angle
-        this.n = 0; //current centre arc
 
         this.perimTeeth = perimTeeth; //number of teeth in shape perimeter
         this.perim = this.perimTeeth * pixPerTooth; //full perimeter arc shape
-        this.arcness=arcness;
+        this.arcness = arcness;
+        this.nArc = nArc; //number of arcs
 
         // below values are set by updateShape() after any change, should usually be followed by an update of pair geom
         // this.teeth = teeth; //number of teeth in full circle of arc component
@@ -140,16 +136,17 @@ class ArcSidedDisc {
         // this.rad = this.circ / PI2; //radius of arcs
         // this.phi = half angle subtended by arcs
         // this.theta = half angle from centre to subsequent vertices
-        
-        this.nArc = nArc; //number of arcs
-        // this.updateArcness();
-        console.log(this)
-        this.updateShape();
-        console.log(this)
+        // this.arcRat = Math.sin(this.theta) / Math.sin(this.phi);
+        // this.radCont = this.rad / this.arcRat;//radius of containing circle
+        // this.drArc = this.rad * (Math.cos(this.phi) - Math.cos(this.theta) / this.arcRat); //dist from geo centre to arc centre
+
+        this.updateShape(1000,false); //placeholder, plan to move function to Pair
+
     }
 
-    updateShape() {
-        // called after changes to nArc, teeth, perimTeeth
+    updateShape(fixedTeeth,out) {
+        // called after changes to nArc, perimTeeth, arcness
+        let fixedRad=fixedTeeth*pixPerTooth/PI2;
         this.perim = this.perimTeeth * pixPerTooth;
 
         if (this.nArc == 1) {
@@ -158,19 +155,39 @@ class ArcSidedDisc {
             this.rad = this.circ / PI2
             this.theta = PI2;
             this.phi = PI2;
+            this.arcRat = Math.sin(this.theta) / Math.sin(this.phi);
+            this.radCont = this.rad / this.arcRat;//radius of containing circle
+            this.drArc = this.rad * (Math.cos(this.phi) - Math.cos(this.theta) / this.arcRat); //dist from geo centre to arc centre
         }
         else {
-            this.theta = PI2 / 2 / this.nArc; // half angle from geo centre to arc intersect points
-            this.phi = Math.acos(this.arcness * (maxArcness - Math.cos(this.theta)) + Math.cos(this.theta));
-            this.rad=this.perim/(2*this.phi*this.nArc);
-            this.circ=PI2*this.rad;
-            this.teeth=this.circ/pixPerTooth;
+            // console.log(this)
+            if (this.teeth >= fixedTeeth & !out) {
+                //only pivoting
+                
+                this.theta = PI2 / 2 / this.nArc; // half angle from geo centre to arc intersect points
+                this.phi = Math.acos(this.arcness * (maxArcness - Math.cos(this.theta)) + Math.cos(this.theta));
+                this.radCont = fixedRad * Math.sin(this.perim / (2 * fixedRad * this.nArc))/Math.sin(this.theta);
+                this.arcRat = Math.sin(this.theta) / Math.sin(this.phi);
+                this.rad=this.radCont*this.arcRat;
+                this.circ = PI2 * this.rad;
+                this.teeth = this.circ / pixPerTooth;
+                this.drArc = this.rad * (Math.cos(this.phi) - Math.cos(this.theta) / this.arcRat); //dist from geo centre to arc centre
+                
+            }
+            else {
+                //rolling+pivoting
+                this.theta = PI2 / 2 / this.nArc; // half angle from geo centre to arc intersect points
+                this.phi = Math.acos(this.arcness * (maxArcness - Math.cos(this.theta)) + Math.cos(this.theta));
+                this.rad = this.perim / (2 * this.phi * this.nArc);
+                this.circ = PI2 * this.rad;
+                this.teeth = this.circ / pixPerTooth;
+                this.arcRat = Math.sin(this.theta) / Math.sin(this.phi);
+                this.radCont = this.rad / this.arcRat;//radius of containing circle
+                this.drArc = this.rad * (Math.cos(this.phi) - Math.cos(this.theta) / this.arcRat); //dist from geo centre to arc centre
+            }
+            // console.log("phi:", this.phi)
 
         }
-        this.arcRat = Math.sin(this.theta) / Math.sin(this.phi);
-        this.radCont = this.rad / this.arcRat;//radius of containing circle
-
-        this.drArc = this.rad * (Math.cos(this.phi) - Math.cos(this.theta) / this.arcRat); //dist from geo centre to arc centre
 
     }
     draw() {
@@ -381,9 +398,7 @@ class Pair {
     updateGeom() {
         let m = this.moving;
         let f = this.fixed;
-        // m.updateShape();
         this.configRings();
-        // console.log(m)
 
         this.fullTraceTh = PI2 * calcLCM(this.fixed.teeth, this.moving.perimTeeth) / this.fixed.teeth; // roll required to complete
         // this.arcness = (m.teeth - m.perimTeeth) / (f.teeth - m.perimTeeth); // 0: circle, 1: arcRad = Fixed Rad
@@ -556,6 +571,9 @@ class Pair {
         // if (!skipCrossCheck) {
         //     this.checkRollCentreCross(th);
         // }
+        if (th==0){
+            th=0.00001;
+        }
         let rad2deg = 180 / Math.PI;
         let f = this.fixed;
         let m = this.moving;
@@ -694,6 +712,7 @@ class Pair {
         this.penUp();
         this.out = !pair.out;
         this.configRings();
+        this.moving.updateShape(this.fixed.teeth,this.out);
         this.updateGeom();
         this.move(pair.th);
         this.penDown();
@@ -1471,6 +1490,7 @@ function createSliderPanel() {
             pair.configRings();
             pair.fixed.circ = pair.fixed.teeth * pixPerTooth;
             pair.fixed.rad = pair.fixed.circ / PI2
+            pair.moving.updateShape(pair.fixed.teeth,pair.out)
             pair.updateGeom();
             pair.move(pair.th);
             pair.penDown();
@@ -1495,7 +1515,7 @@ function createSliderPanel() {
             //need to use same definition of arcness to define moving.teeth, as using in pair.updateGeom()
             // pair.moving.teeth = pair.arcness * (pair.fixed.teeth - pair.moving.perimTeeth) + pair.moving.perimTeeth
             // pair.configRings();
-            pair.moving.updateShape();
+            pair.moving.updateShape(pair.fixed.teeth,pair.out);
             pair.updateGeom();
             pair.move(pair.th);
             pair.penDown();
@@ -1522,7 +1542,7 @@ function createSliderPanel() {
             pair.moving.arcness = Math.min(1, Math.max(-0.01 / pixRat * dy + yDragVar0, 0));
 
             pair.configRings();
-            pair.moving.updateShape();
+            pair.moving.updateShape(pair.fixed.teeth,pair.out);
             pair.updateGeom();
             pair.move(pair.th);
             pair.penDown();
@@ -1547,7 +1567,7 @@ function createSliderPanel() {
             // if (pair.moving.teeth == pair.fixed.teeth) {
             //     pair.moving.teeth--;
             // }
-            pair.moving.updateShape();
+            pair.moving.updateShape(pair.fixed.teeth,pair.out);
             pair.updateGeom();
             pair.configRings();
 
@@ -1948,14 +1968,14 @@ function init() {
     canvas.style.backgroundColor = bgFillStyle
     let perimTeethInit = discSizes.random();
     let fixedTeeth = ringSizes.random()
-    let arcnessInit = Math.random()-0.5
+    let arcnessInit = Math.random() - 0.5
     let nArc = (Math.random() < 0.5) ? 1 : 2 + Math.floor(Math.random() * 3);
     // let movingTeeth = perimTeethInit + (0.2 + Math.random() * 0.6) * (fixedTeeth - perimTeethInit);
     let penAngle = (Math.random() < 0.5) ? (Math.random() < 0.5 ? 0 : 0.5 * PI2 / nArc) : Math.random() * PI2;
     // let fixedDisc = new Disc(fixedTeeth, ring = 1);
     // let movingDisc = new ArcSidedDisc(movingTeeth, Math.random(), nArc, perimTeeth = perimTeethInit, penAngle = penAngle, ring = 0);
     let fixedDisc = new Disc(105);
-    let movingDisc = new ArcSidedDisc(perimTeeth=70,arcness=0.2,rat= .5, nArc = 2);
+    let movingDisc = new ArcSidedDisc(perimTeeth = 70, arcness = 0.2, rat = .5, nArc = 2);
     pair = new Pair(fixedDisc, movingDisc)
     // // pair.inOut();
     // // pair.move(-20.09 / 360 * PI2)
