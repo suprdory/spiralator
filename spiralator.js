@@ -343,7 +343,7 @@ class Pair {
 
         this.updateMovingShape();
         this.updatePairGeom();
-        
+
         this.setColor();
         this.trace = new Trace(this);
         this.traces = [];
@@ -352,8 +352,8 @@ class Pair {
     }
     updateMovingShape() {
         // updates only moving shape but requires knowledge of fixed shape size in the case that the arc sizes is greater than fixed size to determine effective perimeter
-        let m=this.moving;
-        let f=this.fixed;
+        let m = this.moving;
+        let f = this.fixed;
         // called after changes to nArc, perimTeeth, arcness
         let fixedRad = f.teeth * pixPerTooth / PI2;
         m.perim = m.perimTeeth * pixPerTooth;
@@ -556,12 +556,12 @@ class Pair {
     nudge(n) {
         this.penUp()
         let thInc = -n * PI2 / this.fixed.teeth;
-        if (!this.out) {
+        // if (!this.out) {
             this.moving.th0 += thInc;// * this.fixed.rad / this.moving.rad;
-        }
-        if (this.out) {
-            this.moving.th0 -= thInc * this.fixed.rad / this.moving.rad;
-        }
+        // }
+        // if (this.out) {
+            // this.moving.th0 -= thInc * this.fixed.rad / this.moving.rad;
+        // }
         this.move(this.th + thInc);
         this.penDown()
     }
@@ -575,8 +575,8 @@ class Pair {
         // if (!skipCrossCheck) {
         //     this.checkRollCentreCross(th);
         // }
-        if (th==0){
-            th=0.00001;
+        if (th == 0) {
+            th = 0.00001;
         }
         let rad2deg = 180 / Math.PI;
         let f = this.fixed;
@@ -606,8 +606,7 @@ class Pair {
         this.gamma = this.sigma = Math.asin(m.radCont * Math.sin())
 
         if ((Math.abs(thg_delta) < alpha) | (Math.abs(thg_delta) >= (2 * beta - alpha))) {
-            // console.log('rolling, n:', nSide, 'th:', th * rad2deg, 'th_delta:', thg_delta, 'alpha:', alpha,'2b-a', (2 * beta - alpha))
-
+            //rolling
             if (this.out) {
                 //set current arc centre and shape rotation
                 m.x = f.x + (f.rad + m.rad) * Math.cos(m.th0 + th_rollcentre + tha_roll);
@@ -630,12 +629,8 @@ class Pair {
         else {
             //pivoting, set geo centre directly
             if (!this.out) {
-                if (th == 0) {
-                    this.ohm = -1 * PI2 / 4;
-                }
-                else {
-                    this.ohm = Math.PI - Math.asin(f.rad / this.b * Math.sin(th_piv))
-                }
+
+                this.ohm = Math.PI - Math.asin(f.rad / this.b * Math.sin(th_piv))
                 this.omg = Math.PI - this.ohm - th_piv
                 this.c = ((f.rad - this.b * Math.cos(this.omg)) ** 2 + (this.b * Math.sin(this.omg)) ** 2) ** 0.5
                 this.gam = nPiv * 2 * Math.PI / m.nArc - thPP - this.omg + Math.PI / m.nArc;
@@ -1974,16 +1969,30 @@ function init() {
     let fixedTeeth = ringSizes.random()
     let arcnessInit = Math.random() * 0.6
     let nArc = (Math.random() < 0.5) ? 1 : 2 + Math.floor(Math.random() * 3);
-    let rat=Math.random()*0.5+0.5
+    let rat = Math.random() * 0.5 + 0.5
     let penAngle = (Math.random() < 0.5) ? (Math.random() < 0.5 ? 0 : 0.5 * PI2 / nArc) : Math.random() * PI2;
-    let fixedDisc = new Disc(fixedTeeth, ring = 1);
-    // let movingDisc = new ArcSidedDisc(movingTeeth, Math.random(), nArc, perimTeeth = perimTeethInit, penAngle = penAngle, ring = 0);
+    let fixedDisc = new Disc(fixedTeeth);
+    let movingDisc = new ArcSidedDisc(perimTeeth = perimTeethInit, arcness = arcnessInit, rat = rat, nArc = nArc, penAngle = penAngle, ring = false)
+
     // let fixedDisc = new Disc(105);
-    // let movingDisc = new ArcSidedDisc(perimTeeth = 70, arcness = 0.2, rat = .5, nArc = 2);
-    let movingDisc = new ArcSidedDisc(perimTeeth = perimTeethInit,arcness=arcnessInit,rat=rat,nArc=nArc,penAngle=penAngle,ring=false)
+    // let movingDisc = new ArcSidedDisc(perimTeeth = 57, arcness = 0, rat = 1, nArc = 1, penAngle = 0, ring = false)
     pair = new Pair(fixedDisc, movingDisc)
-    // // pair.inOut();
-    // // pair.move(-20.09 / 360 * PI2)
+    
+    // pair.fullTrace();
+    // pair.nudge(1);
+    // pair.fullTrace();
+    // pair.nudge(1);
+    // pair.fullTrace();
+
+    // pair.reset();
+    // pair.inOut();
+
+    // pair.fullTrace();
+    // pair.nudge(1);
+    // pair.fullTrace();
+    // pair.nudge(1);
+    // pair.fullTrace();
+    // pair.move(2)
 }
 
 const canvas = document.getElementById("cw");
