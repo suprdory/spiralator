@@ -746,7 +746,7 @@ class Pair {
         //check if local pivot point has changed since last move
         if (thPP != this.thPP) {
             //if so move to roll centre
-            console.log("Roll cross:", this.nRoll)
+            // console.log("Roll cross:", this.nRoll)
             this.move(this.nRoll * 2 * beta+1e-10+m.th0, true)
         }
 
@@ -1970,18 +1970,18 @@ function init() {
     let fixedTeeth = ringSizes.random()
     let arcnessInit = Math.random() * 0.6
     let nArc = (Math.random() < 0.5) ? 1 : 2 + Math.floor(Math.random() * 3);
-    let rat = Math.random() * 0.5 + 0.5
+    let rat = Math.random() * 0.5 + 0.5;
     let penAngle = (Math.random() < 0.5) ? (Math.random() < 0.5 ? 0 : 0.5 * PI2 / nArc) : Math.random() * PI2;
-    // let fixedDisc = new Disc(fixedTeeth);
-    // let movingDisc = new ArcSidedDisc(perimTeeth = perimTeethInit, arcness = arcnessInit, rat = rat, nArc = nArc, penAngle = penAngle, ring = false)
+    let fixedDisc = new Disc(fixedTeeth);
+    let movingDisc = new ArcSidedDisc(perimTeeth = perimTeethInit, arcness = arcnessInit, rat = rat, nArc = nArc, penAngle = penAngle, ring = false)
 
-    let fixedDisc = new Disc(105);
-    let movingDisc = new ArcSidedDisc(perimTeeth = 48, arcness = .7, rat = 1, nArc = 2, penAngle = 0*PI2/4, ring = false)
+    // let fixedDisc = new Disc(105);
+    // let movingDisc = new ArcSidedDisc(perimTeeth = 48, arcness = .7, rat = 1, nArc = 2, penAngle = 0*PI2/4, ring = false)
     pair = new Pair(fixedDisc, movingDisc)
     
-    pair.fullTrace();
-    pair.nudge(1);
-    pair.fullTrace();
+    // pair.fullTrace();
+    // pair.nudge(1);
+    // pair.fullTrace();
     // pair.nudge(1);
     // pair.fullTrace();
 
