@@ -462,7 +462,7 @@ class Pair {
         ctx.textAlign = "center";
         ctx.font = txtSize + 'px sans-serif';
         ctx.textBaseline = "middle";
-        ctx.fillText(Math.round(this.moving.rat * this.moving.teeth), X / 2, Y / 2 + txtSize * 0.9);
+        ctx.fillText(Math.round(this.moving.rat *100)+"%", X / 2, Y / 2 + txtSize * 0.9);
         ctx.font = txtSize / 2 + 'px sans-serif';
         ctx.fillText('Pen Radius', X / 2, Y / 2 - txtSize + txtSize * 0.9);
 
