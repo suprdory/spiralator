@@ -342,6 +342,7 @@ class Pair {
         this.locked = true;
 
         this.updateMovingShape();
+        this.updateMovingShape(); //second call required to test derived moving.teeth againt fixed.teeth
         this.updatePairGeom();
 
         this.setColor();
@@ -572,16 +573,17 @@ class Pair {
         this.penDown()
     }
     move(th, skipCrossCheck = false) {
-        // if (!skipCrossCheck) {
-        //     this.checkRollCentreCross(th);
-        // }
+        if (!skipCrossCheck) {
+            this.checkRollCentreCross(th);
+        }
         if (th == 0) {
-            th = 0.00001;
+            th = 1e-5;
         }
         let rad2deg = 180 / Math.PI;
         let f = this.fixed;
         let m = this.moving;
         let thg = th - m.th0; //angle to geocentre of arcshape (minis nudge offset)
+
         this.b = m.radCont; // radius of arcShape containing circle
         let alpha = this.thg_pp; // angle to geocentre of first transition to pivoting;
         let beta = this.tha_pp; // angle to first pivot point
@@ -745,11 +747,10 @@ class Pair {
         if (thPP != this.thPP) {
             //if so move to roll centre
             console.log("Roll cross:", this.nRoll)
-            this.move(this.nRoll * 2 * beta, true)
+            this.move(this.nRoll * 2 * beta+1e-10+m.th0, true)
         }
 
     }
-
     roll(th) {
         this.move(this.th)
         if (Math.abs(th - this.th) < dth) {
@@ -779,10 +780,10 @@ class Pair {
     fullTrace() {
         this.penUp();
         this.penDown();
-        // let startTh = this.th;
+        let startTh = this.th;
         // let traceTh = PI2 * calcLCM(this.fixed.teeth, this.moving.perimTeeth) / this.fixed.teeth
         this.roll(this.th + this.fullTraceTh);
-        // this.move(startTh + this.fullTraceTh);
+        this.move(startTh + this.fullTraceTh);
         this.penUp();
         this.penDown();
     }
@@ -1971,16 +1972,16 @@ function init() {
     let nArc = (Math.random() < 0.5) ? 1 : 2 + Math.floor(Math.random() * 3);
     let rat = Math.random() * 0.5 + 0.5
     let penAngle = (Math.random() < 0.5) ? (Math.random() < 0.5 ? 0 : 0.5 * PI2 / nArc) : Math.random() * PI2;
-    let fixedDisc = new Disc(fixedTeeth);
-    let movingDisc = new ArcSidedDisc(perimTeeth = perimTeethInit, arcness = arcnessInit, rat = rat, nArc = nArc, penAngle = penAngle, ring = false)
+    // let fixedDisc = new Disc(fixedTeeth);
+    // let movingDisc = new ArcSidedDisc(perimTeeth = perimTeethInit, arcness = arcnessInit, rat = rat, nArc = nArc, penAngle = penAngle, ring = false)
 
-    // let fixedDisc = new Disc(105);
-    // let movingDisc = new ArcSidedDisc(perimTeeth = 57, arcness = 0, rat = 1, nArc = 1, penAngle = 0, ring = false)
+    let fixedDisc = new Disc(105);
+    let movingDisc = new ArcSidedDisc(perimTeeth = 48, arcness = .7, rat = 1, nArc = 2, penAngle = 0*PI2/4, ring = false)
     pair = new Pair(fixedDisc, movingDisc)
     
-    // pair.fullTrace();
-    // pair.nudge(1);
-    // pair.fullTrace();
+    pair.fullTrace();
+    pair.nudge(1);
+    pair.fullTrace();
     // pair.nudge(1);
     // pair.fullTrace();
 
@@ -2027,7 +2028,7 @@ const galleryRes = 1920;
 const shareRes = 1920;
 
 
-const dth = PI2 / 200; // PI2/200 default
+const dth = PI2 / 360; // PI2/200 default
 
 //vars for pinch zoom handling
 var prevDiff = 0;

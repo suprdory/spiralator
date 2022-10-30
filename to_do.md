@@ -1,9 +1,9 @@
 # to do
 
 * handle oversize non-inverted arcs
-* force roll (and auto) to pass through roll discontinuities
 
 # done
+* force roll (and auto) to pass through roll discontinuities - move checks for transition between pivot points and forces a point at roll centre 
 * fix inverted nudgeing
 * move updateShape() function to pair as it now requires pair info
 * allow 'hanging' for ArcRad > fix Rad - new geom required - decided to just pivot instead
