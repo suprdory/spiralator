@@ -395,10 +395,10 @@ class Pair {
                 m.radCont = m.rad / m.arcRat;//radius of containing circle
                 m.drArc = m.rad * (Math.cos(m.phi) - Math.cos(m.theta) / m.arcRat); //dist from geo centre to arc centre
             }
-            // console.log("phi:", this.phi)
+        
 
         }
-
+        console.log(m)
     }
     updatePairGeom() {
         let m = this.moving;
@@ -577,7 +577,7 @@ class Pair {
             this.checkRollCentreCross(th);
         }
         if (th == 0) {
-            th = 1e-5;
+            th = 1e-5; // some glitches around pivot/roll selection at th==0
         }
         let rad2deg = 180 / Math.PI;
         let f = this.fixed;
@@ -588,9 +588,10 @@ class Pair {
         let alpha = this.thg_pp; // angle to geocentre of first transition to pivoting;
         let beta = this.tha_pp; // angle to first pivot point
         let thg_delta = thg % (2 * beta); //angle relative to last roll centre (first roll centre at 0)
-        let n = parseInt(thg / (2 * beta)); //number of roll centres passed
+        let n = Math.floor(thg / (2 * beta)); //number of roll centres passed
         let nPiv = n - (thg <= 0); // pivot centre number
         let nRoll = n + Math.sign(thg) * (Math.abs(thg_delta) > beta);// roll centre number
+                
         this.nRoll = nRoll;
         let nSide = (nRoll) % m.nArc; //side number rolling;
         let thPP; //current pivot point angle
@@ -1263,7 +1264,8 @@ function zoomHandler(dW, xc, yc) {
 
 
 }
-function calcLCM(a, b) { //lowest common multiple
+function calcLCM(a, b) {
+    //lowest common multiple
     let min = (a > b) ? a : b;
     while (min < 1000000) {
         if (min % a == 0 && min % b == 0) {
@@ -1972,11 +1974,11 @@ function init() {
     let nArc = (Math.random() < 0.5) ? 1 : 2 + Math.floor(Math.random() * 3);
     let rat = Math.random() * 0.5 + 0.5;
     let penAngle = (Math.random() < 0.5) ? (Math.random() < 0.5 ? 0 : 0.5 * PI2 / nArc) : Math.random() * PI2;
-    let fixedDisc = new Disc(fixedTeeth);
-    let movingDisc = new ArcSidedDisc(perimTeeth = perimTeethInit, arcness = arcnessInit, rat = rat, nArc = nArc, penAngle = penAngle, ring = false)
+    // let fixedDisc = new Disc(fixedTeeth);
+    // let movingDisc = new ArcSidedDisc(perimTeeth = perimTeethInit, arcness = arcnessInit, rat = rat, nArc = nArc, penAngle = penAngle, ring = false)
 
-    // let fixedDisc = new Disc(105);
-    // let movingDisc = new ArcSidedDisc(perimTeeth = 48, arcness = .7, rat = 1, nArc = 2, penAngle = 0*PI2/4, ring = false)
+    let fixedDisc = new Disc(96);
+    let movingDisc = new ArcSidedDisc(perimTeeth = 84, arcness = .17, rat = .8, nArc = 1, penAngle = 0*PI2/4, ring = false)
     pair = new Pair(fixedDisc, movingDisc)
     
     // pair.fullTrace();
@@ -1993,7 +1995,7 @@ function init() {
     // pair.fullTrace();
     // pair.nudge(1);
     // pair.fullTrace();
-    // pair.move(2)
+
 }
 
 const canvas = document.getElementById("cw");
@@ -2070,6 +2072,7 @@ addPointerListeners();
 // panelArray.forEach(panel => panel.active = false)
 
 init();
+pair.move(+.01)
 anim();
 
 
