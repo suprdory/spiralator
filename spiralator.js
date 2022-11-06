@@ -74,16 +74,16 @@ class Point {
     }
 }
 class Trace {
-    constructor(pair,alpha=1) {
+    constructor(pair, alpha = 1) {
         this.points = [];
-        
-        if (alpha == 1){
+
+        if (alpha == 1) {
             // console.log("normal mode:" + alpha)
             this.color = "hsl(" + pair.hue + "," + pair.saturation + "%," + pair.lightness + "%)";
         }
-        else{
+        else {
             // console.log("alpha mode:"+alpha)
-            this.color = "hsla(" + pair.hue + "," + pair.saturation + "%," + pair.lightness + "%," +alpha+")";
+            this.color = "hsla(" + pair.hue + "," + pair.saturation + "%," + pair.lightness + "%," + alpha + ")";
         }
         // this.thickness = baseLW;
     }
@@ -338,7 +338,7 @@ class ArcSidedDisc {
     }
 }
 class Pair {
-    constructor(fixed, moving,previewState) {
+    constructor(fixed, moving, previewState) {
         this.fixed = fixed;
         this.moving = moving;
         this.out = false;
@@ -348,17 +348,17 @@ class Pair {
         this.saturation = 100;
         this.lightness = 65;
         this.locked = true;
-        this.showPreview=previewState;
+        this.showPreview = previewState;
         this.setColor();
         this.trace = new Trace(this, 1);
         this.previewTrace;
         this.traces = [];
-        this.tracing = false;
-        
+
+
         this.updateMovingShape();
         this.updatePairGeom();
         this.move(this.th);
-
+        this.tracing = true;
     }
     updateMovingShape() {
         // updates only moving shape but requires knowledge of fixed shape size in the case that the arc sizes is greater than fixed size to determine effective perimeter
@@ -441,7 +441,7 @@ class Pair {
         //updateGeoCentre
         m.x0 = m.x + m.drArc * Math.cos(m.th + m.n * 2 * m.theta);
         m.y0 = m.y + m.drArc * Math.sin(m.th + m.n * 2 * m.theta);
-        if (this.showPreview){
+        if (this.showPreview) {
             this.calcPreview();
         }
     }
@@ -582,9 +582,9 @@ class Pair {
         this.move(0);
         this.penDown()
     }
-    move(th, skipCrossCheck = false,preview=false) {
+    move(th, skipCrossCheck = false, preview = false) {
         if (!skipCrossCheck) {
-            this.checkRollCentreCross(th,preview);
+            this.checkRollCentreCross(th, preview);
         }
         if (th == 0) {
             th = 1e-5; // some glitches around pivot/roll selection at th==0
@@ -680,7 +680,7 @@ class Pair {
         if (this.tracing & !preview) {
             this.trace.points.push(this.tracePoint());
         }
-        if (preview){
+        if (preview) {
             // console.log(this.previewTrace)
             this.previewTrace.points.push(this.tracePoint());
         }
@@ -747,7 +747,7 @@ class Pair {
             this.fixed.ring = 1;
         }
     }
-    checkRollCentreCross(th,preview) {
+    checkRollCentreCross(th, preview) {
 
         let m = this.moving;
         let thg = th - m.th0;
@@ -762,15 +762,15 @@ class Pair {
         if (thPP != this.thPP) {
             //if so move to roll centre
             // console.log("Roll cross:", this.nRoll)
-            this.move(this.nRoll * 2 * beta + 1e-10 + m.th0, true,preview)
+            this.move(this.nRoll * 2 * beta + 1e-10 + m.th0, true, preview)
         }
 
     }
-    roll(th,preview=false) {
+    roll(th, preview = false) {
         this.move(this.th, false, preview)
         if (Math.abs(th - this.th) < dth) {
             // normal move, increment is safely small
-            this.move(th, false,preview)
+            this.move(th, false, preview)
         }
         else {
             // move in units of dth
@@ -801,19 +801,19 @@ class Pair {
         this.penUp();
         this.penDown();
     }
-    togglePreview(){
+    togglePreview() {
         this.calcPreview();
-        this.showPreview=!this.showPreview;
-        previewState=this.showPreview;
+        this.showPreview = !this.showPreview;
+        previewState = this.showPreview;
     }
     calcPreview() {
-        this.previewTrace=new Trace(this,previewAlpha)
-        this.previewTrace.points=[];
+        this.previewTrace = new Trace(this, previewAlpha)
+        this.previewTrace.points = [];
         let startTh = this.th;
-        this.roll(this.th + this.fullTraceTh,true);
-        this.move(startTh + this.fullTraceTh,false,true);
+        this.roll(this.th + this.fullTraceTh, true);
+        this.move(startTh + this.fullTraceTh, false, true);
         this.penUp();
-        this.move(startTh,true,false)
+        this.move(startTh, true, false)
         this.penDown();
     }
     oneTrace() {
@@ -1177,11 +1177,18 @@ function pointerDownHandler(xc, yc, n = 1) {
     xt = (x - xOff) / (scl)
     yt = (y - yOff) / (scl)
 
-    if (!pair.auto & showWheels & pair.moving.contains(xt, yt)) {
+    if (!pair.auto & showWheels & pair.moving.contains(xt, yt) &
+        ((y < (Y - uiHeight) & orient == "wideandtall") ||
+            ((y < (Y - uiHeight)) & (y > (uiHeight)) & orient == "tallorsquare") ||
+            ((y > 0 & x > uiButtonsWidth) & orient == "wideandshort"))
+    ) {
         mselect = "moving";
         thDragSt = Math.atan2(yt - pair.fixed.y, xt - pair.fixed.x);
     }
-    else if (showWheels & pair.fixed.contains(xt, yt)) {
+    else if (showWheels & pair.fixed.contains(xt, yt) &
+        ((y < (Y - uiHeight) & orient == "wideandtall") ||
+            ((y < (Y - uiHeight)) & (y > (uiHeight)) & orient == "tallorsquare") ||
+            ((y > 0 & x > uiButtonsWidth) & orient == "wideandshort"))) {
         mselect = "fixed";
         y0 = y;
         x0 = x;
@@ -1839,7 +1846,7 @@ function anim() {
     ctx.setTransform(scl, 0, 0, scl, xOff, yOff)
     pair.drawTraces(ctx);
 
-    if (pair.showPreview){
+    if (pair.showPreview) {
         pair.previewTrace.draw(ctx);
     }
 
@@ -1853,6 +1860,11 @@ function anim() {
 
     // fixed stuff
     ctx.setTransform(1, 0, 0, 1, 0, 0)
+
+    // // draw trace count
+    // ctx.font = txtSize + 'px sans-serif';
+    // ctx.fillText(pair.traces.length, 100, 500,)
+
     panelArray.forEach(panel => panel.draw())
 
     if (showInfo) {
@@ -2022,7 +2034,7 @@ function init() {
 
     // let fixedDisc = new Disc(96);
     // let movingDisc = new ArcSidedDisc(perimTeeth = 84, arcness = .17, rat = .8, nArc = 1, penAngle = 0*PI2/4, ring = false)
-    
+
     pair = new Pair(fixedDisc, movingDisc, preview = previewState)
     // pair.fullTrace();
     // pair.nudge(1);
@@ -2058,11 +2070,11 @@ let showColInfo = false;
 let showgalleryForm = false;
 let showArcInfo = false;
 let playDemo = false;
-let previewState=false;
+let previewState = false;
 
 const shareBorderfrac = 0.15;
 const transCol = "rgb(128,128,128,0.3)"
-const previewAlpha=0.5
+const previewAlpha = 0.5
 const wheelColor = "white"
 const uiTextColor = "white"
 const maxWheelSize = 300;
