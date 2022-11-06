@@ -2007,7 +2007,7 @@ function setSize() {
 function init() {
     hueInit = Math.random() * 360
     bgFillStyle = "hsl(" + hueInit + ",100%,5%)";
-    bgFillStyleAlpha = "hsla(" + hueInit + ",100%,5%,.8)"
+    bgFillStyleAlpha = "hsla(" + hueInit + ",100%,5%,.7)"
     fgFillStyle = "hsl(" + hueInit + ",100%,50%)"
     setGallerySubmitHTML();
     canvas.style.backgroundColor = bgFillStyle
@@ -2062,7 +2062,7 @@ let previewState=false;
 
 const shareBorderfrac = 0.15;
 const transCol = "rgb(128,128,128,0.3)"
-const previewAlpha=0.6
+const previewAlpha=0.5
 const wheelColor = "white"
 const uiTextColor = "white"
 const maxWheelSize = 300;
