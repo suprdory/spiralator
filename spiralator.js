@@ -1649,7 +1649,7 @@ function createSliderPanel() {
         function (dy, yDragVar0) {
             showWheelsOverride = true;
             pair.penUp();
-            pair.moving.drawAng = Math.min(PI2 / 2, Math.max(-0.01 / pixRat * dy + yDragVar0, -PI2 / 2))
+            pair.moving.drawAng = Math.min(PI2 / 2, Math.max(-0.005 / pixRat * dy + yDragVar0, -PI2 / 2))
             pair.penDown();
             pair.calcPreview();
 
@@ -1720,7 +1720,7 @@ function createColourPanel() {
             pair.move(pair.th);
             pair.penUpCont();
 
-            pair.lightness = Math.max(00, Math.min(100, yDragVar0 + dy * -0.25 / pixRat));
+            pair.lightness = Math.max(00, Math.min(100, yDragVar0 + dy * -0.15 / pixRat));
 
             pair.setColor();
             pair.fixed.color = pair.color;
