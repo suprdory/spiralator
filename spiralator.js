@@ -353,18 +353,12 @@ class Pair {
         this.trace = new Trace(this, 1);
         this.previewTrace;
         this.traces = [];
-        this.tracing = true;
+        this.tracing = false;
         
         this.updateMovingShape();
         this.updatePairGeom();
         this.move(this.th);
 
-        // this.setColor();
-        // this.trace = new Trace(this,1);
-        // this.previewTrace = new Trace(this,0.5);
-        // this.traces = [];
-        // this.tracing = true;
-        // this.move(this.th);
     }
     updateMovingShape() {
         // updates only moving shape but requires knowledge of fixed shape size in the case that the arc sizes is greater than fixed size to determine effective perimeter
@@ -818,7 +812,9 @@ class Pair {
         let startTh = this.th;
         this.roll(this.th + this.fullTraceTh,true);
         this.move(startTh + this.fullTraceTh,false,true);
+        this.penUp();
         this.move(startTh,true,false)
+        this.penDown();
     }
     oneTrace() {
         this.penUp();
