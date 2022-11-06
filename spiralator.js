@@ -2066,7 +2066,7 @@ let previewState=false;
 
 const shareBorderfrac = 0.15;
 const transCol = "rgb(128,128,128,0.3)"
-const previewAlpha=0.4
+const previewAlpha=0.6
 const wheelColor = "white"
 const uiTextColor = "white"
 const maxWheelSize = 300;
