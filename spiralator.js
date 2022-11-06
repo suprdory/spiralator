@@ -1652,7 +1652,13 @@ function createSliderPanel() {
         function (dy, yDragVar0) {
             showWheelsOverride = true;
             pair.penUp();
-            pair.moving.drawAng = Math.min(PI2 / 2, Math.max(-0.005 / pixRat * dy + yDragVar0, -PI2 / 2))
+            pair.moving.drawAng = Math.min(100*PI2, Math.max(-0.005 / pixRat * dy + yDragVar0, -100*PI2))
+            if (pair.moving.drawAng < -PI2 / 2){
+                pair.moving.drawAng = pair.moving.drawAng+PI2;
+            }
+            if (pair.moving.drawAng > PI2 / 2) {
+                pair.moving.drawAng = pair.moving.drawAng - PI2;
+            }
             pair.penDown();
             pair.calcPreview();
 
