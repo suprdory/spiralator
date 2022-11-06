@@ -338,7 +338,7 @@ class ArcSidedDisc {
     }
 }
 class Pair {
-    constructor(fixed, moving) {
+    constructor(fixed, moving,previewState) {
         this.fixed = fixed;
         this.moving = moving;
         this.out = false;
@@ -348,16 +348,16 @@ class Pair {
         this.saturation = 100;
         this.lightness = 65;
         this.locked = true;
-        this.showPreview=true;
+        this.showPreview=previewState;
         this.setColor();
         this.trace = new Trace(this, 1);
         this.previewTrace;
         this.traces = [];
         this.tracing = true;
-        this.move(this.th);
-
+        
         this.updateMovingShape();
         this.updatePairGeom();
+        this.move(this.th);
 
         // this.setColor();
         // this.trace = new Trace(this,1);
@@ -808,7 +808,9 @@ class Pair {
         this.penDown();
     }
     togglePreview(){
+        this.calcPreview();
         this.showPreview=!this.showPreview;
+        previewState=this.showPreview;
     }
     calcPreview() {
         this.previewTrace=new Trace(this,previewAlpha)
@@ -816,6 +818,7 @@ class Pair {
         let startTh = this.th;
         this.roll(this.th + this.fullTraceTh,true);
         this.move(startTh + this.fullTraceTh,false,true);
+        this.move(startTh,true,false)
     }
     oneTrace() {
         this.penUp();
@@ -2023,8 +2026,8 @@ function init() {
 
     // let fixedDisc = new Disc(96);
     // let movingDisc = new ArcSidedDisc(perimTeeth = 84, arcness = .17, rat = .8, nArc = 1, penAngle = 0*PI2/4, ring = false)
-    pair = new Pair(fixedDisc, movingDisc)
-
+    
+    pair = new Pair(fixedDisc, movingDisc, preview = previewState)
     // pair.fullTrace();
     // pair.nudge(1);
     // pair.fullTrace();
@@ -2059,6 +2062,7 @@ let showColInfo = false;
 let showgalleryForm = false;
 let showArcInfo = false;
 let playDemo = false;
+let previewState=false;
 
 const shareBorderfrac = 0.15;
 const transCol = "rgb(128,128,128,0.3)"
