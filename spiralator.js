@@ -465,77 +465,92 @@ class Pair {
         this.transCol = "hsla(" + this.hue + "," + this.saturation + "%," + this.lightness + "%, 0.3)"
     }
     drawRadInfo() {
+        let Y0 = Y - uiHeight - txtSize * 1.5
+        let X0 = 2 * txtSize
+        let X1 = X - 2 * txtSize
+
         ctx.strokeStyle = this.fixed.color;
         ctx.fillStyle = this.fixed.color;
         ctx.textAlign = "center";
-        ctx.font = txtSize + 'px sans-serif';
+        ctx.font = txtSize/2 + 'px sans-serif';
         ctx.textBaseline = "middle";
-        ctx.fillText(Math.round(this.moving.rat * 100) + "%", X / 2, Y / 2 + txtSize * 0.9);
-        ctx.font = txtSize / 2 + 'px sans-serif';
-        ctx.fillText('Pen Radius', X / 2, Y / 2 - txtSize + txtSize * 0.9);
+        ctx.fillText(Math.round(this.moving.rat * 100) + "%", X0, Y0 + 0.7 * txtSize);
+        ctx.font = txtSize / 4 + 'px sans-serif';
+        ctx.fillText('Pen Radius', X0, Y0);
 
-        ctx.font = txtSize + 'px sans-serif';
-        ctx.fillText(Math.round(this.moving.drawAng * rad2deg), X / 2, Y / 2 - txtSize * 0.9);
-        ctx.font = txtSize / 2 + 'px sans-serif';
-        ctx.fillText('Pen Angle', X / 2, Y / 2 - txtSize - txtSize * 0.9);
+        ctx.font = txtSize/2 + 'px sans-serif';
+        ctx.fillText(Math.round(this.moving.drawAng * rad2deg), X1, Y0 + 0.7 * txtSize);
+        ctx.font = txtSize / 4 + 'px sans-serif';
+        ctx.fillText('Pen Angle', X1, Y0 );
 
     }
     drawArcInfo() {
+        let Y0 = Y - uiHeight - txtSize * 1.5
+        let X0 = 2 * txtSize
+        let X1 = X - 2 * txtSize
+
         ctx.strokeStyle = this.fixed.color;
         ctx.fillStyle = this.fixed.color;
         ctx.textAlign = "center";
-        ctx.font = txtSize + 'px sans-serif';
+        ctx.font = txtSize/2 + 'px sans-serif';
         ctx.textBaseline = "middle";
-        ctx.fillText(this.moving.nArc, X / 2, Y / 2);
-        ctx.font = txtSize / 2 + 'px sans-serif';
-        ctx.fillText('N Sides', X / 2, Y / 2 - txtSize);
+        ctx.fillText(this.moving.nArc, X1, Y0+txtSize*0.7);
+        ctx.font = txtSize / 4 + 'px sans-serif';
+        ctx.fillText('N Sides', X1, Y0);
 
-        ctx.font = txtSize + 'px sans-serif';
+        ctx.font = txtSize/2 + 'px sans-serif';
         ctx.textBaseline = "middle";
         // ctx.fillText(this.moving.perimTeeth + " <= " + this.arcness.toFixed(3) + " < " + this.fixed.teeth, X / 2, Y / 2 - txtSize * 1.8);
-        ctx.fillText((this.moving.arcness * 100).toFixed(0) + "%", X / 2, Y / 2 - txtSize * 1.8);
-        ctx.font = txtSize / 2 + 'px sans-serif';
-        ctx.fillText('Arcness', X / 2, Y / 2 - txtSize - txtSize * 1.8);
+        ctx.fillText((this.moving.arcness * 100).toFixed(0) + "%", X0, Y0+txtSize*.7);
+        ctx.font = txtSize / 4 + 'px sans-serif';
+        ctx.fillText('Arcness', X0, Y0);
 
     }
     drawColInfo() {
+        let Y0 = Y - uiHeight - txtSize * 1.5
+        let X0 = 2 * txtSize
+        let X1 = X - 2 * txtSize
+
         ctx.strokeStyle = this.color;
         ctx.fillStyle = this.color;
         ctx.textAlign = "center";
-        ctx.font = txtSize + 'px sans-serif';
+        ctx.font = txtSize/ 2 + 'px sans-serif';
         ctx.textBaseline = "middle";
-        ctx.fillText(Math.round(this.hue), X / 2 - txtSize, Y / 2);
-        ctx.fillText(Math.round(this.lightness - 50), X / 2 + txtSize, Y / 2);
-        ctx.fillText(Math.round(this.saturation), X / 2, Y / 2 + 2 * txtSize);
+        ctx.fillText(Math.round(this.hue), X0 , Y0+0.7*txtSize);
+        ctx.fillText(Math.round(this.lightness - 50), X / 2, Y0 + 0.7 * txtSize);
+        ctx.fillText(Math.round(this.saturation), X1, Y0 + 0.7 * txtSize);
 
-        ctx.font = txtSize / 2 + 'px sans-serif';
-        ctx.fillText('Hue', X / 2 - txtSize, Y / 2 - txtSize);
-        ctx.fillText('Lightness', X / 2 + txtSize, Y / 2 - txtSize);
-        ctx.fillText('Saturation', X / 2, Y / 2 + txtSize);
+        ctx.font = txtSize / 4 + 'px sans-serif';
+        ctx.fillText('Hue', X0, Y0);
+        ctx.fillText('Lightness', X / 2 , Y0);
+        ctx.fillText('Saturation', X1, Y0);
 
 
     }
     drawInfo() {
-        
+        let Y0 = Y - uiHeight - txtSize * 1.5
+        let X0 = 2*txtSize
+        let X1 = X-2 * txtSize
+
         ctx.strokeStyle = this.fixed.color;
         ctx.fillStyle = this.fixed.color;
         ctx.textAlign = "center";
-        ctx.font = txtSize + 'px sans-serif';
+        ctx.font = txtSize/2 + 'px sans-serif';
         ctx.textBaseline = "middle";
-        ctx.fillText(this.fixed.teeth, X / 2 - txtSize * 1.5, Y / 2 - txtSize * 0.45);
-        ctx.fillText(this.moving.perimTeeth, X / 2 - txtSize * 1.5, Y / 2 + txtSize * 0.60);
-        ctx.fillText(calcLCM(this.fixed.teeth, this.moving.perimTeeth) / this.moving.perimTeeth, X / 2 + 1.5 * txtSize, Y / 2);
+        ctx.fillText(this.fixed.teeth, X0 , Y0 - txtSize * 0.45);
+        ctx.fillText(this.moving.perimTeeth, X0 , Y0 + txtSize * 0.60);
+        ctx.fillText(calcLCM(this.fixed.teeth, this.moving.perimTeeth) / this.moving.perimTeeth, X1 , Y0+txtSize*0.6);
 
         ctx.beginPath();
-        ctx.moveTo(X / 2 - txtSize * 2.5, Y / 2 - txtSize * 0.00);
-        ctx.lineTo(X / 2 - txtSize * 0.5, Y / 2 - txtSize * 0.00);
+        ctx.moveTo(X0 - txtSize * 1.0, Y0 - txtSize * 0.00);
+        ctx.lineTo(X0 + txtSize * 1.0, Y0 - txtSize * 0.00);
         ctx.lineWidth = 3 * pixRat;
         ctx.stroke();
 
-        ctx.font = txtSize / 2 + 'px sans-serif';
-        ctx.fillText('Fixed wheel', X / 2 - txtSize * 1.5, Y / 2 - txtSize * 1.5);
-        ctx.fillText('Moving wheel', X / 2 - txtSize * 1.5, Y / 2 + txtSize * 1.5);
-        ctx.fillText('Symmetry', X / 2 + txtSize * 1.5, Y / 2 + txtSize * -1.0);
+        ctx.font = txtSize / 4 + 'px sans-serif';
+        ctx.fillText('Fixed wheel', X0 , Y0 - txtSize * 1.1);
+        ctx.fillText('Moving wheel', X0 , Y0 + txtSize * 1.1);
+        ctx.fillText('Symmetry', X1 , Y0 - txtSize*0.1);
     }
     penUp() {
         this.tracing = false;
@@ -1590,7 +1605,7 @@ function createSliderPanel() {
     panel.buttonArray.push(perimTeethButton)
 
 
-    let movRadButton = new PButton(panel, 3 / 6, 0, 1 / 6, 1, ["Arcness"],
+    let movRadButton = new PButton(panel, 2 / 6, 0, 1 / 6, 1, ["Arcness"],
         function (dy, yDragVar0) {
             // showWheelsOverride = true;
             pair.penUp();
@@ -1614,7 +1629,7 @@ function createSliderPanel() {
     movRadButton.UDarrows = true;
     panel.buttonArray.push(movRadButton)
 
-    let nArcButton = new PButton(panel, 2 / 6, 0, 1 / 6, 1, ["# Sides"],
+    let nArcButton = new PButton(panel, 3 / 6, 0, 1 / 6, 1, ["# Sides"],
         function (dy, yDragVar0) {
 
             // showWheelsOverride = true;
