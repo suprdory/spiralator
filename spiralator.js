@@ -516,6 +516,7 @@ class Pair {
 
     }
     drawInfo() {
+        
         ctx.strokeStyle = this.fixed.color;
         ctx.fillStyle = this.fixed.color;
         ctx.textAlign = "center";
@@ -1272,9 +1273,9 @@ function doubleClickHandler(clickCase) {
             anim();
         }
     }
-    if (!showWheels) {
-        showWheels = true;
-    }
+    // if (!showWheels) {
+    //     showWheels = true;
+    // }
     else {
         topPanel.active = true;
         bottomPanel.active = true;
@@ -1436,13 +1437,24 @@ function createButtonsPanel() {
             function () { sharePanel.active = true; })
     );
     panel.buttonArray.push(
-        new PButton(panel, 0.0, 0.333, 0.25, 0.333, ["Hide", "UI"],
+        new PButton(panel, 0.0, 0.333, 0.125, 0.333, ["Hide", "UI"],
             function () {
                 // showUI = false;
-                showWheels = false;
+                // showWheels = false;
                 panelArray.forEach(panel => panel.active = false)
             })
     );
+    let hideDiscsButton = new PButton(panel, 0.125, 0.333, 0.125, 0.333, ["Hide", "Discs"],
+        function () {
+            // showUI = false;
+            showWheels = !showWheels;
+            // panelArray.forEach(panel => panel.active = false)
+        },
+        [], [], [], null,
+        function () { return !showWheels; })
+    hideDiscsButton.toggle=true;
+    panel.buttonArray.push(hideDiscsButton);
+
     panel.buttonArray.push(
         new PButton(panel, .0 + 0.125, 0.666, 0.125, 0.333, ["Init"],
             function () {
@@ -1450,6 +1462,7 @@ function createButtonsPanel() {
 
             })
     );
+
 
     let demoButton = new PButton(panel, .0 + 0.0, 0.666, 0.125, 0.333, ["Demo"],
         function () { return toggleDemo(); },
@@ -1524,7 +1537,7 @@ function createSliderPanel() {
 
     let fixRadButton = new PButton(panel, 0 / 6, 0, 1 / 6, 1, ["Fixed", "Size"],
         function (dy, yDragVar0) {
-            showWheelsOverride = true;
+            // showWheelsOverride = true;
             pair.penUp();
             pair.fixed.teeth = Math.round(Math.min(maxWheelSize, Math.max(-0.1 / pixRat * dy + yDragVar0, 20)));
             // if (pair.fixed.teeth == pair.moving.teeth) {
@@ -1551,7 +1564,7 @@ function createSliderPanel() {
 
     let perimTeethButton = new PButton(panel, 1 / 6, 0, 1 / 6, 1, ["Moving", "Size"],
         function (dy, yDragVar0) {
-            showWheelsOverride = true;
+            // showWheelsOverride = true;
             pair.penUp();
             // pair.moving.perimTeeth = Math.round(Math.min(pair.fixed.teeth - 1, Math.max(-0.05 / pixRat * dy + yDragVar0, 10)))
             pair.moving.perimTeeth = Math.round(Math.min(300, Math.max(-0.05 / pixRat * dy + yDragVar0, 10)))
@@ -1579,7 +1592,7 @@ function createSliderPanel() {
 
     let movRadButton = new PButton(panel, 3 / 6, 0, 1 / 6, 1, ["Arcness"],
         function (dy, yDragVar0) {
-            showWheelsOverride = true;
+            // showWheelsOverride = true;
             pair.penUp();
 
             pair.moving.arcness = Math.min(1, Math.max(-0.01 / pixRat * dy + yDragVar0, 0));
@@ -1604,7 +1617,7 @@ function createSliderPanel() {
     let nArcButton = new PButton(panel, 2 / 6, 0, 1 / 6, 1, ["# Sides"],
         function (dy, yDragVar0) {
 
-            showWheelsOverride = true;
+            // showWheelsOverride = true;
             pair.penUp();
             pair.moving.nArc = Math.round(Math.min(7, Math.max(-0.05 / pixRat * dy + yDragVar0, 1)));
             // if (pair.moving.teeth == pair.fixed.teeth) {
@@ -1630,7 +1643,7 @@ function createSliderPanel() {
 
     let ratButton = new PButton(panel, 4 / 6, 0, 1 / 6, 1, ["Pen", "Radius"],
         function (dy, yDragVar0) {
-            showWheelsOverride = true;
+            // showWheelsOverride = true;
             pair.penUp();
             pair.moving.rat = Math.min(maxDrawRadiusRatio, Math.max(-0.002 / pixRat * dy + yDragVar0, 0))
             pair.penDown();
@@ -1650,7 +1663,7 @@ function createSliderPanel() {
 
     let angButton = new PButton(panel, 5 / 6, 0, 1 / 6, 1, ["Pen", "Angle"],
         function (dy, yDragVar0) {
-            showWheelsOverride = true;
+            // showWheelsOverride = true;
             pair.penUp();
             pair.moving.drawAng = Math.min(100*PI2, Math.max(-0.005 / pixRat * dy + yDragVar0, -100*PI2))
             if (pair.moving.drawAng < -PI2 / 2){
