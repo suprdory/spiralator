@@ -826,8 +826,11 @@ class Pair {
         this.previewTrace = new Trace(this, previewAlpha)
         this.previewTrace.points = [];
         let startTh = this.th;
-        this.roll(this.th + this.fullTraceTh, true);
-        this.move(startTh + this.fullTraceTh, false, true);
+
+        this.move(0, true, true);
+        this.roll(this.fullTraceTh, true);
+        // this.move(this.fullTraceTh, true, true);
+        
         this.penUp();
         this.move(startTh, true, false)
         this.penDown();
@@ -2066,10 +2069,15 @@ function init() {
     let fixedDisc = new Disc(fixedTeeth);
     let movingDisc = new ArcSidedDisc(perimTeeth = perimTeethInit, arcness = arcnessInit, rat = ratInit, nArc = nArcInit, penAngle = penAngleInit, ring = false)
 
-    // let fixedDisc = new Disc(96);
-    // let movingDisc = new ArcSidedDisc(perimTeeth = 84, arcness = .17, rat = .8, nArc = 1, penAngle = 0*PI2/4, ring = false)
+    // let fixedDisc = new Disc(106);
+    // let movingDisc = new ArcSidedDisc(perimTeeth = 60, arcness = .17, rat = .8, nArc = 2, penAngle = 0*PI2/4, ring = false)
 
     pair = new Pair(fixedDisc, movingDisc, preview = previewState)
+    // pair.togglePreview();
+    // pair.inOut();
+    // pair.moving.nSide=2;
+    // pair.updateMovingShape();
+    // pair.updatePairGeom();
     // pair.fullTrace();
     // pair.nudge(1);
     // pair.fullTrace();
