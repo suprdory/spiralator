@@ -1418,6 +1418,60 @@ function shareImage() {
         })
     }
 }
+function downloadImage() {
+    if (pair.traces.length > 0) {
+        let date = new Date().toJSON();
+        // console.log(date); // 2022-06-17T11:06:50.369Z
+        sharePanel.wait = true;
+        canvasSq = drawSquareFullImage(shareRes);
+        canvasSq.toBlob(function (blob) {
+            const filesArray = [
+                new File(
+                    [blob],
+                    "spiralator-" + date +".png",
+                    {
+                        type: "image/png",
+                        lastModified: new Date().getTime()
+                    }
+                )
+            ];
+            const shareData = {
+                files: filesArray,
+            };
+            // navigator.share(shareData)
+            // // Dynamically create a File
+            // const myFile = new File([`${new Date()}: Meow!`], 'my-cat.txt');
+            // // Download it using our function
+            // downloadFile(myFile);
+
+            downloadFile(shareData['files'][0]);
+            sharePanel.wait = false;
+            anim()
+        })
+    }
+}
+
+function downloadFile(file) {
+  // Create a link and set the URL using `createObjectURL`
+  const link = document.createElement("a");
+  link.style.display = "none";
+  link.href = URL.createObjectURL(file);
+  link.download = file.name;
+
+  // It needs to be added to the DOM so it can be clicked
+  document.body.appendChild(link);
+  link.click();
+
+  // To make this work on Firefox we need to wait
+  // a little while before removing it.
+  setTimeout(() => {
+    URL.revokeObjectURL(link.href);
+    link.parentNode.removeChild(link);
+  }, 0);
+}
+
+
+
 function uploadImage(name, comment) {
     if (pair.traces.length > 0) {
         sharePanel.wait = true;
@@ -1473,8 +1527,14 @@ function createSharePanel() {
         new PButton(panel, 0.1, .2, .8, 0.1, ["Share Image"],
             function () { shareImage(); })
     );
+
     panel.buttonArray.push(
-        new PButton(panel, 0.1, .5, .8, 0.1, ["Upload to Gallery"],
+        new PButton(panel, 0.1, .4, .8, 0.1, ["Download Image"],
+            function () { downloadImage(); })
+    );
+
+    panel.buttonArray.push(
+        new PButton(panel, 0.1, .6, .8, 0.1, ["Upload to Gallery"],
             function () { toggleGalleryForm() })
     );
     panel.buttonArray.push(
@@ -1492,7 +1552,7 @@ function createButtonsPanel() {
     panel.anyClickActivates = true;
 
     panel.buttonArray.push(
-        new PButton(panel, 0.0, 0.0, 0.25, 0.333, ["Share"],
+        new PButton(panel, 0.0, 0.0, 0.25, 0.333, ["Save/Share"],
             function () { sharePanel.active = true; })
     );
     panel.buttonArray.push(
@@ -2153,7 +2213,7 @@ function init() {
     // pair.fullTrace();
     // pair.nudge(1);
     // pair.fullTrace();
-
+        // sharePanel.active=true;
 }
 
 const canvas = document.getElementById("cw");
