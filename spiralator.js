@@ -480,6 +480,7 @@ class Pair {
             this.fixed.y = y;
             pair.move(pair.th)
             pair.penDown()
+            pair.calcPreview();
             // this.auto=auto
         }
     }
@@ -1667,7 +1668,7 @@ function createSliderPanel() {
             // showWheelsOverride = true;
             pair.penUp();
             if (pair.moving.nArc>1){
-            pair.moving.arcness = Math.min(1, Math.max(-0.01 / pixRat * dy + yDragVar0, 0));
+            pair.moving.arcness = Math.min(1, Math.max(-0.005 / pixRat * dy + yDragVar0, 0));
 
             pair.configRings();
             pair.updateMovingShape();
