@@ -518,9 +518,10 @@ class Pair {
 
         ctx.font = txtSize / 2 + 'px sans-serif';
         ctx.textBaseline = "middle";
-        // ctx.fillText(this.moving.perimTeeth + " <= " + this.arcness.toFixed(3) 
-        //+ " < " + this.fixed.teeth, X / 2, Y / 2 - txtSize * 1.8);
-        ctx.fillText((this.moving.arcness * 100).toFixed(0) + "%", X0, Y0 + txtSize * .7);
+        // let arcFrac=1+Math.log(this.moving.teeth/this.fixed.teeth);
+        let arcFrac = Math.log((this.moving.teeth-this.moving.perimTeeth) * (Math.exp(1) - 1) / (this.fixed.teeth-this.moving.perimTeeth)+1);
+        ctx.fillText((arcFrac * 100).toFixed(0) + "%", X0, Y0 + txtSize * .7);
+        // ctx.fillText((this.moving.arcness * 100).toFixed(0) + "%", X0, Y0 + txtSize * .7);
         ctx.font = txtSize / 4 + 'px sans-serif';
         ctx.fillText('Arcness', X0, Y0);
 
