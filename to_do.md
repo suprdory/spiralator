@@ -1,8 +1,8 @@
 # to do
 
-* handle oversize non-inverted arcs
-
 # done
+* scale arcness by moving/fixed teeth ratio. scaled/shifted log seems to work well
+* handle oversize non-inverted arcs - limit size of non-inverted nArcs>1.
 * preview!
 * force roll (and auto) to pass through roll discontinuities - move checks for transition between pivot points and forces a point at roll centre 
 * fix inverted nudgeing

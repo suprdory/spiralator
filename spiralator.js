@@ -80,12 +80,12 @@ class Trace {
         if (alpha == 1) {
             // console.log("normal mode:" + alpha)
             this.color = "hsl(" + pair.hue + "," + pair.saturation + "%," +
-             pair.lightness + "%)";
+                pair.lightness + "%)";
         }
         else {
             // console.log("alpha mode:"+alpha)
-            this.color = "hsla(" + pair.hue + "," + pair.saturation + "%," + 
-            pair.lightness + "%," + alpha + ")";
+            this.color = "hsla(" + pair.hue + "," + pair.saturation + "%," +
+                pair.lightness + "%," + alpha + ")";
         }
         // this.thickness = baseLW;
     }
@@ -369,9 +369,13 @@ class Pair {
     updateMovingShape() {
         // updates only moving shape but requires knowledge of fixed shape size 
         // in the case that the arc sizes is greater than fixed size to determine effective perimeter
+        // called after changes to nArc, perimTeeth, arcness
         let m = this.moving;
         let f = this.fixed;
-        // called after changes to nArc, perimTeeth, arcness
+        //if inverted oversize arcShape, reduce size to fit inside.
+        !this.out & m.nArc > 1 & m.perimTeeth >= f.teeth ?
+            m.perimTeeth = f.teeth - 1 : 0;
+
         let fixedRad = f.teeth * pixPerTooth / PI2;
         m.perim = m.perimTeeth * pixPerTooth;
 
@@ -385,21 +389,22 @@ class Pair {
             m.radCont = m.rad / m.arcRat;//radius of containing circle
             //dist from geo centre to arc centre
             m.drArc = m.rad * (Math.cos(m.phi) - Math.cos(m.theta) / m.arcRat);
+            m.teeth=m.perimTeeth
 
         }
         else { // first get teeth
 
             m.theta = PI2 / 2 / m.nArc; // half angle from geo centre to arc intersect points
-            m.phi = Math.acos(m.arcness * (maxArcness - Math.cos(m.theta)) + 
-            Math.cos(m.theta));
+            m.phi = Math.acos(m.arcness * (maxArcness - Math.cos(m.theta)) +
+                Math.cos(m.theta));
             m.rad = m.perim / (2 * m.phi * m.nArc);
             m.circ = PI2 * m.rad;
             m.teeth = m.circ / pixPerTooth;
             if (m.teeth >= f.teeth & !this.out) {
                 //only pivoting - phi still determined by arcness but radCont determined by 
                 // 'effective perimeter' as not rolling
-                m.radCont = fixedRad * Math.sin(m.perim / (2 * fixedRad * m.nArc)) / 
-                Math.sin(m.theta);
+                m.radCont = fixedRad * Math.sin(m.perim / (2 * fixedRad * m.nArc)) /
+                    Math.sin(m.theta);
                 m.arcRat = Math.sin(m.theta) / Math.sin(m.phi);
                 m.rad = m.radCont * m.arcRat;
                 m.circ = PI2 * m.rad;
@@ -423,8 +428,8 @@ class Pair {
         let f = this.fixed;
         this.configRings();
         // roll required to complete
-        this.fullTraceTh = PI2 * calcLCM(this.fixed.teeth, this.moving.perimTeeth) / 
-        this.fixed.teeth;
+        this.fullTraceTh = PI2 * calcLCM(this.fixed.teeth, this.moving.perimTeeth) /
+            this.fixed.teeth;
         // this.arcness = (m.teeth - m.perimTeeth) / (f.teeth - m.perimTeeth); 
         // 0: circle, 1: arcRad = Fixed Rad
 
@@ -434,8 +439,8 @@ class Pair {
                 this.tha_pp = (m.phi * m.rad / f.rad) //first pivot switch point (when tha is at pivot angle)
                 //angle to geocentre (thg) at which tha_pp occurs
                 this.thg_pp = m.phi * m.rad / f.rad - Math.asin(m.drArc * Math.sin(m.phi) /
-                    ((f.rad - m.rad) ** 2 + m.drArc ** 2 + 2 * m.drArc * 
-                    (f.rad - m.rad) * Math.cos(m.phi)) ** 0.5)
+                    ((f.rad - m.rad) ** 2 + m.drArc ** 2 + 2 * m.drArc *
+                        (f.rad - m.rad) * Math.cos(m.phi)) ** 0.5)
             }
             else {
                 // console.log('only pivot')
@@ -447,8 +452,8 @@ class Pair {
             //out (inverted)
             this.tha_pp = (m.phi * m.rad / f.rad)
             this.thg_pp = m.phi * m.rad / f.rad - Math.asin(m.drArc * Math.sin(m.phi) /
-                ((f.rad + m.rad) ** 2 + m.drArc ** 2 - 2 * m.drArc * (f.rad + m.rad) * 
-                Math.cos(m.phi)) ** 0.5)
+                ((f.rad + m.rad) ** 2 + m.drArc ** 2 - 2 * m.drArc * (f.rad + m.rad) *
+                    Math.cos(m.phi)) ** 0.5)
 
         }
 
@@ -519,7 +524,7 @@ class Pair {
         ctx.font = txtSize / 2 + 'px sans-serif';
         ctx.textBaseline = "middle";
         // let arcFrac=1+Math.log(this.moving.teeth/this.fixed.teeth);
-        let arcFrac = Math.log((this.moving.teeth-this.moving.perimTeeth) * (Math.exp(1) - 1) / (this.fixed.teeth-this.moving.perimTeeth)+1);
+        let arcFrac = Math.log((this.moving.teeth - this.moving.perimTeeth) * (Math.exp(1) - 1) / (this.fixed.teeth - this.moving.perimTeeth) + 1);
         ctx.fillText((arcFrac * 100).toFixed(0) + "%", X0, Y0 + txtSize * .7);
         // ctx.fillText((this.moving.arcness * 100).toFixed(0) + "%", X0, Y0 + txtSize * .7);
         ctx.font = txtSize / 4 + 'px sans-serif';
@@ -595,7 +600,7 @@ class Pair {
         this.tracing = true;
     }
     update() {
-        this.roll(this.th + .1 * 
+        this.roll(this.th + .1 *
             Math.max(Math.abs(this.moving.perim / this.fixed.circ)) * this.auto);
         // this.roll(this.th + .05 / Math.max(Math.abs(1 - this.fixed.circ / this.moving.perim), .15)
         // * this.auto);
@@ -665,8 +670,8 @@ class Pair {
                 //set current arc centre and shape rotation
                 m.x = f.x + (f.rad + m.rad) * Math.cos(m.th0 + th_rollcentre + tha_roll);
                 m.y = f.y + (f.rad + m.rad) * Math.sin(m.th0 + th_rollcentre + tha_roll);
-                m.th = m.th0 + (nSide * PI2 / m.nArc) + th_rollcentre + 
-                tha_roll * (f.rad / m.rad + 1) + PI2 / 2;
+                m.th = m.th0 + (nSide * PI2 / m.nArc) + th_rollcentre +
+                    tha_roll * (f.rad / m.rad + 1) + PI2 / 2;
                 //updateGeoCentre
                 m.x0 = m.x + m.drArc * Math.cos(m.th + (m.nArc - nSide) * 2 * m.theta);
                 m.y0 = m.y + m.drArc * Math.sin(m.th + (m.nArc - nSide) * 2 * m.theta);
@@ -687,8 +692,8 @@ class Pair {
 
                 this.ohm = Math.PI - Math.asin(f.rad / this.b * Math.sin(th_piv))
                 this.omg = Math.PI - this.ohm - th_piv
-                this.c = ((f.rad - this.b * Math.cos(this.omg)) ** 2 + 
-                (this.b * Math.sin(this.omg)) ** 2) ** 0.5
+                this.c = ((f.rad - this.b * Math.cos(this.omg)) ** 2 +
+                    (this.b * Math.sin(this.omg)) ** 2) ** 0.5
                 this.gam = nPiv * 2 * Math.PI / m.nArc - thPP - this.omg + Math.PI / m.nArc;
                 m.x0 = f.x + this.c * Math.cos(m.th0 + thg);
                 m.y0 = f.y + this.c * Math.sin(m.th0 + thg);
@@ -701,10 +706,10 @@ class Pair {
                 //inverted
                 this.ohm = Math.asin(f.rad / this.b * Math.sin(th_piv))
                 this.omg = Math.PI - this.ohm - th_piv
-                this.c = ((f.rad - this.b * Math.cos(this.omg)) ** 2 + 
-                (this.b * Math.sin(this.omg)) ** 2) ** 0.5
-                this.gam = (m.nArc - nPiv) * 2 * Math.PI / m.nArc - 
-                thPP - this.omg - 1 * Math.PI / m.nArc;
+                this.c = ((f.rad - this.b * Math.cos(this.omg)) ** 2 +
+                    (this.b * Math.sin(this.omg)) ** 2) ** 0.5
+                this.gam = (m.nArc - nPiv) * 2 * Math.PI / m.nArc -
+                    thPP - this.omg - 1 * Math.PI / m.nArc;
                 m.x0 = f.x + this.c * Math.cos(m.th0 + thg);
                 m.y0 = f.y + this.c * Math.sin(m.th0 + thg);
                 m.th = m.th0 - this.gam;
@@ -923,7 +928,7 @@ class Pair {
     }
 }
 class PButton {
-    constructor(panel, x, y, w, h, txt, fun, argObj, getXdragVar, getYdragVar, 
+    constructor(panel, x, y, w, h, txt, fun, argObj, getXdragVar, getYdragVar,
         isDepressedFun, toggleValFun) {
         this.x = panel.x + x * panel.w;
         this.y = panel.y + y * panel.h;
@@ -1001,9 +1006,9 @@ class PButton {
             ctx.fillText(this.txt, this.x + this.w / 2, this.y + this.h / 2, this.w * 0.9);
         }
         if (this.nTxtLines == 2) {
-            ctx.fillText(this.txt[0], 
+            ctx.fillText(this.txt[0],
                 this.x + this.w / 2, this.y + this.h / 2 - .6 * txtSize / 4, this.w * 0.9);
-            ctx.fillText(this.txt[1], 
+            ctx.fillText(this.txt[1],
                 this.x + this.w / 2, this.y + this.h / 2 + .6 * txtSize / 4, this.w * 0.9);
         }
     }
@@ -1593,14 +1598,17 @@ function createSliderPanel() {
         function (dy, yDragVar0) {
             // showWheelsOverride = true;
             pair.penUp();
-            pair.fixed.teeth = Math.round(Math.min(maxWheelSize, 
+            pair.fixed.teeth = Math.round(Math.min(maxWheelSize,
                 Math.max(-0.1 / pixRat * dy + yDragVar0, 20)));
-            // if (pair.fixed.teeth == pair.moving.teeth) {
-            //     pair.fixed.teeth--;
-            // }
+            if (pair.fixed.teeth == pair.moving.perimTeeth) {
+                pair.fixed.teeth--;
+            }
+
             pair.configRings();
             pair.fixed.circ = pair.fixed.teeth * pixPerTooth;
             pair.fixed.rad = pair.fixed.circ / PI2
+            !pair.out & pair.moving.nArc > 1 & pair.moving.perimTeeth >= pair.fixed.teeth ?
+                pair.moving.perimTeeth = pair.fixed.teeth - 1 : 0;
             pair.updateMovingShape()
             pair.updatePairGeom();
             pair.move(pair.th);
@@ -1623,13 +1631,18 @@ function createSliderPanel() {
             pair.penUp();
             // pair.moving.perimTeeth = Math.round(Math.min(pair.fixed.teeth - 1, 
             //Math.max(-0.05 / pixRat * dy + yDragVar0, 10)))
-            pair.moving.perimTeeth = Math.round(Math.min(300, 
+            !pair.out & pair.moving.nArc > 1 ?
+                maxPerimTeeth = Math.min(maxWheelSize, pair.fixed.teeth - 1) : maxPerimTeeth = maxWheelSize;
+            pair.moving.perimTeeth = Math.round(Math.min(maxPerimTeeth,
                 Math.max(-0.05 / pixRat * dy + yDragVar0, 10)))
             //need to use same definition of arcness to define moving.teeth, 
             // as using in pair.updatePairGeom()
             // pair.moving.teeth = pair.arcness * (pair.fixed.teeth - pair.moving.perimTeeth) 
             // + pair.moving.perimTeeth
             // pair.configRings();
+            if (pair.fixed.teeth == pair.moving.perimTeeth) {
+                pair.moving.perimTeeth++;
+            }
             pair.updateMovingShape();
             pair.updatePairGeom();
             pair.move(pair.th);
@@ -1653,14 +1666,15 @@ function createSliderPanel() {
         function (dy, yDragVar0) {
             // showWheelsOverride = true;
             pair.penUp();
-
+            if (pair.moving.nArc>1){
             pair.moving.arcness = Math.min(1, Math.max(-0.01 / pixRat * dy + yDragVar0, 0));
 
             pair.configRings();
             pair.updateMovingShape();
             pair.updatePairGeom();
             pair.move(pair.th);
-            pair.penDown();
+            pair.penDown();}
+
         }, [], [],
         function () {
             return pair.moving.arcness;
