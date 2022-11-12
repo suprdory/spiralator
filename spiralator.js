@@ -1450,7 +1450,6 @@ function downloadImage() {
         })
     }
 }
-
 function downloadFile(file) {
   // Create a link and set the URL using `createObjectURL`
   const link = document.createElement("a");
@@ -1469,9 +1468,6 @@ function downloadFile(file) {
     link.parentNode.removeChild(link);
   }, 0);
 }
-
-
-
 function uploadImage(name, comment) {
     if (pair.traces.length > 0) {
         sharePanel.wait = true;
@@ -2096,7 +2092,7 @@ function setSize() {
     baseLW = 1 * pixRat;
     pixPerTooth = 9 * pixRat;
 
-    nOscButtons = 13;
+    nOscButtons = 15;
     minPanelWidth = 60 * pixRat
     uiBorder = 5 * pixRat;
 
@@ -2108,11 +2104,11 @@ function setSize() {
         console.log('wide and tall enough')
         uiHeight = 0.2 * Y;
 
-        uiButtonsWidth = minPanelWidth * 4;
+        uiButtonsWidth = minPanelWidth * (4+2);
         uiSlidersWidth = minPanelWidth * 6;
         uiShapeWidth = minPanelWidth * 3;
 
-        uiButtonsX = (X - nOscButtons * minPanelWidth) / 2;
+        uiButtonsX = (X - (nOscButtons) * minPanelWidth) / 2;
         uiSlidersX = uiButtonsX + uiButtonsWidth;
         uiShapeX = uiSlidersX + uiSlidersWidth;
 
