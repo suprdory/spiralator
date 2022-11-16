@@ -76,8 +76,9 @@ class Point {
 class Trace {
     constructor(pair, alpha = 1) {
         this.points = [];
+        this.lw=pair.lw;
 
-        if (alpha == 1) {
+        if (alpha == 3) {
             // console.log("normal mode:" + alpha)
             this.color = "hsl(" + pair.hue + "," + pair.saturation + "%," +
                 pair.lightness + "%)";
@@ -93,7 +94,7 @@ class Trace {
         if (this.points.length > 0) {
             ctx.beginPath();
             ctx.strokeStyle = this.color;
-            ctx.lineWidth = baseLW * 1;
+            ctx.lineWidth = baseLW * this.lw;
             ctx.moveTo(this.points[0].x, this.points[0].y);
             this.points.forEach(point => {
                 ctx.lineTo(point.x, point.y);
@@ -132,7 +133,7 @@ class ArcSidedDisc {
         this.rat = rat;
         this.drawAng = penAngle;
         this.lw = baseLW * 2;
-
+        this.penLW=1;
         this.th0 = 0; //rotation angle at pair.th=0, shifted by nudging
 
         this.perimTeeth = perimTeeth; //number of teeth in shape perimeter
@@ -300,7 +301,7 @@ class ArcSidedDisc {
         ctx.arc(
             this.x0 + this.radCont * Math.cos(this.th + this.drawAng) * this.rat,
             this.y0 + this.radCont * Math.sin(this.th + this.drawAng) * this.rat,
-            3 * baseLW, 0, PI2
+            3 * baseLW * this.penLW**0.5, 0, PI2
         )
         ctx.fill();
 
@@ -359,6 +360,7 @@ class Pair {
         this.trace = new Trace(this, 1);
         this.previewTrace;
         this.traces = [];
+        this.lw=1;
 
 
         this.updateMovingShape();
@@ -553,6 +555,28 @@ class Pair {
 
 
     }
+    drawLWInfo() {
+        let Y0 = Y - uiHeight - txtSize * 1.5
+        // let X0 = 2 * txtSize
+        // let X1 = X - 2 * txtSize
+
+        ctx.strokeStyle = this.color;
+        ctx.fillStyle = this.color;
+        ctx.textAlign = "center";
+        ctx.font = txtSize / 2 + 'px sans-serif';
+        ctx.textBaseline = "middle";
+        // ctx.fillText(Math.round(this.hue), X0, Y0 + 0.7 * txtSize);
+        ctx.fillText(this.lw, X / 2, Y0 + 0.7 * txtSize);
+        // ctx.fillText(Math.round(this.saturation), X1, Y0 + 0.7 * txtSize);
+
+        ctx.font = txtSize / 4 + 'px sans-serif';
+        // ctx.fillText('Hue', X0, Y0);
+        ctx.fillText('Line Width', X / 2, Y0);
+        // ctx.fillText('Saturation', X1, Y0);
+
+
+    }
+
     drawInfo() {
         let Y0 = Y - uiHeight - txtSize * 1.5
         let X0 = 2 * txtSize
@@ -1823,13 +1847,52 @@ function createSliderPanel() {
 
 }
 function createColourPanel() {
-    let nButs = 3;
+    let nButs = 4;
 
     let panel = new Panel(uiShapeX + uiBorder, uiShapeY + uiBorder, uiShapeWidth -
         2 * uiBorder, uiHeight - 2 * uiBorder);
     panel.anyClickActivates = true;
 
-    let hueButton = new PButton(panel, 0 / nButs, 0, 1 / nButs, 1, ["Hue"],
+    let lwButton = new PButton(panel, 0 / nButs, 0, 1 / nButs, 1, ["Line","Width"],
+        function (dy, yDragVar0) {
+
+            pair.move(pair.th);
+            pair.penUpCont();
+
+            // pair.hue = yDragVar0 - 0.5 / pixRat * dy;
+            // if (pair.hue > 360) {
+            //     pair.hue -= 360;
+            // }
+            // if (pair.hue < 0) {
+            //     pair.hue += 360;
+            // }
+
+            // console.log(dy, yDragVar0, dx, xdragVar0)
+            pair.lw = Math.round(Math.max(1, Math.min(10, yDragVar0 + dy * -0.15/pixRat)));
+            pair.moving.penLW = pair.lw
+            // pair.setColor();
+            // pair.fixed.color = pair.color;
+            // pair.moving.color = pair.color;
+            // document.querySelector(':root').style.setProperty('--fgColor', pair.color)
+            // pair.move(pair.th);
+            pair.penDown();
+            pair.calcPreview();
+
+        }, [], [],
+        function () {
+            return pair.lw;
+        },
+        function (isDepressed) {
+            showLWInfo = isDepressed;
+        }
+    )
+    lwButton.yDrag = true;
+    // colButton.xDrag = true;
+    lwButton.UDarrows = true;
+    // colButton.LRarrows = true;
+    panel.buttonArray.push(lwButton)
+
+    let hueButton = new PButton(panel, 1 / nButs, 0, 1 / nButs, 1, ["Hue"],
         function (dy, yDragVar0) {
 
             pair.move(pair.th);
@@ -1868,7 +1931,7 @@ function createColourPanel() {
     // colButton.LRarrows = true;
     panel.buttonArray.push(hueButton)
 
-    let lightnessButton = new PButton(panel, 1 / nButs, 0, 1 / nButs, 1, ["Lightness"],
+    let lightnessButton = new PButton(panel, 2 / nButs, 0, 1 / nButs, 1, ["Lightness"],
         function (dy, yDragVar0) {
 
             pair.move(pair.th);
@@ -1897,7 +1960,7 @@ function createColourPanel() {
     // colButton.LRarrows = true;
     panel.buttonArray.push(lightnessButton)
 
-    let satButton = new PButton(panel, 2 / nButs, 0, 1 / nButs, 1, ["Saturation"],
+    let satButton = new PButton(panel, 3 / nButs, 0, 1 / nButs, 1, ["Saturation"],
         function (dy, yDragVar0) {
 
             pair.move(pair.th);
@@ -1986,7 +2049,7 @@ function anim() {
         pair.auto = 1;
     }
 
-    if (pair.auto & !showColInfo & !showInfo & !showRadInfo & !showArcInfo) {
+    if (pair.auto & !showColInfo & !showInfo & !showRadInfo & !showArcInfo & !showLWInfo) {
         pair.update();
     }
 
@@ -2029,6 +2092,9 @@ function anim() {
     }
     if (showColInfo) {
         pair.drawColInfo();
+    }
+    if (showLWInfo) {
+        pair.drawLWInfo();
     }
 
     // ctx.textAlign = "left"
@@ -2225,6 +2291,7 @@ let showWheels = true;
 let showWheelsOverride = false;
 let showInfo = false;
 let showRadInfo = false;
+let showLWInfo = false;
 let showColInfo = false;
 let showgalleryForm = false;
 let showArcInfo = false;
