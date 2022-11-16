@@ -76,7 +76,7 @@ class Point {
 class Trace {
     constructor(pair, alpha = 1) {
         this.points = [];
-        this.lw=pair.lw;
+        this.lw = pair.lw;
 
         if (alpha == 3) {
             // console.log("normal mode:" + alpha)
@@ -133,7 +133,7 @@ class ArcSidedDisc {
         this.rat = rat;
         this.drawAng = penAngle;
         this.lw = baseLW * 2;
-        this.penLW=1;
+        this.penLW = 1;
         this.th0 = 0; //rotation angle at pair.th=0, shifted by nudging
 
         this.perimTeeth = perimTeeth; //number of teeth in shape perimeter
@@ -301,7 +301,7 @@ class ArcSidedDisc {
         ctx.arc(
             this.x0 + this.radCont * Math.cos(this.th + this.drawAng) * this.rat,
             this.y0 + this.radCont * Math.sin(this.th + this.drawAng) * this.rat,
-            3 * baseLW * this.penLW**0.5, 0, PI2
+            3 * baseLW * this.penLW ** 0.5, 0, PI2
         )
         ctx.fill();
 
@@ -354,13 +354,16 @@ class Pair {
         this.hue = hueInit;
         this.saturation = 100;
         this.lightness = 65;
+        this.hueBG = this.hue;
+        this.lightnessBG = 5;
+        this.saturationBG = 100;
         this.locked = true;
         this.showPreview = previewState;
         this.setColor();
         this.trace = new Trace(this, 1);
         this.previewTrace;
         this.traces = [];
-        this.lw=1;
+        this.lw = 1;
 
 
         this.updateMovingShape();
@@ -391,7 +394,7 @@ class Pair {
             m.radCont = m.rad / m.arcRat;//radius of containing circle
             //dist from geo centre to arc centre
             m.drArc = m.rad * (Math.cos(m.phi) - Math.cos(m.theta) / m.arcRat);
-            m.teeth=m.perimTeeth
+            m.teeth = m.perimTeeth
 
         }
         else { // first get teeth
@@ -489,6 +492,23 @@ class Pair {
     setColor() {
         this.color = "hsl(" + this.hue + "," + this.saturation + "%," + this.lightness + "%)"
         this.transCol = "hsla(" + this.hue + "," + this.saturation + "%," + this.lightness + "%, 0.3)"
+        this.colorBG = "hsl(" + this.hueBG + "," + this.saturationBG + "%," + this.lightnessBG + "%)"
+        this.colorBGtrans = "hsla(" + this.hueBG + "," + this.saturationBG + "%," + this.lightnessBG + "%, 0.7)"
+        canvas.style.backgroundColor = this.colorBG;
+        if (this.lightnessBG > 50){
+            // console.log("Dark text required")
+            this.fixed.color="black";
+            this.moving.color = "black";
+            uiTextColor="black";
+            wheelColor="black"
+        }
+        else {
+            // console.log("Light text required")
+            this.fixed.color = "white";
+            this.moving.color = "white";
+            uiTextColor = "white";
+            wheelColor = "white"
+        }
     }
     drawRadInfo() {
         let Y0 = Y - uiHeight - txtSize * 1.5
@@ -544,9 +564,16 @@ class Pair {
         ctx.textAlign = "center";
         ctx.font = txtSize / 2 + 'px sans-serif';
         ctx.textBaseline = "middle";
+        if (!selBG){
         ctx.fillText(Math.round(this.hue), X0, Y0 + 0.7 * txtSize);
         ctx.fillText(Math.round(this.lightness - 50), X / 2, Y0 + 0.7 * txtSize);
         ctx.fillText(Math.round(this.saturation), X1, Y0 + 0.7 * txtSize);
+        }
+        else{
+            ctx.fillText(Math.round(this.hueBG), X0, Y0 + 0.7 * txtSize);
+            ctx.fillText(Math.round(this.lightnessBG - 50), X / 2, Y0 + 0.7 * txtSize);
+            ctx.fillText(Math.round(this.saturationBG), X1, Y0 + 0.7 * txtSize);  
+        }
 
         ctx.font = txtSize / 4 + 'px sans-serif';
         ctx.fillText('Hue', X0, Y0);
@@ -1099,12 +1126,12 @@ class Panel {
             if (this.overlay) {
                 ctx.beginPath();
                 ctx.lineWidth = baseLW * 1;
-                ctx.fillStyle = bgFillStyleAlpha;
+                ctx.fillStyle = pair.colorBGtrans;
                 ctx.fillRect(0, 0, X, Y);
-                ctx.fillStyle = bgFillStyle;
+                ctx.fillStyle = pair.colorBG;
                 ctx.fillRect(this.x, this.y, this.w, this.h)
             }
-            ctx.fillStyle = bgFillStyleAlpha;
+            ctx.fillStyle = pair.colorBGtrans;
             ctx.fillRect(this.x, this.y, this.w, this.h);
 
             ctx.beginPath();
@@ -1409,9 +1436,8 @@ function drawSquareFullImage(n = 1920) {
     canvasSh.width = n;
     canvasSh.height = n;
     var ctxSh = canvasSh.getContext('2d');
-    ctxSh.fillStyle = bgFillStyle;
-    // canvasSh.style.backgroundColor=bgFillStyle
-    // canvasSh.style.backgroundColor = bgFillStyle
+    ctxSh.fillStyle = pair.colorBG;
+
     ctxSh.fillRect(0, 0, canvasSh.width, canvasSh.height);
     ctxSh.setTransform(imscl, 0, 0, imscl, xoff, yoff)
     pair.drawTraces(ctxSh);
@@ -1452,7 +1478,7 @@ function downloadImage() {
             const filesArray = [
                 new File(
                     [blob],
-                    "spiralator-" + date +".png",
+                    "spiralator-" + date + ".png",
                     {
                         type: "image/png",
                         lastModified: new Date().getTime()
@@ -1475,22 +1501,22 @@ function downloadImage() {
     }
 }
 function downloadFile(file) {
-  // Create a link and set the URL using `createObjectURL`
-  const link = document.createElement("a");
-  link.style.display = "none";
-  link.href = URL.createObjectURL(file);
-  link.download = file.name;
+    // Create a link and set the URL using `createObjectURL`
+    const link = document.createElement("a");
+    link.style.display = "none";
+    link.href = URL.createObjectURL(file);
+    link.download = file.name;
 
-  // It needs to be added to the DOM so it can be clicked
-  document.body.appendChild(link);
-  link.click();
+    // It needs to be added to the DOM so it can be clicked
+    document.body.appendChild(link);
+    link.click();
 
-  // To make this work on Firefox we need to wait
-  // a little while before removing it.
-  setTimeout(() => {
-    URL.revokeObjectURL(link.href);
-    link.parentNode.removeChild(link);
-  }, 0);
+    // To make this work on Firefox we need to wait
+    // a little while before removing it.
+    setTimeout(() => {
+        URL.revokeObjectURL(link.href);
+        link.parentNode.removeChild(link);
+    }, 0);
 }
 function uploadImage(name, comment) {
     if (pair.traces.length > 0) {
@@ -1575,6 +1601,47 @@ function createButtonsPanel() {
         new PButton(panel, 0.0, 0.0, 0.25, 0.333, ["Save/Share"],
             function () { sharePanel.active = true; })
     );
+
+    panel.buttonArray.push(
+        new PButton(panel, 0.25, .0, 0.125, 0.333, ["Clear", "All"],
+            function () { pair.clearAll() })
+    );
+
+
+
+    let invertButton = new PButton(panel, 0.375, 0, 0.125, 0.333, ["Invert"],
+        function () { pair.inOut(); },
+        [], [], [], null,
+        function () { return pair.out; });
+    invertButton.toggle = true;
+    panel.buttonArray.push(invertButton);
+
+    panel.buttonArray.push(
+        new PButton(panel, 0.500, 0, 0.125, 0.333, ["Reset"],
+            function () { return pair.reset(); })
+    );
+
+    let previewButton = new PButton(panel, 0.625, 0, 0.125, 0.333, ["Preview"],
+        function () { return pair.togglePreview(); },
+        [], [], [], null,
+        function () { return pair.showPreview; })
+    previewButton.toggle = true;
+    panel.buttonArray.push(previewButton);
+    
+    bgButton = new PButton(panel, 0.750, .0, 0.125, 0.333, ["Set", "BG"],
+        function () { return toggleBGsel(); },
+        [], [], [], null,
+        function () { return selBG; })
+    bgButton.toggle = true;
+    panel.buttonArray.push(bgButton);
+
+    let lockButton = new PButton(panel, 0.875, 0, 0.125, 0.333, ["Lock", "Ring"],
+        function () { return pair.toggleLock(); },
+        [], [], [], null,
+        function () { return pair.locked; })
+    lockButton.toggle = true;
+    panel.buttonArray.push(lockButton);
+
     panel.buttonArray.push(
         new PButton(panel, 0.0, 0.333, 0.125, 0.333, ["Hide", "UI"],
             function () {
@@ -1594,14 +1661,6 @@ function createButtonsPanel() {
     hideDiscsButton.toggle = true;
     panel.buttonArray.push(hideDiscsButton);
 
-    panel.buttonArray.push(
-        new PButton(panel, .0 + 0.125, 0.666, 0.125, 0.333, ["Rand"],
-            function () {
-                randDiscs()
-
-            })
-    );
-
 
     let demoButton = new PButton(panel, .0 + 0.0, 0.666, 0.125, 0.333, ["Demo"],
         function () { return toggleDemo(); },
@@ -1611,22 +1670,20 @@ function createButtonsPanel() {
     panel.buttonArray.push(demoButton);
 
     panel.buttonArray.push(
-        new PButton(panel, 0.25, .0, 0.25, 0.333, ["Clear", "All"],
-            function () { pair.clearAll() })
+        new PButton(panel, .0 + 0.125, 0.666, 0.125, 0.333, ["Rand"],
+            function () {
+                randDiscs()
+
+            })
     );
+
+
+
     panel.buttonArray.push(
         new PButton(panel, 0.25, .333, 0.25, 0.666, ["Undo"],
             function () { pair.clear(); })
     );
 
-
-
-    let invertButton = new PButton(panel, 0.5, 0, 0.125, 0.333, ["Invert"],
-        function () { pair.inOut(); },
-        [], [], [], null,
-        function () { return pair.out; });
-    invertButton.toggle = true;
-    panel.buttonArray.push(invertButton);
 
 
     panel.buttonArray.push(
@@ -1638,24 +1695,11 @@ function createButtonsPanel() {
             function () { return pair.nudge(-1); })
     );
 
-    panel.buttonArray.push(
-        new PButton(panel, 0.625, 0, 0.125, 0.333, ["Reset"],
-            function () { return pair.reset(); })
-    );
 
-    let lockButton = new PButton(panel, 0.875, 0, 0.125, 0.333, ["Lock", "Ring"],
-        function () { return pair.toggleLock(); },
-        [], [], [], null,
-        function () { return pair.locked; })
-    lockButton.toggle = true;
-    panel.buttonArray.push(lockButton);
 
-    let previewButton = new PButton(panel, 0.750, 0, 0.125, 0.333, ["Preview"],
-        function () { return pair.togglePreview(); },
-        [], [], [], null,
-        function () { return pair.showPreview; })
-    previewButton.toggle = true;
-    panel.buttonArray.push(previewButton);
+
+
+
 
 
     panel.buttonArray.push(
@@ -1747,14 +1791,15 @@ function createSliderPanel() {
         function (dy, yDragVar0) {
             // showWheelsOverride = true;
             pair.penUp();
-            if (pair.moving.nArc>1){
-            pair.moving.arcness = Math.min(1, Math.max(-0.005 / pixRat * dy + yDragVar0, 0));
+            if (pair.moving.nArc > 1) {
+                pair.moving.arcness = Math.min(1, Math.max(-0.005 / pixRat * dy + yDragVar0, 0));
 
-            pair.configRings();
-            pair.updateMovingShape();
-            pair.updatePairGeom();
-            pair.move(pair.th);
-            pair.penDown();}
+                pair.configRings();
+                pair.updateMovingShape();
+                pair.updatePairGeom();
+                pair.move(pair.th);
+                pair.penDown();
+            }
 
         }, [], [],
         function () {
@@ -1853,13 +1898,13 @@ function createColourPanel() {
         2 * uiBorder, uiHeight - 2 * uiBorder);
     panel.anyClickActivates = true;
 
-    let lwButton = new PButton(panel, 0 / nButs, 0, 1 / nButs, 1, ["Line","Width"],
+    let lwButton = new PButton(panel, 0 / nButs, 0, 1 / nButs, 1, ["Line", "Width"],
         function (dy, yDragVar0) {
 
             pair.move(pair.th);
             pair.penUpCont();
             // console.log(dy, yDragVar0, dx, xdragVar0)
-            pair.lw = Math.round(Math.max(1, Math.min(10, yDragVar0 + dy * -0.05/pixRat)));
+            pair.lw = Math.round(Math.max(1, Math.min(10, yDragVar0 + dy * -0.05 / pixRat)));
             pair.moving.penLW = pair.lw
             // pair.setColor();
             // pair.fixed.color = pair.color;
@@ -1885,32 +1930,45 @@ function createColourPanel() {
 
     let hueButton = new PButton(panel, 1 / nButs, 0, 1 / nButs, 1, ["Hue"],
         function (dy, yDragVar0) {
+            if (!selBG) {
+                pair.move(pair.th);
+                pair.penUpCont();
 
-            pair.move(pair.th);
-            pair.penUpCont();
+                pair.hue = yDragVar0 - 0.5 / pixRat * dy;
+                if (pair.hue > 360) {
+                    pair.hue -= 360;
+                }
+                if (pair.hue < 0) {
+                    pair.hue += 360;
+                }
 
-            pair.hue = yDragVar0 - 0.5 / pixRat * dy;
-            if (pair.hue > 360) {
-                pair.hue -= 360;
+                pair.setColor();
+                pair.fixed.color = pair.color;
+                pair.moving.color = pair.color;
+                document.querySelector(':root').style.setProperty('--fgColor', pair.color)
+                pair.move(pair.th);
+                pair.penDown();
+                pair.calcPreview();
             }
-            if (pair.hue < 0) {
-                pair.hue += 360;
+            else {
+                pair.hueBG = yDragVar0 - 0.5 / pixRat * dy;
+                if (pair.hueBG > 360) {
+                    pair.hueBG -= 360;
+                }
+                if (pair.hueBG < 0) {
+                    pair.hueBG += 360;
+                }
+                pair.setColor();
             }
-
-            // console.log(dy, yDragVar0, dx, xdragVar0)
-            // pair.lightness = Math.max(00, Math.min(100, xdragVar0 + dx * 0.25/pixRat));
-
-            pair.setColor();
-            pair.fixed.color = pair.color;
-            pair.moving.color = pair.color;
-            document.querySelector(':root').style.setProperty('--fgColor', pair.color)
-            pair.move(pair.th);
-            pair.penDown();
-            pair.calcPreview();
 
         }, [], [],
         function () {
-            return pair.hue;
+            if (!selBG) {
+                return pair.hue;
+            }
+            else {
+                return pair.hueBG;
+            }
         },
         function (isDepressed) {
             showColInfo = isDepressed;
@@ -1924,22 +1982,35 @@ function createColourPanel() {
 
     let lightnessButton = new PButton(panel, 2 / nButs, 0, 1 / nButs, 1, ["Lightness"],
         function (dy, yDragVar0) {
+            if (!selBG) {
+                pair.move(pair.th);
+                pair.penUpCont();
 
-            pair.move(pair.th);
-            pair.penUpCont();
+                pair.lightness = Math.max(00, Math.min(100, yDragVar0 + dy * -0.15 / pixRat));
 
-            pair.lightness = Math.max(00, Math.min(100, yDragVar0 + dy * -0.15 / pixRat));
+                pair.setColor();
+                pair.fixed.color = pair.color;
+                pair.moving.color = pair.color;
+                document.querySelector(':root').style.setProperty('--fgColor', pair.color)
+                pair.move(pair.th);
+                pair.penDown();
+                pair.calcPreview();
+            }
+            else {
+                pair.lightnessBG = Math.max(00, Math.min(100, yDragVar0 + dy * -0.15 / pixRat));
+                pair.setColor();
+            }
 
-            pair.setColor();
-            pair.fixed.color = pair.color;
-            pair.moving.color = pair.color;
-            document.querySelector(':root').style.setProperty('--fgColor', pair.color)
-            pair.move(pair.th);
-            pair.penDown();
-            pair.calcPreview();
+
         }, [], [],
         function () {
-            return pair.lightness;
+            if (!selBG) {
+                return pair.lightness;
+            }
+            else {
+                return pair.lightnessBG;
+            }
+
         },
         function (isDepressed) {
             showColInfo = isDepressed;
@@ -1953,7 +2024,7 @@ function createColourPanel() {
 
     let satButton = new PButton(panel, 3 / nButs, 0, 1 / nButs, 1, ["Saturation"],
         function (dy, yDragVar0) {
-
+            if (!selBG) {
             pair.move(pair.th);
             pair.penUpCont();
 
@@ -1966,10 +2037,19 @@ function createColourPanel() {
             pair.move(pair.th);
             pair.penDown();
             pair.calcPreview();
+            }
+            else {
+                pair.saturationBG = Math.max(00, Math.min(100, yDragVar0 + dy * -0.25 / pixRat));
+                pair.setColor();
+            }
 
         }, [], [],
         function () {
-            return pair.saturation;
+            if (!selBG) {
+            return pair.saturation;}
+            else{
+                return pair.saturationBG;
+            }
         },
         function (isDepressed) {
             showColInfo = isDepressed;
@@ -2007,7 +2087,7 @@ function toggleGalleryForm() {
     }
 }
 function setGallerySubmitHTML() {
-    document.querySelector(':root').style.setProperty('--bgColor', bgFillStyle)
+    document.querySelector(':root').style.setProperty('--bgColor', pair.colorBG)
     document.querySelector(':root').style.setProperty('--fgColor', fgFillStyle)
     document.querySelector(':root').style.setProperty('--textSize', 12 + 'pt')
     document.getElementById("submit").addEventListener("click", submitToGallery, { passive: true })
@@ -2161,7 +2241,7 @@ function setSize() {
         console.log('wide and tall enough')
         uiHeight = 0.2 * Y;
 
-        uiButtonsWidth = minPanelWidth * (4+2);
+        uiButtonsWidth = minPanelWidth * (4 + 2);
         uiSlidersWidth = minPanelWidth * 6;
         uiShapeWidth = minPanelWidth * 3;
 
@@ -2224,13 +2304,10 @@ function setSize() {
     colourPanel = createColourPanel();
     panelArray = [topPanel, bottomPanel, colourPanel, sharePanel];
 }
-
-function randDiscs(){
-    // hueInit = Math.random() * 360
-    // bgFillStyle = "hsl(" + hueInit + ",100%,5%)";
-    // bgFillStyleAlpha = "hsla(" + hueInit + ",100%,5%,.7)"
-    // fgFillStyle = "hsl(" + hueInit + ",100%,50%)"
-    // canvas.style.backgroundColor = bgFillStyle
+function toggleBGsel() {
+    selBG = !selBG;
+}
+function randDiscs() {
     let perimTeethInit = discSizes.random();
     let fixedTeeth = ringSizes.random()
     let arcnessInit = Math.random() * 0.6
@@ -2238,9 +2315,6 @@ function randDiscs(){
     let ratInit = Math.random() * 0.5 + 0.5;
     let penAngleInit = (Math.random() < 0.5) ?
         (Math.random() < 0.5 ? 0 : 0.5 * PI2 / nArcInit) : Math.random() * PI2 - PI2 / 2;
-    // let fixedDisc = new Disc(fixedTeeth);
-    // let movingDisc = new ArcSidedDisc(perimTeeth = perimTeethInit, arcness = arcnessInit,
-        // rat = ratInit, nArc = nArcInit, penAngle = penAngleInit, ring = false)
     pair.fixed = new Disc(fixedTeeth);
     pair.moving = new ArcSidedDisc(perimTeeth = perimTeethInit, arcness = arcnessInit,
         rat = ratInit, nArc = nArcInit, penAngle = penAngleInit, ring = false)
@@ -2250,15 +2324,12 @@ function randDiscs(){
     pair.setColor();
     pair.move(pair.th);
     pair.penDown();
-    // console.log(pair.movingDisc.perimTeeth)
 }
 function init() {
-    setGallerySubmitHTML();
+
     hueInit = Math.random() * 360
-    bgFillStyle = "hsl(" + hueInit + ",100%,5%)";
-    bgFillStyleAlpha = "hsla(" + hueInit + ",100%,5%,.7)"
     fgFillStyle = "hsl(" + hueInit + ",100%,50%)"
-    canvas.style.backgroundColor = bgFillStyle
+
     let perimTeethInit = discSizes.random();
     let fixedTeeth = ringSizes.random()
     let arcnessInit = Math.random() * 0.6
@@ -2268,7 +2339,8 @@ function init() {
         (Math.random() < 0.5 ? 0 : 0.5 * PI2 / nArcInit) : Math.random() * PI2 - PI2 / 2;
     pair = new Pair(new Disc(fixedTeeth), new ArcSidedDisc(perimTeeth = perimTeethInit, arcness = arcnessInit,
         rat = ratInit, nArc = nArcInit, penAngle = penAngleInit, ring = false), preview = previewState)
-
+    canvas.style.backgroundColor = pair.colorBG;
+    setGallerySubmitHTML();
 }
 
 const canvas = document.getElementById("cw");
@@ -2290,12 +2362,13 @@ let showgalleryForm = false;
 let showArcInfo = false;
 let playDemo = false;
 let previewState = false;
+let selBG = false;
 
 const shareBorderfrac = 0.15;
 const transCol = "rgb(128,128,128,0.3)"
 const previewAlpha = 0.5
-const wheelColor = "white"
-const uiTextColor = "white"
+let wheelColor = "white"
+let uiTextColor = "white"
 const maxWheelSize = 300;
 const minWheelSize = 10;
 const maxDrawRadiusRatio = 2;
@@ -2317,7 +2390,7 @@ ringSizes = [96, 105]//,144,150]
 discSizes = [24, 30, 32, 40, 42, 45, 48, 52, 56, 60, 63, 72, 75, 80, 84]
 
 
-let fgFillStyle, bgFillStyleAlpha, bgFillStyle, hueInit, pair, uiSlidersX, uiSlidersY,
+let fgFillStyle, hueInit, pair, uiSlidersX, uiSlidersY,
     uiSlidersWidth, pixRat, X, Y, scl, txtSize, baseLW, pixPerTooth, xOff, yOff,
     uiButtonsX, uiButtonsY, uiButtonsWidth, uiShapeX, uiShapeY, uiShapeWidth;
 setSize();
