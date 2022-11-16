@@ -1595,9 +1595,9 @@ function createButtonsPanel() {
     panel.buttonArray.push(hideDiscsButton);
 
     panel.buttonArray.push(
-        new PButton(panel, .0 + 0.125, 0.666, 0.125, 0.333, ["Init"],
+        new PButton(panel, .0 + 0.125, 0.666, 0.125, 0.333, ["Rand"],
             function () {
-                init()
+                randDiscs()
 
             })
     );
@@ -1858,17 +1858,8 @@ function createColourPanel() {
 
             pair.move(pair.th);
             pair.penUpCont();
-
-            // pair.hue = yDragVar0 - 0.5 / pixRat * dy;
-            // if (pair.hue > 360) {
-            //     pair.hue -= 360;
-            // }
-            // if (pair.hue < 0) {
-            //     pair.hue += 360;
-            // }
-
             // console.log(dy, yDragVar0, dx, xdragVar0)
-            pair.lw = Math.round(Math.max(1, Math.min(10, yDragVar0 + dy * -0.15/pixRat)));
+            pair.lw = Math.round(Math.max(1, Math.min(10, yDragVar0 + dy * -0.05/pixRat)));
             pair.moving.penLW = pair.lw
             // pair.setColor();
             // pair.fixed.color = pair.color;
@@ -2213,14 +2204,14 @@ function setSize() {
         uiHeight = 0.2 * Y;
 
         uiButtonsWidth = X;
-        uiSlidersWidth = X * (6 / 9);
-        uiShapeWidth = X * (3 / 9);
+        uiSlidersWidth = X * (6 / 10);
+        uiShapeWidth = X * (4 / 10);
 
         uiButtonsX = (X - 1 * uiButtonsWidth) / 2;
         uiButtonsY = 0;
         uiSlidersX = (X - 1 * uiButtonsWidth) / 2;
         uiSlidersY = Y - uiHeight;
-        uiShapeX = (X - 1 * uiButtonsWidth) / 2 + (6 / 9) * uiButtonsWidth;
+        uiShapeX = (X - 1 * uiButtonsWidth) / 2 + (6 / 10) * uiButtonsWidth;
         uiShapeY = Y - uiHeight;
 
         xOff = X * .5;
@@ -2233,12 +2224,40 @@ function setSize() {
     colourPanel = createColourPanel();
     panelArray = [topPanel, bottomPanel, colourPanel, sharePanel];
 }
+
+function randDiscs(){
+    // hueInit = Math.random() * 360
+    // bgFillStyle = "hsl(" + hueInit + ",100%,5%)";
+    // bgFillStyleAlpha = "hsla(" + hueInit + ",100%,5%,.7)"
+    // fgFillStyle = "hsl(" + hueInit + ",100%,50%)"
+    // canvas.style.backgroundColor = bgFillStyle
+    let perimTeethInit = discSizes.random();
+    let fixedTeeth = ringSizes.random()
+    let arcnessInit = Math.random() * 0.6
+    let nArcInit = (Math.random() < 0.5) ? 1 : 2 + Math.floor(Math.random() * 3);
+    let ratInit = Math.random() * 0.5 + 0.5;
+    let penAngleInit = (Math.random() < 0.5) ?
+        (Math.random() < 0.5 ? 0 : 0.5 * PI2 / nArcInit) : Math.random() * PI2 - PI2 / 2;
+    // let fixedDisc = new Disc(fixedTeeth);
+    // let movingDisc = new ArcSidedDisc(perimTeeth = perimTeethInit, arcness = arcnessInit,
+        // rat = ratInit, nArc = nArcInit, penAngle = penAngleInit, ring = false)
+    pair.fixed = new Disc(fixedTeeth);
+    pair.moving = new ArcSidedDisc(perimTeeth = perimTeethInit, arcness = arcnessInit,
+        rat = ratInit, nArc = nArcInit, penAngle = penAngleInit, ring = false)
+    pair.penUp();
+    pair.updateMovingShape();
+    pair.updatePairGeom();
+    pair.setColor();
+    pair.move(pair.th);
+    pair.penDown();
+    // console.log(pair.movingDisc.perimTeeth)
+}
 function init() {
+    setGallerySubmitHTML();
     hueInit = Math.random() * 360
     bgFillStyle = "hsl(" + hueInit + ",100%,5%)";
     bgFillStyleAlpha = "hsla(" + hueInit + ",100%,5%,.7)"
     fgFillStyle = "hsl(" + hueInit + ",100%,50%)"
-    setGallerySubmitHTML();
     canvas.style.backgroundColor = bgFillStyle
     let perimTeethInit = discSizes.random();
     let fixedTeeth = ringSizes.random()
@@ -2247,35 +2266,9 @@ function init() {
     let ratInit = Math.random() * 0.5 + 0.5;
     let penAngleInit = (Math.random() < 0.5) ?
         (Math.random() < 0.5 ? 0 : 0.5 * PI2 / nArcInit) : Math.random() * PI2 - PI2 / 2;
-    let fixedDisc = new Disc(fixedTeeth);
-    let movingDisc = new ArcSidedDisc(perimTeeth = perimTeethInit, arcness = arcnessInit,
-        rat = ratInit, nArc = nArcInit, penAngle = penAngleInit, ring = false)
+    pair = new Pair(new Disc(fixedTeeth), new ArcSidedDisc(perimTeeth = perimTeethInit, arcness = arcnessInit,
+        rat = ratInit, nArc = nArcInit, penAngle = penAngleInit, ring = false), preview = previewState)
 
-    // let fixedDisc = new Disc(106);
-    // let movingDisc = new ArcSidedDisc(perimTeeth = 60, arcness = .17, rat = .8, nArc = 2, 
-    //penAngle = 0*PI2/4, ring = false)
-
-    pair = new Pair(fixedDisc, movingDisc, preview = previewState)
-    // pair.togglePreview();
-    // pair.inOut();
-    // pair.moving.nSide=2;
-    // pair.updateMovingShape();
-    // pair.updatePairGeom();
-    // pair.fullTrace();
-    // pair.nudge(1);
-    // pair.fullTrace();
-    // pair.nudge(1);
-    // pair.fullTrace();
-
-    // pair.reset();
-    // pair.inOut();
-
-    // pair.fullTrace();
-    // pair.nudge(1);
-    // pair.fullTrace();
-    // pair.nudge(1);
-    // pair.fullTrace();
-        // sharePanel.active=true;
 }
 
 const canvas = document.getElementById("cw");
