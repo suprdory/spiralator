@@ -351,7 +351,7 @@ class Pair {
         this.out = false;
         this.th = 0;
         this.auto = 0;
-        this.hue = hueInit;
+        this.hue = Math.random() * 360;
         this.saturation = 100;
         this.lightness = 65;
         this.hueBG = this.hue;
@@ -495,12 +495,12 @@ class Pair {
         this.colorBG = "hsl(" + this.hueBG + "," + this.saturationBG + "%," + this.lightnessBG + "%)"
         this.colorBGtrans = "hsla(" + this.hueBG + "," + this.saturationBG + "%," + this.lightnessBG + "%, 0.7)"
         canvas.style.backgroundColor = this.colorBG;
-        if (this.lightnessBG > 50){
+        if (this.lightnessBG > 50) {
             // console.log("Dark text required")
-            this.fixed.color="black";
+            this.fixed.color = "black";
             this.moving.color = "black";
-            uiTextColor="black";
-            wheelColor="black"
+            uiTextColor = "black";
+            wheelColor = "black"
         }
         else {
             // console.log("Light text required")
@@ -564,15 +564,15 @@ class Pair {
         ctx.textAlign = "center";
         ctx.font = txtSize / 2 + 'px sans-serif';
         ctx.textBaseline = "middle";
-        if (!selBG){
-        ctx.fillText(Math.round(this.hue), X0, Y0 + 0.7 * txtSize);
-        ctx.fillText(Math.round(this.lightness - 50), X / 2, Y0 + 0.7 * txtSize);
-        ctx.fillText(Math.round(this.saturation), X1, Y0 + 0.7 * txtSize);
+        if (!selBG) {
+            ctx.fillText(Math.round(this.hue), X0, Y0 + 0.7 * txtSize);
+            ctx.fillText(Math.round(this.lightness - 50), X / 2, Y0 + 0.7 * txtSize);
+            ctx.fillText(Math.round(this.saturation), X1, Y0 + 0.7 * txtSize);
         }
-        else{
+        else {
             ctx.fillText(Math.round(this.hueBG), X0, Y0 + 0.7 * txtSize);
             ctx.fillText(Math.round(this.lightnessBG - 50), X / 2, Y0 + 0.7 * txtSize);
-            ctx.fillText(Math.round(this.saturationBG), X1, Y0 + 0.7 * txtSize);  
+            ctx.fillText(Math.round(this.saturationBG), X1, Y0 + 0.7 * txtSize);
         }
 
         ctx.font = txtSize / 4 + 'px sans-serif';
@@ -1256,7 +1256,7 @@ function pointerDownHandler(xc, yc, n = 1) {
     let x = xc * pixRat;
     let y = yc * pixRat;
 
-    if (!showgalleryForm) {
+    if (!showgalleryForm & !showDocs) {
         panelArray.forEach(panel => panel.pointerDown(x, y))
 
 
@@ -1602,32 +1602,26 @@ function createButtonsPanel() {
             function () { sharePanel.active = true; })
     );
 
-    panel.buttonArray.push(
-        new PButton(panel, 0.25, .0, 0.125, 0.333, ["Clear", "All"],
-            function () { pair.clearAll() })
-    );
 
 
 
-    let invertButton = new PButton(panel, 0.375, 0, 0.125, 0.333, ["Invert"],
+
+    let invertButton = new PButton(panel, 0.500, 0, 0.125, 0.333, ["Invert"],
         function () { pair.inOut(); },
         [], [], [], null,
         function () { return pair.out; });
     invertButton.toggle = true;
     panel.buttonArray.push(invertButton);
 
-    panel.buttonArray.push(
-        new PButton(panel, 0.500, 0, 0.125, 0.333, ["Reset"],
-            function () { return pair.reset(); })
-    );
 
-    let previewButton = new PButton(panel, 0.625, 0, 0.125, 0.333, ["Preview"],
+
+    let previewButton = new PButton(panel, 0.625, 0, 0.125, 0.333, ["Show", "Preview"],
         function () { return pair.togglePreview(); },
         [], [], [], null,
         function () { return pair.showPreview; })
     previewButton.toggle = true;
     panel.buttonArray.push(previewButton);
-    
+
     bgButton = new PButton(panel, 0.750, .0, 0.125, 0.333, ["Set", "BG"],
         function () { return toggleBGsel(); },
         [], [], [], null,
@@ -1645,8 +1639,6 @@ function createButtonsPanel() {
     panel.buttonArray.push(
         new PButton(panel, 0.0, 0.333, 0.125, 0.333, ["Hide", "UI"],
             function () {
-                // showUI = false;
-                // showWheels = false;
                 panelArray.forEach(panel => panel.active = false)
             })
     );
@@ -1661,8 +1653,13 @@ function createButtonsPanel() {
     hideDiscsButton.toggle = true;
     panel.buttonArray.push(hideDiscsButton);
 
+    panel.buttonArray.push(
+        new PButton(panel, 0.0, 0.666, 0.125, 0.333, ["?"],
+            function () { toggleDocs(); })
+    );
 
-    let demoButton = new PButton(panel, .0 + 0.0, 0.666, 0.125, 0.333, ["Demo"],
+
+    let demoButton = new PButton(panel, .125, 0.666, 0.125, 0.333, ["Demo"],
         function () { return toggleDemo(); },
         [], [], [], null,
         function () { return playDemo; })
@@ -1670,17 +1667,32 @@ function createButtonsPanel() {
     panel.buttonArray.push(demoButton);
 
     panel.buttonArray.push(
-        new PButton(panel, .0 + 0.125, 0.666, 0.125, 0.333, ["Rand"],
+        new PButton(panel, 0.375, 0.000, 0.125, 0.333, ["Rand", "Discs"],
             function () {
                 randDiscs()
 
             })
     );
 
-
+    panel.buttonArray.push(
+        new PButton(panel, 0.25, 0.000, 0.125, 0.333, ["Rand", "Cols"],
+            function () {
+                randCols()
+            })
+    );
 
     panel.buttonArray.push(
-        new PButton(panel, 0.25, .333, 0.25, 0.666, ["Undo"],
+        new PButton(panel, 0.25, .333, 0.125, 0.333, ["Clear", "All"],
+            function () { pair.clearAll() })
+    );
+
+    panel.buttonArray.push(
+        new PButton(panel, 0.375, .333, 0.125, 0.333, ["Reset", "Pos"],
+            function () { return pair.reset(); })
+    );
+
+    panel.buttonArray.push(
+        new PButton(panel, 0.25, .666, 0.25, 0.333, ["Undo"],
             function () { pair.clear(); })
     );
 
@@ -1698,7 +1710,10 @@ function createButtonsPanel() {
 
 
 
-
+    panel.buttonArray.push(
+        new PButton(panel, 0.75, .3333, 0.25, 0.3333, ["360°"],
+            function () { pair.oneTrace() })
+    );
 
 
 
@@ -1707,10 +1722,7 @@ function createButtonsPanel() {
             function () { pair.fullTrace() })
     );
 
-    panel.buttonArray.push(
-        new PButton(panel, 0.75, .3333, 0.25, 0.3333, ["Trace 360°"],
-            function () { pair.oneTrace() })
-    );
+
 
     return (panel)
 }
@@ -2025,18 +2037,18 @@ function createColourPanel() {
     let satButton = new PButton(panel, 3 / nButs, 0, 1 / nButs, 1, ["Saturation"],
         function (dy, yDragVar0) {
             if (!selBG) {
-            pair.move(pair.th);
-            pair.penUpCont();
+                pair.move(pair.th);
+                pair.penUpCont();
 
-            pair.saturation = Math.max(00, Math.min(100, yDragVar0 + dy * -0.25 / pixRat));
+                pair.saturation = Math.max(00, Math.min(100, yDragVar0 + dy * -0.25 / pixRat));
 
-            pair.setColor();
-            pair.fixed.color = pair.color;
-            pair.moving.color = pair.color;
-            document.querySelector(':root').style.setProperty('--fgColor', pair.color)
-            pair.move(pair.th);
-            pair.penDown();
-            pair.calcPreview();
+                pair.setColor();
+                pair.fixed.color = pair.color;
+                pair.moving.color = pair.color;
+                document.querySelector(':root').style.setProperty('--fgColor', pair.color)
+                pair.move(pair.th);
+                pair.penDown();
+                pair.calcPreview();
             }
             else {
                 pair.saturationBG = Math.max(00, Math.min(100, yDragVar0 + dy * -0.25 / pixRat));
@@ -2046,8 +2058,9 @@ function createColourPanel() {
         }, [], [],
         function () {
             if (!selBG) {
-            return pair.saturation;}
-            else{
+                return pair.saturation;
+            }
+            else {
                 return pair.saturationBG;
             }
         },
@@ -2086,13 +2099,27 @@ function toggleGalleryForm() {
         showgalleryForm = false;
     }
 }
+function toggleDocs() {
+    docs = document.getElementById("docs").style;
+    // console.log(form.visibility)
+    if (!(docs.visibility == "visible")) {
+        docs.visibility = "visible"
+        showDocs = true;
+    }
+    else {
+        docs.visibility = "hidden"
+        showDocs = false;
+    }
+}
+
 function setGallerySubmitHTML() {
     document.querySelector(':root').style.setProperty('--bgColor', pair.colorBG)
-    document.querySelector(':root').style.setProperty('--fgColor', fgFillStyle)
+    document.querySelector(':root').style.setProperty('--fgColor', pair.color)
     document.querySelector(':root').style.setProperty('--textSize', 12 + 'pt')
     document.getElementById("submit").addEventListener("click", submitToGallery, { passive: true })
     document.getElementById("close").addEventListener("click", toggleGalleryForm, { passive: true })
     document.getElementById('name').value = localStorage.getItem('name');
+    document.getElementById("closeDocs").addEventListener("click", toggleDocs, { passive: true })
 }
 function wakeGalleryServer() {
     fetch(galleryAPIurl)
@@ -2325,10 +2352,20 @@ function randDiscs() {
     pair.move(pair.th);
     pair.penDown();
 }
-function init() {
+function randCols() {
 
-    hueInit = Math.random() * 360
-    fgFillStyle = "hsl(" + hueInit + ",100%,50%)"
+    pair.move(pair.th);
+    pair.penUpCont();
+    pair.hue = Math.random() * 360;
+    pair.hueBG = pair.hue;
+    pair.setColor();
+    pair.move(pair.th);
+    pair.calcPreview();
+    pair.penDown();
+    setGallerySubmitHTML();
+}
+
+function init() {
 
     let perimTeethInit = discSizes.random();
     let fixedTeeth = ringSizes.random()
@@ -2340,6 +2377,7 @@ function init() {
     pair = new Pair(new Disc(fixedTeeth), new ArcSidedDisc(perimTeeth = perimTeethInit, arcness = arcnessInit,
         rat = ratInit, nArc = nArcInit, penAngle = penAngleInit, ring = false), preview = previewState)
     canvas.style.backgroundColor = pair.colorBG;
+
     setGallerySubmitHTML();
 }
 
@@ -2359,6 +2397,7 @@ let showRadInfo = false;
 let showLWInfo = false;
 let showColInfo = false;
 let showgalleryForm = false;
+let showDocs = false;
 let showArcInfo = false;
 let playDemo = false;
 let previewState = false;
@@ -2390,7 +2429,7 @@ ringSizes = [96, 105]//,144,150]
 discSizes = [24, 30, 32, 40, 42, 45, 48, 52, 56, 60, 63, 72, 75, 80, 84]
 
 
-let fgFillStyle, hueInit, pair, uiSlidersX, uiSlidersY,
+let pair, uiSlidersX, uiSlidersY,
     uiSlidersWidth, pixRat, X, Y, scl, txtSize, baseLW, pixPerTooth, xOff, yOff,
     uiButtonsX, uiButtonsY, uiButtonsWidth, uiShapeX, uiShapeY, uiShapeWidth;
 setSize();

@@ -35,6 +35,24 @@
    padding: 1px;
  }
 
+ #docs {
+   position: fixed;
+   top: 10%;
+   left: 10%;
+   width: 80%;
+   height: 80%;
+   border-style: solid;
+   border-width: 2px;
+   border-color: var(--fgColor);
+   background-color: var(--bgColor);
+   color: white;
+   /* visibility: visible; */
+   visibility: hidden;
+   font-size: var(--textSize);
+   z-index: 1;
+   padding: 1px;
+ }
+
  /* ::placeholder{
   color:rgb(255, 255, 255)
 } */
@@ -128,6 +146,23 @@
    color: inherit;
    padding: inherit;
  }
+ 
+ #closeDocs {
+   position: absolute;
+   top: 85%;
+   left: 10%;
+   width: 80%;
+   height: 10%;
+
+   background-color: inherit;
+   font-size: inherit;
+   border-style: inherit;
+   border-width: inherit;
+   border-color: inherit;
+   color: inherit;
+   padding: inherit;
+ }
+
 
  #close:active {
    background-color: var(--fgColor);
