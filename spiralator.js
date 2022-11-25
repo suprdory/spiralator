@@ -525,7 +525,7 @@ class Pair {
         ctx.fillText('Pen Radius', X0, Y0);
 
         ctx.font = txtSize / 2 + 'px sans-serif';
-        ctx.fillText(Math.round(this.moving.drawAng * rad2deg), X1, Y0 + 0.7 * txtSize);
+        ctx.fillText(Math.round(-this.moving.drawAng * rad2deg), X1, Y0 + 0.7 * txtSize);
         ctx.font = txtSize / 4 + 'px sans-serif';
         ctx.fillText('Pen Angle', X1, Y0);
 
@@ -1865,7 +1865,7 @@ function createSliderPanel() {
             // showWheelsOverride = true;
             pair.penUp();
             pair.moving.drawAng =
-                Math.min(100 * PI2, Math.max(-0.005 / pixRat * dy + yDragVar0, -100 * PI2));
+                Math.min(100 * PI2, Math.max(0.005 / pixRat * dy + yDragVar0, -100 * PI2));
             if (pair.moving.drawAng < -PI2 / 2) {
                 pair.moving.drawAng = pair.moving.drawAng + PI2;
             }
