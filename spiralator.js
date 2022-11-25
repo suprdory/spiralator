@@ -2229,7 +2229,7 @@ function setSize() {
     baseLW = 1 * pixRat;
     pixPerTooth = 9 * pixRat;
 
-    nOscButtons = 15;
+    nOscButtons = 16;
     minPanelWidth = 60 * pixRat
     uiBorder = 5 * pixRat;
 
@@ -2243,7 +2243,7 @@ function setSize() {
 
         uiButtonsWidth = minPanelWidth * (4 + 2);
         uiSlidersWidth = minPanelWidth * 6;
-        uiShapeWidth = minPanelWidth * 3;
+        uiShapeWidth = minPanelWidth * 4;
 
         uiButtonsX = (X - (nOscButtons) * minPanelWidth) / 2;
         uiSlidersX = uiButtonsX + uiButtonsWidth;
@@ -2265,8 +2265,8 @@ function setSize() {
         orient = "wideandshort";
         uiHeight = 0.5 * Y;
         uiButtonsWidth = 0.333 * X;
-        uiSlidersWidth = uiButtonsWidth * 6 / 9;
-        uiShapeWidth = uiButtonsWidth * 3 / 9;
+        uiSlidersWidth = uiButtonsWidth * 6 / 10;
+        uiShapeWidth = uiButtonsWidth * 4 / 10;
         uiButtonsX = 0;
         uiButtonsY = 0;
         uiSlidersX = 0;
