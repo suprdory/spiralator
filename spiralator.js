@@ -2124,7 +2124,13 @@ function toggleDocs() {
     else {
         docs.visibility = "hidden"
         showDocs = false;
+    if (!pair.auto){
+        anim();
     }
+
+    }
+
+
 }
 
 function setGallerySubmitHTML() {
