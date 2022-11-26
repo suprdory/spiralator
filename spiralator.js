@@ -1249,17 +1249,19 @@ function addPointerListeners() {
     }
 }
 function pointerWheelHandler(dW, xc, yc) {
-    zoomHandler(dW, xc, yc);
-    if (!pair.auto) { requestAnimationFrame(anim); }
+    if (!showDocs) {
+        zoomHandler(dW, xc, yc);
+        if (!pair.auto) { requestAnimationFrame(anim); }
+    }
 }
 function pointerDownHandler(xc, yc, n = 1) {
     let x = xc * pixRat;
     let y = yc * pixRat;
 
-    if (!showgalleryForm & !showDocs) {
+    if (sharePanel.active) {
+        sharePanel.pointerDown(x, y)
+    } else if (!showgalleryForm & !showDocs) {
         panelArray.forEach(panel => panel.pointerDown(x, y))
-
-
         let now = new Date().getTime();
         let timeSince = now - lastTouch;
         if (timeSince < 300 & n < 2) {
@@ -1287,7 +1289,7 @@ function pointerDownHandler(xc, yc, n = 1) {
     xt = (x - xOff) / (scl)
     yt = (y - yOff) / (scl)
 
-    if (!pair.auto & showWheels & pair.moving.contains(xt, yt) &
+    if (!sharePanel.active & !showgalleryForm & !showDocs & !pair.auto & showWheels & pair.moving.contains(xt, yt) &
         ((y < (Y - uiHeight) & orient == "wideandtall") ||
             ((y < (Y - uiHeight)) & (y > (uiHeight)) & orient == "tallorsquare") ||
             ((y > 0 & x > uiButtonsWidth) & orient == "wideandshort"))
@@ -1295,7 +1297,7 @@ function pointerDownHandler(xc, yc, n = 1) {
         mselect = "moving";
         thDragSt = Math.atan2(yt - pair.fixed.y, xt - pair.fixed.x);
     }
-    else if (showWheels & pair.fixed.contains(xt, yt) &
+    else if (!sharePanel.active & !showgalleryForm & !showDocs & showWheels & pair.fixed.contains(xt, yt) &
         ((y < (Y - uiHeight) & orient == "wideandtall") ||
             ((y < (Y - uiHeight)) & (y > (uiHeight)) & orient == "tallorsquare") ||
             ((y > 0 & x > uiButtonsWidth) & orient == "wideandshort"))) {
@@ -1306,13 +1308,13 @@ function pointerDownHandler(xc, yc, n = 1) {
         yfix0 = pair.fixed.y;
     }
 
-    else if (
+    else if (!sharePanel.active & !showgalleryForm & !showDocs & (
         (topPanel.active &
             (orient == "wideandtall" & y < (Y - uiHeight)) ||
             (orient == "tallorsquare" & y > uiHeight & y < (Y - uiHeight)) ||
             (orient == "wideandshort" & x > uiButtonsWidth)
         ) ||
-        !topPanel.active
+        !topPanel.active)
     ) {
         mselect = "pan";
         y0 = y;
@@ -1597,44 +1599,27 @@ function createButtonsPanel() {
         2 * uiBorder, uiHeight - 2 * uiBorder);
     panel.anyClickActivates = true;
 
+
     panel.buttonArray.push(
-        new PButton(panel, 0.0, 0.0, 0.25, 0.333, ["Save/Share"],
-            function () { sharePanel.active = true; })
+        new PButton(panel, 0.0, 0.0, 0.125, 0.333, ["?"],
+            function () { toggleDocs(); })
     );
-
-
-
-
-
-    let invertButton = new PButton(panel, 0.500, 0, 0.125, 0.333, ["Invert"],
-        function () { pair.inOut(); },
-        [], [], [], null,
-        function () { return pair.out; });
-    invertButton.toggle = true;
-    panel.buttonArray.push(invertButton);
-
-
-
-    let previewButton = new PButton(panel, 0.625, 0, 0.125, 0.333, ["Show", "Preview"],
-        function () { return pair.togglePreview(); },
-        [], [], [], null,
-        function () { return pair.showPreview; })
-    previewButton.toggle = true;
-    panel.buttonArray.push(previewButton);
-
-    bgButton = new PButton(panel, 0.750, .0, 0.125, 0.333, ["Set", "BG"],
-        function () { return toggleBGsel(); },
-        [], [], [], null,
-        function () { return selBG; })
-    bgButton.toggle = true;
-    panel.buttonArray.push(bgButton);
-
-    let lockButton = new PButton(panel, 0.875, 0, 0.125, 0.333, ["Lock", "Ring"],
+    let lockButton = new PButton(panel, 0.125, 0, 0.125, 0.333, ["Lock", "Ring"],
         function () { return pair.toggleLock(); },
         [], [], [], null,
         function () { return pair.locked; })
     lockButton.toggle = true;
     panel.buttonArray.push(lockButton);
+
+
+
+
+
+
+
+
+
+
 
     panel.buttonArray.push(
         new PButton(panel, 0.0, 0.333, 0.125, 0.333, ["Hide", "UI"],
@@ -1653,21 +1638,12 @@ function createButtonsPanel() {
     hideDiscsButton.toggle = true;
     panel.buttonArray.push(hideDiscsButton);
 
-    panel.buttonArray.push(
-        new PButton(panel, 0.0, 0.666, 0.125, 0.333, ["?"],
-            function () { toggleDocs(); })
-    );
 
 
-    let demoButton = new PButton(panel, .125, 0.666, 0.125, 0.333, ["Demo"],
-        function () { return toggleDemo(); },
-        [], [], [], null,
-        function () { return playDemo; })
-    demoButton.toggle = true;
-    panel.buttonArray.push(demoButton);
+
 
     panel.buttonArray.push(
-        new PButton(panel, 0.375, 0.000, 0.125, 0.333, ["Rand", "Discs"],
+        new PButton(panel, 0.125, 0.666, 0.125, 0.333, ["Rand", "Discs"],
             function () {
                 randDiscs()
 
@@ -1675,28 +1651,62 @@ function createButtonsPanel() {
     );
 
     panel.buttonArray.push(
-        new PButton(panel, 0.25, 0.000, 0.125, 0.333, ["Rand", "Cols"],
+        new PButton(panel, 0.000, 0.666, 0.125, 0.333, ["Rand", "Cols"],
             function () {
                 randCols()
             })
     );
 
+
+    let demoButton = new PButton(panel, .25, 0.000, 0.125, 0.333, ["Demo"],
+        function () { return toggleDemo(); },
+        [], [], [], null,
+        function () { return playDemo; })
+    demoButton.toggle = true;
+    panel.buttonArray.push(demoButton);
+
     panel.buttonArray.push(
-        new PButton(panel, 0.25, .333, 0.125, 0.333, ["Clear", "All"],
+        new PButton(panel, 0.375, 0.0, 0.125, 0.333, ["Share/", "Gallery"],
+            function () { sharePanel.active = true; })
+    );
+
+    bgButton = new PButton(panel, 0.250, .333, 0.125, 0.333, ["Set", "BG"],
+        function () { return toggleBGsel(); },
+        [], [], [], null,
+        function () { return selBG; })
+    bgButton.toggle = true;
+    panel.buttonArray.push(bgButton);
+    panel.buttonArray.push(
+        new PButton(panel, 0.375, .333, 0.125, 0.333, ["Clear", "All"],
             function () { pair.clearAll() })
     );
 
+
+
+
+    let previewButton = new PButton(panel, 0.250, 0.666, 0.125, 0.333, ["Show", "Preview"],
+        function () { return pair.togglePreview(); },
+        [], [], [], null,
+        function () { return pair.showPreview; })
+    previewButton.toggle = true;
+    panel.buttonArray.push(previewButton);
+
+    let invertButton = new PButton(panel, 0.375, 0.666, 0.125, 0.333, ["Invert"],
+        function () { pair.inOut(); },
+        [], [], [], null,
+        function () { return pair.out; });
+    invertButton.toggle = true;
+    panel.buttonArray.push(invertButton);
+
+
+
+
+
+    
     panel.buttonArray.push(
-        new PButton(panel, 0.375, .333, 0.125, 0.333, ["Reset", "Pos"],
+        new PButton(panel, 0.500, .0, 0.25, 0.333, ["Reset","Position"],
             function () { return pair.reset(); })
     );
-
-    panel.buttonArray.push(
-        new PButton(panel, 0.25, .666, 0.25, 0.333, ["Undo"],
-            function () { pair.clear(); })
-    );
-
-
 
     panel.buttonArray.push(
         new PButton(panel, 0.5, .333, 0.25, 0.333, ["Nudge +"],
@@ -1708,7 +1718,10 @@ function createButtonsPanel() {
     );
 
 
-
+    panel.buttonArray.push(
+        new PButton(panel, 0.75, .000, 0.25, 0.333, ["Undo"],
+            function () { pair.clear(); })
+    );
 
     panel.buttonArray.push(
         new PButton(panel, 0.75, .3333, 0.25, 0.3333, ["360°"],
@@ -1798,34 +1811,7 @@ function createSliderPanel() {
     perimTeethButton.UDarrows = true;
     panel.buttonArray.push(perimTeethButton)
 
-
-    let movRadButton = new PButton(panel, 2 / 6, 0, 1 / 6, 1, ["Arcness"],
-        function (dy, yDragVar0) {
-            // showWheelsOverride = true;
-            pair.penUp();
-            if (pair.moving.nArc > 1) {
-                pair.moving.arcness = Math.min(1, Math.max(-0.005 / pixRat * dy + yDragVar0, 0));
-
-                pair.configRings();
-                pair.updateMovingShape();
-                pair.updatePairGeom();
-                pair.move(pair.th);
-                pair.penDown();
-            }
-
-        }, [], [],
-        function () {
-            return pair.moving.arcness;
-        },
-        function (isDepressed) {
-            showArcInfo = isDepressed;
-        }
-    )
-    movRadButton.yDrag = true;
-    movRadButton.UDarrows = true;
-    panel.buttonArray.push(movRadButton)
-
-    let nArcButton = new PButton(panel, 3 / 6, 0, 1 / 6, 1, ["# Sides"],
+    let nArcButton = new PButton(panel, 2 / 6, 0, 1 / 6, 1, ["# Sides"],
         function (dy, yDragVar0) {
 
             // showWheelsOverride = true;
@@ -1851,6 +1837,34 @@ function createSliderPanel() {
     nArcButton.yDrag = true;
     nArcButton.UDarrows = true;
     panel.buttonArray.push(nArcButton)
+
+    let movRadButton = new PButton(panel, 3 / 6, 0, 1 / 6, 1, ["Arcness"],
+        function (dy, yDragVar0) {
+            // showWheelsOverride = true;
+            pair.penUp();
+            if (pair.moving.nArc > 1) {
+                pair.moving.arcness = Math.min(1, Math.max(-0.005 / pixRat * dy + yDragVar0, 0));
+
+                pair.configRings();
+                pair.updateMovingShape();
+                pair.updatePairGeom();
+                pair.move(pair.th);
+                pair.penDown();
+            }
+
+        }, [], [],
+        function () {
+            return pair.moving.arcness;
+        },
+        function (isDepressed) {
+            showArcInfo = isDepressed;
+        }
+    )
+    movRadButton.yDrag = true;
+    movRadButton.UDarrows = true;
+    panel.buttonArray.push(movRadButton)
+
+
 
     let ratButton = new PButton(panel, 4 / 6, 0, 1 / 6, 1, ["Pen", "Radius"],
         function (dy, yDragVar0) {
@@ -1957,7 +1971,7 @@ function createColourPanel() {
                 pair.setColor();
                 pair.fixed.color = pair.color;
                 pair.moving.color = pair.color;
-                document.querySelector(':root').style.setProperty('--fgColor', pair.color)
+                // document.querySelector(':root').style.setProperty('--fgColor', pair.color)
                 pair.move(pair.th);
                 pair.penDown();
                 pair.calcPreview();
@@ -1972,6 +1986,7 @@ function createColourPanel() {
                 }
                 pair.setColor();
             }
+            setGallerySubmitHTML();
 
         }, [], [],
         function () {
@@ -2143,8 +2158,14 @@ function anim() {
     if (pair.auto) { requestAnimationFrame(anim); }
 
     if (playDemo & Math.abs(pair.th) > (pair.fullTraceTh + PI2)) {
-        init();
-        pair.auto = 1;
+        // init();  
+        pair.penUp();
+        pair.clearAll();
+        pair.th = 0;
+        randCols();
+        randDiscs();
+
+        // pair.auto = 1;
     }
 
     if (pair.auto & !showColInfo & !showInfo & !showRadInfo & !showArcInfo & !showLWInfo) {
@@ -2178,6 +2199,16 @@ function anim() {
     // ctx.fillText(pair.traces.length, 100, 500,)
 
     panelArray.forEach(panel => panel.draw())
+
+    if (showDocs) {
+        ctx.beginPath();
+        // ctx.lineWidth = baseLW * 1;
+        ctx.fillStyle = pair.colorBGtrans;
+        ctx.fillRect(0, 0, X, Y);
+        ctx.fillStyle = pair.colorBG;
+        ctx.fillRect(this.x, this.y, this.w, this.h)
+    }
+
 
     if (showInfo) {
         pair.drawInfo();
@@ -2438,7 +2469,9 @@ wakeGalleryServer()
 addPointerListeners();
 
 init();
+// toggleDocs();
 anim();
+
 
 
 

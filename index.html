@@ -3,8 +3,8 @@
 <html>
 
 <head>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-4RYPJJS4M3"></script>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-4RYPJJS4M3"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag() { dataLayer.push(arguments); }
@@ -12,48 +12,136 @@
 
         gtag('config', 'G-4RYPJJS4M3');
     </script>
-    <link rel="apple-touch-icon" sizes="57x57" href="img/apple-icon-57x57.png">
-    <link rel="apple-touch-icon" sizes="60x60" href="img/apple-icon-60x60.png">
-    <link rel="apple-touch-icon" sizes="72x72" href="img/apple-icon-72x72.png">
-    <link rel="apple-touch-icon" sizes="76x76" href="img/apple-icon-76x76.png">
-    <link rel="apple-touch-icon" sizes="114x114" href="img/apple-icon-114x114.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="img/apple-icon-120x120.png">
-    <link rel="apple-touch-icon" sizes="144x144" href="img/apple-icon-144x144.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="img/apple-icon-152x152.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="img/apple-icon-180x180.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="img/android-icon-192x192.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="96x96" href="img/favicon-96x96.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="img/favicon-16x16.png">
-    <link rel="manifest" href="img/manifest.json">
-    <meta name="msapplication-TileColor" content="#ffffff">
-    <meta name="msapplication-TileImage" content="img/ms-icon-144x144.png">
-    <meta name="theme-color" content="#ffffff">
+  <link rel="apple-touch-icon" sizes="57x57" href="img/apple-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="img/apple-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="img/apple-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="img/apple-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="img/apple-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="img/apple-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="img/apple-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="img/apple-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="img/apple-icon-180x180.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="img/android-icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="96x96" href="img/favicon-96x96.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="img/favicon-16x16.png">
+  <link rel="manifest" href="img/manifest.json">
+  <meta name="msapplication-TileColor" content="#ffffff">
+  <meta name="msapplication-TileImage" content="img/ms-icon-144x144.png">
+  <meta name="theme-color" content="#ffffff">
 
 
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no" />
 
-    <title>spiralator</title>
-    <link rel="stylesheet" href="style.css">
+  <title>spiralator</title>
+  <link rel="stylesheet" href="style.css">
 
 </head>
 
 <body style="touch-action:none">
-    <canvas id="cw"></canvas>
-    <div id="galleryForm">
-        <label id="nameLab" for="name">Name</label>
-        <input type="text" id="name" name="name" placeholder="Name">
-        <label id="commentLab" for="comment">Comment</label>
-        <textarea id="comment" name="comment" placeholder="Comment" maxlength="1000"></textarea>
-        <input type="button" id="submit" value="Upload">
-        <input type="button" id="close" value="Close">
+  <canvas id="cw"></canvas>
+  <div id="galleryForm">
+    <label id="nameLab" for="name">Name</label>
+    <input type="text" id="name" name="name" placeholder="Name">
+    <label id="commentLab" for="comment">Comment</label>
+    <textarea id="comment" name="comment" placeholder="Comment" maxlength="1000"></textarea>
+    <input type="button" id="submit" value="Upload">
+    <input type="button" id="close" value="Close">
+  </div>
+  <div class="centred">
+    <div id="docs" class="hiddenScroll">
+
+      <input type="button" id="closeDocs" value="Close">
+
+      <!-- </div> -->
+      <div class="docText">
+        <h1>Spiralator</h1>
+
+        <p>A simple tool designed to help explore and express the beautiful geometries
+          of circles rotating in circles. Inspired by the old spirograph toy but not constrained by its
+          practicalities. </p>
+
+        <h2>Instructions</h2>
+        <p> The vertical sliders set the disc and pen configuration. Draw by dragging the moving disc around the fixed
+          disc. Double-clicking in the main window starts and stops auto-drawing. </p>
+        <p> Some tips: Press the "Demo" button to watch a random series of shapes being drawn;
+          when you're experimenting, the "Show Preview" button is useful to immediately see the effects of
+          altering
+          the parameters; "View Gallery" in the "Share/Save" menu for inspiration;
+          for a "light mode", the "Set BG" button enables changing the background using the
+          colour sliders.</p>
+
+        <h3>Sliders</h3>
+        <h4>Fixed Size</h4>
+        <p>Set the size (number of teeth) of the fixed disc or ring. Together with "Moving Size" below governs
+          the rotational symmetry.</p>
+        <h4>Moving Size</h4>
+        <p> Set the size (number of teeth) of the moving disc or ring. The moving disc size may be greater than the
+          fixed disk size if it is circular or inverted.</p>
+        <h4># Sides</h4>
+        <p>Number of sides of the moving (arc-) shape. 1 is circular, 2 is ovaloid, 3 is triangloid etc.</p>
+        <h4>Arcness</h4>
+        <p>Non-circularity of the moving arc-shape. 0% is circular, 100% gives fully pivotal internal motion. Only effective when the number of sides is greater than 1.
+        </p>
+
+        <h4>Pen Radius</h4>
+        <p> Distance from the centre of the moving shape to the pen.</p>
+        <h4>Pen Angle</h4>
+        <p> Angle to the pen from the 0-tooth via the centre. Interesting when combined with non-circular
+          moving shapes.</p>
+        <h4>Line Width</h4>
+        <p> Pen thickness.</p>
+        <h4>Hue, Lightness, Saturation</h4>
+        <p> Adjusts pen colour unless "Set BG" is toggled when they control the background
+          colour.</p>
+
+        <h3>Buttons</h3>
+        <h4>Show Preview</h4>
+        <p> Dynamic preview of the fully completed path. See how pen and disc adjustments affect the completed path
+          live.</p>
+        <h4>Nudge +/-</h4>
+        <p> Shift the discs by one tooth (without drawing).</p>
+        <h4>Complete</h4>
+        <p> Draw a fully complete path.</p>
+        <h4>360°</h4>
+        <p> Draws one revolution of the moving disc about the fixed disc.</p>
+        <h4>Undo</h4>
+        <p> Erase the last drawing action.</p>
+        <h4>Share/Gallery</h4>
+        <p>Opens sub menu with "Share Image" and "Download Image" options. "Upload to Gallery" and "View Gallery" allow
+          interaction with a public Spiralator gallery.</p>
+        <h4>Demo</h4>
+        <p> Draws a randomized sequence of configurations to completion. Hide discs and UI and relax.</p>
+
+        <h4>Hide UI</h4>
+        <p> Hide the user interface. Bring it back with a doubple click.</p>
+        <h4>Hide Disc</h4>
+        <p> Toggles the discs - you can still draw when the discs are hidden.</p>
+        <h4>Rand Discs</h4>
+        <p> Randomizes the disc and pen position configuration.</p>
+        <h4>Rand Cols</h4>
+        <p> Randomizes the pen hue (with matching background hue).</p>
+
+        <h4>Clear All</h4>
+        <p>Erase all drawing. Not undoable!</p>
+        <h4>Set BG</h4>
+        <p>Toggle to change background colour using the colour sliders</p>
+        <h4> Lock Ring</h4>
+        <p> The fixed ring is locked in position by default. Untoggle this button to permit moving of the fixed ring.
+        </p>
+        <h4>Reset Position</h4>
+        <p>Reset the moving ring to its original position in the fixed ring</p>
+        <h4>Invert</h4>
+        <p>Flip the moving disc to the outside of the fixed ring.</p>
+        <h4>?</h4>
+        <p>Brings up these docs. But you knew that.</p>
+        <h1> Thanks!</h1>
+        <p>If you enjoy Spiralator you may also be interested in <a href="http://harmonata.com">harmonata</a>.</p>
+        <p>Contact me: <a href="mailto:suprdory@gmail.com">suprdory@gmail.com</a></p>
+      </div>
     </div>
-    <div id="docs">
-        <!-- <label id="about" for="name">About</label>
-        <p type="text" id="name" name="name" placeholder="Name"> -->
-        <input type="button" id="closeDocs" value="Close">
-    </div>
+  </div>
 
 </body>
 <script src="config.js"></script>
