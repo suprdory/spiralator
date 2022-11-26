@@ -54,13 +54,11 @@
    font-size: var(--textSize);
    z-index: 1;
    padding: 1px;
-
  }
 
  /* Hide scrollbar for Chrome, Safari and Opera */
  .hiddenScroll::-webkit-scrollbar {
    display: none;
-
  }
 
  /* Hide scrollbar for IE, Edge and Firefox */
