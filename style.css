@@ -42,8 +42,8 @@
  #docs {
    position: absolute;
    top: 5%;
-   width: 80%;
-   left: 10%;
+   width: min(90%, 500px);
+   left: max(calc(5% - 4px), calc((100% - 500px)/2));
 
    height: 90%;
    border-style: solid;
@@ -54,14 +54,13 @@
    font-size: var(--textSize);
    z-index: 1;
    padding: 1px;
-   overflow-y: auto;
-   /* margin-left: auto; */
-   /* margin-right: auto; */
+
  }
 
  /* Hide scrollbar for Chrome, Safari and Opera */
  .hiddenScroll::-webkit-scrollbar {
    display: none;
+
  }
 
  /* Hide scrollbar for IE, Edge and Firefox */
@@ -70,6 +69,7 @@
    /* IE and Edge */
    scrollbar-width: none;
    /* Firefox */
+
  }
 
  .centred {
@@ -166,14 +166,18 @@
    padding: inherit;
  }
 
+
+
  #closeDocs {
-   position: relative;
+   position: absolute;
    top: 10px;
-   max-width: 200px;
-   min-width: 200px;
+   width: 200px;
+   /* min-width: 200px; */
    height: 50px;
-   margin-left: auto;
-   margin-right: auto;
+   left: calc(50% - 100px);
+
+   /* margin-left: auto; */
+   /* margin-right: auto; */
 
    background-color: inherit;
    font-size: inherit;
@@ -209,8 +213,13 @@
 
 
  .docText {
+   position: absolute;
+   top: 70px;
+   height: calc(100% - 90px);
    text-align: left;
    padding: 10px;
+   overflow-y: auto;
+
  }
 
  h4 {
@@ -221,6 +230,4 @@
 
  p {
    margin-top: 5px;
-   /* border-bottom: 0px;
-      bottom: 0px; */
  }
