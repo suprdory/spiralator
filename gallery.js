@@ -35,6 +35,7 @@ function add_image(n) {
             elemName.innerText = data.name;
             elemComment.innerText = data.comment;
             elemID.innerText=data.id;
+
             if (elemComment.innerText != '') {
                 console.log(elemComment.innerText)
                 elemDiv.appendChild(elemComment);
@@ -44,7 +45,16 @@ function add_image(n) {
             }
             if (dispID){
             if (elemID.innerText != '') {
+                var button = document.createElement("BUTTON");
+                button.innerText='Delete '+data.id
+                button.addEventListener('click', () => {
+                    // alert('Oh, you clicked me!')
+                    del_image(data.id);
+            })
+                button.classList.add("delButton")
+
                 elemDiv.appendChild(elemID);
+                elemDiv.appendChild(button)
             }}
 
             // console.log(data)
@@ -53,10 +63,18 @@ function add_image(n) {
     document.body.appendChild(elemDiv);
 }
 
-
+function del_image(id){
+    fetch(galleryAPIurl + '/del_image?id=' + id+'&pw='+pw)
+        // .then(response => response.json())
+        .then(data => {
+            console.log(data)
+        }
+        )
+}
 const queryString = window.location.search;
 const urlParams = new URLSearchParams(queryString);
 const dispID = urlParams.get('id');
+const pw = urlParams.get('pw');
 
 let imageWidth = Math.min(window.innerWidth, 1080,window.innerHeight*0.95)
 document.querySelector(':root').style.setProperty('--nameSize', 10 + 'pt')

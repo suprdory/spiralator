@@ -1521,10 +1521,12 @@ function downloadFile(file) {
     }, 0);
 }
 function uploadImage(name, comment) {
+    // console.log("uploadImage()")
     if (pair.traces.length > 0) {
+        // console.log("traces > 0")
         sharePanel.wait = true;
         anim();
-        canvasSq = drawSquareFullImage(galleryRes);
+        let canvasSq = drawSquareFullImage(galleryRes);
         canvasSq.toBlob(function (blob) {
             imgFile = new File(
                 [blob],
@@ -2013,7 +2015,7 @@ function createColourPanel() {
                 pair.move(pair.th);
                 pair.penUpCont();
 
-                pair.lightness = Math.max(00, Math.min(100, yDragVar0 + dy * -0.15 / pixRat));
+                pair.lightness = Math.max(0, Math.min(100, yDragVar0 + dy * -0.15 / pixRat));
 
                 pair.setColor();
                 pair.fixed.color = pair.color;
@@ -2024,7 +2026,7 @@ function createColourPanel() {
                 pair.calcPreview();
             }
             else {
-                pair.lightnessBG = Math.max(00, Math.min(100, yDragVar0 + dy * -0.15 / pixRat));
+                pair.lightnessBG = Math.max(0, Math.min(100, yDragVar0 + dy * -0.15 / pixRat));
                 pair.setColor();
             }
 
@@ -2055,7 +2057,7 @@ function createColourPanel() {
                 pair.move(pair.th);
                 pair.penUpCont();
 
-                pair.saturation = Math.max(00, Math.min(100, yDragVar0 + dy * -0.25 / pixRat));
+                pair.saturation = Math.max(0, Math.min(100, yDragVar0 + dy * -0.25 / pixRat));
 
                 pair.setColor();
                 pair.fixed.color = pair.color;
@@ -2066,7 +2068,7 @@ function createColourPanel() {
                 pair.calcPreview();
             }
             else {
-                pair.saturationBG = Math.max(00, Math.min(100, yDragVar0 + dy * -0.25 / pixRat));
+                pair.saturationBG = Math.max(0, Math.min(100, yDragVar0 + dy * -0.25 / pixRat));
                 pair.setColor();
             }
 

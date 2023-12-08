@@ -40,3 +40,9 @@
    margin-bottom: 5%;
    font-size: var(--commentSize);
  }
+
+ .delButton{
+   padding: 2%;
+  margin: 0 0 0 0;
+
+ }
