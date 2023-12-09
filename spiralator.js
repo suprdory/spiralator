@@ -603,7 +603,6 @@ class Pair {
 
 
     }
-
     drawInfo() {
         let Y0 = Y - uiHeight - txtSize * 1.5
         let X0 = 2 * txtSize
@@ -624,6 +623,7 @@ class Pair {
         ctx.lineTo(X0 + txtSize * 1.0, Y0 - txtSize * 0.00);
         ctx.lineWidth = 3 * pixRat;
         ctx.stroke();
+        ctx.lineWidth = pixRat;
 
         ctx.font = txtSize / 4 + 'px sans-serif';
         ctx.fillText('Fixed wheel', X0, Y0 - txtSize * 1.1);
