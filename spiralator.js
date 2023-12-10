@@ -634,7 +634,7 @@ class Pair {
     }
     penUp() {
         this.tracing = false;
-        if (this.trace.points.length > 1) {
+        if (this.trace.points.length > 2) {
             this.traces.push(this.trace);
         }
         this.trace = new Trace(this);
@@ -916,12 +916,17 @@ class Pair {
         this.previewTrace = new Trace(this, previewAlpha)
         this.previewTrace.points = [];
         let startTh = this.th;
+        
+        this.penUp();
 
+        // draw review trace 
         this.move(0, true, true);
         this.roll(this.fullTraceTh, true);
-        // this.move(this.fullTraceTh, true, true);
+        
+        // this.move(0, true, true);
+        // this.roll(startTh+this.fullTraceTh, true);
 
-        this.penUp();
+        // return to pre preview position and start drawing
         this.move(startTh, true, false)
         this.penDown();
     }
@@ -2383,10 +2388,13 @@ function randDiscs() {
     let ratInit = Math.random() * 0.5 + 0.5;
     let penAngleInit = (Math.random() < 0.5) ?
         (Math.random() < 0.5 ? 0 : 0.5 * PI2 / nArcInit) : Math.random() * PI2 - PI2 / 2;
+
+    pair.penUp();
+    
     pair.fixed = new Disc(fixedTeeth);
     pair.moving = new ArcSidedDisc(perimTeeth = perimTeethInit, arcness = arcnessInit,
         rat = ratInit, nArc = nArcInit, penAngle = penAngleInit, ring = false)
-    pair.penUp();
+
     pair.updateMovingShape();
     pair.updatePairGeom();
     pair.setColor();
@@ -2482,12 +2490,13 @@ init();
 anim();
 
 
-
-// test bad dot trace on randCol() randDisc()
-// for (let i = 0; i<300; i++) {
+// // test bad dot trace on randCol() randDisc()
+// for (let i = 0; i<301; i++) {
 //     // log(i)
+//     pair.togglePreview()
 //     randDiscs();
-//     randCols();
+//     // randCols();
 // }
-// anim()
 // log(pair.traces)
+// pair.roll(3)
+// anim()
