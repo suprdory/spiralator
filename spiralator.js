@@ -1,6 +1,8 @@
 Array.prototype.random = function () {
     return this[Math.floor((Math.random() * this.length))];
 }
+function log(m){console.log(m)
+}
 class Disc {
     constructor(
         teeth = 84, ring = 0
@@ -1704,9 +1706,9 @@ function createButtonsPanel() {
 
 
 
-    
+
     panel.buttonArray.push(
-        new PButton(panel, 0.500, .0, 0.25, 0.333, ["Reset","Position"],
+        new PButton(panel, 0.500, .0, 0.25, 0.333, ["Reset", "Position"],
             function () { return pair.reset(); })
     );
 
@@ -2126,9 +2128,9 @@ function toggleDocs() {
     else {
         docs.visibility = "hidden"
         showDocs = false;
-    if (!pair.auto){
-        anim();
-    }
+        if (!pair.auto) {
+            anim();
+        }
 
     }
 
@@ -2392,9 +2394,8 @@ function randDiscs() {
     pair.penDown();
 }
 function randCols() {
-
-    pair.move(pair.th);
     pair.penUpCont();
+    pair.move(pair.th);
     pair.hue = Math.random() * 360;
     pair.hueBG = pair.hue;
     pair.setColor();
@@ -2482,4 +2483,11 @@ anim();
 
 
 
-
+// test bad dot trace on randCol() randDisc()
+// for (let i = 0; i<300; i++) {
+//     // log(i)
+//     randDiscs();
+//     randCols();
+// }
+// anim()
+// log(pair.traces)
