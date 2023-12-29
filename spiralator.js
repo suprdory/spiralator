@@ -1,8 +1,8 @@
 Array.prototype.random = function () {
     return this[Math.floor((Math.random() * this.length))];
 }
-function log(m){console.log(m)
-}
+log = console.log;
+
 class Disc {
     constructor(
         teeth = 84, ring = 0
@@ -68,6 +68,33 @@ class Disc {
         }
 
     }
+    toSSobj() {
+        let ss = {};
+        ss.x = this.x
+        ss.y = this.y
+        ss.thickness = this.thickness
+        ss.teeth = this.teeth
+        ss.circ = this.circ
+        ss.rad = this.rad
+        ss.color = this.color
+        ss.lw = this.lw
+        ss.ring = this.ring
+        // log("toSSobj", ss, this)
+        return ss;
+    }
+    fromSSobj(ss) {
+        // log(ss)
+
+        this.x = ss.x;
+        this.y = ss.y;
+        this.thickness = ss.thickness;
+        this.teeth = ss.teeth;
+        this.circ = ss.circ;
+        this.rad = ss.rad;
+        this.color = ss.color;
+        this.lw = ss.lw;
+        this.ring = ss.ring;
+    }
 }
 class Point {
     constructor(x, y) {
@@ -122,6 +149,21 @@ class Trace {
             ymax: ymax,
         })
     }
+    toSSobj() {
+        so = {}
+        so.lw = this.lw;
+        so.color = this.color;
+        so.points = this.points;
+        log("trace.toSSobj() returning:",so)
+        return so
+    }
+    fromSSobj(so) {
+        log("trace from so")
+        this.color=so.color;
+        this.lw=so.lw;
+        this.points=[]
+        so.points.forEach(point => this.points.push(new Point(point.x,point.y)))
+    }
 }
 class ArcSidedDisc {
     constructor(
@@ -156,8 +198,6 @@ class ArcSidedDisc {
         //dist from geo centre to arc centre
 
     }
-
-
     draw() {
         //set geo (drawing) centre from rotation centre
         // this.updateGeoCentre()
@@ -344,6 +384,18 @@ class ArcSidedDisc {
             return (d2CentreSq - this.radCont ** 2) *
                 (d2CentreSq - (this.rad + this.thickness * this.ring) ** 2) < 0
         }
+    }
+    toSSobj() {
+        let keys = ['x', 'y', 'thickness', 'color', 'ring', 'rat', 'drawAng', 'lw', 'penLW',
+            'th0', 'perimTeeth', 'perim', 'arcness', 'nArc', 'teeth', 'circ', 'rad', 'phi',
+            'theta', 'arcRat', 'radCont', 'drArc']
+        let ss = {};
+        keys.forEach(key => ss[key] = this[key])
+        // log("ArcSidedDisc.toSSobj", ss)
+        return ss;
+    }
+    fromSSobj(so) {
+        Object.keys(so).forEach(key => this[key] = so[key])
     }
 }
 class Pair {
@@ -916,13 +968,13 @@ class Pair {
         this.previewTrace = new Trace(this, previewAlpha)
         this.previewTrace.points = [];
         let startTh = this.th;
-        
+
         this.penUp();
 
         // draw review trace 
         this.move(0, true, true);
         this.roll(this.fullTraceTh, true);
-        
+
         // this.move(0, true, true);
         // this.roll(startTh+this.fullTraceTh, true);
 
@@ -984,6 +1036,40 @@ class Pair {
             ymax: ymax,
         })
 
+    }
+    toSSobj() {
+        let keys = ['out', 'th', 'auto', 'hue', 'saturation', 'lightness', 'hueBG', 'lightnessBG',
+            'saturationBG', 'locked', 'showPreview', 'previewTrace', 'lw']
+        let ss = {};
+        keys.forEach(key => ss[key] = this[key])
+        ss.trace = this.trace.toSSobj();
+        ss.traces=[];
+        this.traces.forEach(trace => ss.traces.push(trace.toSSobj()))
+        // log("Pair.toSSobj", ss)
+        return ss;
+
+        // unstored objs from constructor
+        // this.trace = new Trace(this, 1);
+        // this.traces = [];
+    }
+    fromSSobj(so) {
+        Object.keys(so).forEach(key => this[key] = so[key])
+        // log("fromSS_pair:",this)
+        this.setColor();
+        pair.updateMovingShape();
+        pair.updatePairGeom();
+        pair.move(pair.th);
+
+        this.trace = new Trace(this, 1);
+        this.traces = [];
+
+        // this.trace.fromSSobj(so.trace);
+        // so.traces.forEach(trace => {
+        //     let newTrace= new Trace(this,1);
+        //     this.traces.push(newTrace.fromSSobj(trace))
+        // })
+
+        // log(so.trace)
     }
 }
 class PButton {
@@ -1374,7 +1460,15 @@ function pointerUpHandler(xc, yc) {
     mselect = null;
 
     panelArray.forEach(panel => panel.pointerUp(x, y))
+
     if (!pair.auto) { requestAnimationFrame(anim); }
+
+    console.log("pointer up in active panel, saving state to local storage")
+    let stateJSON = state2json()
+    localStorage.setItem("so", stateJSON)
+    const url = new URL(location);
+    url.searchParams.delete('skey')
+    history.pushState({}, "", url);
 }
 function doubleClickHandler(clickCase) {
     if (topPanel.active) {
@@ -2390,7 +2484,7 @@ function randDiscs() {
         (Math.random() < 0.5 ? 0 : 0.5 * PI2 / nArcInit) : Math.random() * PI2 - PI2 / 2;
 
     pair.penUp();
-    
+
     pair.fixed = new Disc(fixedTeeth);
     pair.moving = new ArcSidedDisc(perimTeeth = perimTeethInit, arcness = arcnessInit,
         rat = ratInit, nArc = nArcInit, penAngle = penAngleInit, ring = false)
@@ -2427,6 +2521,33 @@ function init() {
     canvas.style.backgroundColor = pair.colorBG;
 
     setGallerySubmitHTML();
+}
+
+function state2json() {
+    // state object
+    let so = {};
+    // save wheel states
+    so.fixed = pair.fixed.toSSobj();
+    so.moving = pair.moving.toSSobj();
+    so.pair = pair.toSSobj();
+
+    // log("state2json", so)
+    let stateString = JSON.stringify(so)
+    return stateString
+}
+
+function json2state(json) {
+    //state object
+    let so = JSON.parse(json);
+
+    //set wheel states
+    pair.fixed.fromSSobj(so.fixed);
+    pair.moving.fromSSobj(so.moving);
+    pair.fromSSobj(so.pair);
+
+    canvas.style.backgroundColor = pair.colorBG;
+    setGallerySubmitHTML();
+
 }
 
 const canvas = document.getElementById("cw");
@@ -2486,17 +2607,19 @@ wakeGalleryServer()
 addPointerListeners();
 
 init();
-// toggleDocs();
+
+// reset bad local storage state object
+// localStorage.setItem("so", state2json())
+
+// local save state handling
+so = localStorage.getItem("so")
+// log("init lsso",so)
+if (so) {
+    // log("ls state exists:", so)
+    json2state(so)
+}
+else {
+    localStorage.setItem("so", state2json())
+}
+
 anim();
-
-
-// // test bad dot trace on randCol() randDisc()
-// for (let i = 0; i<301; i++) {
-//     // log(i)
-//     pair.togglePreview()
-//     randDiscs();
-//     // randCols();
-// }
-// log(pair.traces)
-// pair.roll(3)
-// anim()
