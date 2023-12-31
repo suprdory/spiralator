@@ -1481,7 +1481,7 @@ function pointerUpHandler(xc, yc) {
     let stateJSON = state2json()
     localStorage.setItem("so", stateJSON)
     const url = new URL(location);
-    url.searchParams.delete('skey')
+    url.searchParams.delete('s')
     history.pushState({}, "", url);
 }
 function doubleClickHandler(clickCase) {
@@ -1678,32 +1678,34 @@ function uploadImage(name, comment) {
     }
 }
 function createSharePanel() {
-    xsize = 200 * pixRat;
-    ysize = 400 * pixRat;
+    let xsize = 200 * pixRat;
+    let ysize = 400 * pixRat;
     let panel = new Panel((X - xsize) / 2, (Y - ysize) / 2, xsize, ysize);
     panel.overlay = true;
-    // panel.wait=true;
+    panel.wait = false;
     panel.active = false;
     panel.buttonArray.push(
-        new PButton(panel, 0.0, 0, 1, 0.1, ["Close"],
+        new PButton(panel, 0.0, 0, 1, 0.083, ["Close"],
             function () { panel.active = false; })
     );
     panel.buttonArray.push(
-        new PButton(panel, 0.1, .2, .8, 0.1, ["Share Image"],
+        new PButton(panel, 0.1, 0.1666, .8, 0.083, ["Share URL"],
+            function () { shareURL(); })
+    );
+    panel.buttonArray.push(
+        new PButton(panel, 0.1, .3333, .8, 0.083, ["Share Image"],
             function () { shareImage(); })
     );
-
     panel.buttonArray.push(
-        new PButton(panel, 0.1, .4, .8, 0.1, ["Download Image"],
+        new PButton(panel, 0.1, .5000, .8, 0.083, ["Download Image"],
             function () { downloadImage(); })
     );
-
     panel.buttonArray.push(
-        new PButton(panel, 0.1, .6, .8, 0.1, ["Upload to Gallery"],
+        new PButton(panel, 0.1, .6666, .8, 0.083, ["Upload to Gallery"],
             function () { toggleGalleryForm() })
     );
     panel.buttonArray.push(
-        new PButton(panel, 0.1, .8, .8, 0.1, ["View Gallery"],
+        new PButton(panel, 0.1, .83333, .8, 0.083, ["View Gallery"],
             function () { window.location.href = 'gallery.html' })
     );
 
@@ -2550,6 +2552,44 @@ function json2state(json) {
 
 }
 
+function shareURL() {
+    console.log('wait')
+    sharePanel.wait = true;
+    if (!pair.auto) { requestAnimationFrame(anim); }
+
+
+    let url = window.location.href
+    // url = url + '?so=' + state2json();
+    // let shareData = { 'url': url }
+    // log(shareData)
+    // navigator.share(shareData)
+
+    let formData = new FormData();
+    formData.append('version', "v01");
+    formData.append('state', state2json());
+    fetch(galleryAPIurl + '/post_state', {
+        method: 'POST',
+        // WARNING!!!! DO NOT set Content Type!
+        // headers: { 'Content-Type': 'multipart/form-data' },
+        body: formData,
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            url = url + '?s=' + data.key;
+            let shareData = { 'url': url }
+            navigator.share(shareData)
+            console.log('unwait')
+            sharePanel.wait = false;
+            if (!pair.auto) { requestAnimationFrame(anim); }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            sharePanel.wait = false;
+            if (!pair.auto) { requestAnimationFrame(anim); }
+        })
+}
+
 const canvas = document.getElementById("cw");
 const ctx = canvas.getContext("2d");
 const PI2 = Math.PI * 2;
@@ -2621,6 +2661,49 @@ if (so) {
 else {
     log("ls state does not exist, create")
     localStorage.setItem("so", state2json())
+}
+
+const queryString = window.location.search;
+const urlParams = new URLSearchParams(queryString);
+
+// let urlArgMode = false;
+// let urlso = urlParams.get('so')
+// if (urlso) {
+//     // log('url arg mode',urlso);
+//     urlArgMode = true;
+//     json2state(urlso)
+//     showWheels = false;
+//     panelArray.forEach(panel => panel.active = false)
+// }
+let urlskey = urlParams.get('s')
+if (urlskey) {
+    log("skey:", urlskey)
+    console.log('wait')
+    sharePanel.wait = true;
+    if (!pair.auto) { requestAnimationFrame(anim); }
+
+    log("get url:", galleryAPIurl + '/get_state?skey=' + urlskey)
+    fetch(galleryAPIurl + '/get_state?skey=' + urlskey, {
+        method: 'GET',
+        // WARNING!!!! DO NOT set Content Type!
+        // headers: { 'Content-Type': 'multipart/form-data' },
+
+    })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            json2state(JSON.stringify(data));
+            showWheels = false;
+            panelArray.forEach(panel => panel.active = false)
+            console.log('unwait')
+            sharePanel.wait = false;
+            if (!pair.auto) { requestAnimationFrame(anim); }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+            sharePanel.wait = false;
+            if (!pair.auto) { requestAnimationFrame(anim); }
+        })
 }
 
 anim();
