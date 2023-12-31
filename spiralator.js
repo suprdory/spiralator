@@ -153,16 +153,21 @@ class Trace {
         so = {}
         so.lw = this.lw;
         so.color = this.color;
-        so.points = this.points;
-        log("trace.toSSobj() returning:",so)
+        let points=[]
+        // log("nPoints", this.points.length)
+        // log("points",this.points)
+        this.points.forEach(point => points.push([(point.x).toFixed(1),(point.y).toFixed(1)]))
+        so.points = points;
+        // log("trace.toSSobj() returning:",so)
         return so
     }
     fromSSobj(so) {
-        log("trace from so")
+        // log("trace from so")
         this.color=so.color;
         this.lw=so.lw;
         this.points=[]
-        so.points.forEach(point => this.points.push(new Point(point.x,point.y)))
+
+        so.points.forEach(point => this.points.push(new Point(parseFloat(point[0]), parseFloat(point[1]))))
     }
 }
 class ArcSidedDisc {
@@ -1039,12 +1044,16 @@ class Pair {
     }
     toSSobj() {
         let keys = ['out', 'th', 'auto', 'hue', 'saturation', 'lightness', 'hueBG', 'lightnessBG',
-            'saturationBG', 'locked', 'showPreview', 'previewTrace', 'lw']
+            'saturationBG', 'locked', 'showPreview', 'lw']
         let ss = {};
         keys.forEach(key => ss[key] = this[key])
+        // log("pair.trace",this.trace)
         ss.trace = this.trace.toSSobj();
+
+
         ss.traces=[];
         this.traces.forEach(trace => ss.traces.push(trace.toSSobj()))
+        // log("pair.toSSobj() ss.traces",ss.traces)
         // log("Pair.toSSobj", ss)
         return ss;
 
@@ -1053,23 +1062,28 @@ class Pair {
         // this.traces = [];
     }
     fromSSobj(so) {
+        // log("pair.fromSSobj points 0", so.trace.points)
         Object.keys(so).forEach(key => this[key] = so[key])
-        // log("fromSS_pair:",this)
         this.setColor();
         pair.updateMovingShape();
         pair.updatePairGeom();
+
+        pair.penUp();
         pair.move(pair.th);
+        pair.penDown();
+
 
         this.trace = new Trace(this, 1);
         this.traces = [];
 
-        // this.trace.fromSSobj(so.trace);
-        // so.traces.forEach(trace => {
-        //     let newTrace= new Trace(this,1);
-        //     this.traces.push(newTrace.fromSSobj(trace))
-        // })
-
-        // log(so.trace)
+        this.trace.fromSSobj(so.trace);
+        so.traces.forEach(trace => {
+            let newTrace= new Trace(this,1);
+            newTrace.fromSSobj(trace);
+            this.traces.push(newTrace)
+        })
+        // log("SO",so.trace.points)
+        // log("Pair",this.trace.points)
     }
 }
 class PButton {
@@ -1463,7 +1477,7 @@ function pointerUpHandler(xc, yc) {
 
     if (!pair.auto) { requestAnimationFrame(anim); }
 
-    console.log("pointer up in active panel, saving state to local storage")
+    // console.log("pointer up in active panel, saving state to local storage")
     let stateJSON = state2json()
     localStorage.setItem("so", stateJSON)
     const url = new URL(location);
@@ -1704,7 +1718,7 @@ function createButtonsPanel() {
 
 
     panel.buttonArray.push(
-        new PButton(panel, 0.0, 0.0, 0.125, 0.333, ["?"],
+        new PButton(panel, 0.375, 0.0, 0.125, 0.333,  ["?"],
             function () { toggleDocs(); })
     );
     let lockButton = new PButton(panel, 0.125, 0, 0.125, 0.333, ["Lock", "Ring"],
@@ -1713,16 +1727,6 @@ function createButtonsPanel() {
         function () { return pair.locked; })
     lockButton.toggle = true;
     panel.buttonArray.push(lockButton);
-
-
-
-
-
-
-
-
-
-
 
     panel.buttonArray.push(
         new PButton(panel, 0.0, 0.333, 0.125, 0.333, ["Hide", "UI"],
@@ -1740,10 +1744,6 @@ function createButtonsPanel() {
         function () { return !showWheels; })
     hideDiscsButton.toggle = true;
     panel.buttonArray.push(hideDiscsButton);
-
-
-
-
 
     panel.buttonArray.push(
         new PButton(panel, 0.125, 0.666, 0.125, 0.333, ["Rand", "Discs"],
@@ -1769,7 +1769,7 @@ function createButtonsPanel() {
     panel.buttonArray.push(demoButton);
 
     panel.buttonArray.push(
-        new PButton(panel, 0.375, 0.0, 0.125, 0.333, ["Share/", "Gallery"],
+        new PButton(panel, 0.0, 0.0, 0.125, 0.333,  ["Share/", "Gallery"],
             function () { sharePanel.active = true; })
     );
 
@@ -2235,7 +2235,6 @@ function toggleDocs() {
 
 
 }
-
 function setGallerySubmitHTML() {
     document.querySelector(':root').style.setProperty('--bgColor', pair.colorBG)
     document.querySelector(':root').style.setProperty('--fgColor', pair.color)
@@ -2533,6 +2532,7 @@ function state2json() {
 
     // log("state2json", so)
     let stateString = JSON.stringify(so)
+    log("SS size",stateString.length)
     return stateString
 }
 
@@ -2615,10 +2615,11 @@ init();
 so = localStorage.getItem("so")
 // log("init lsso",so)
 if (so) {
-    // log("ls state exists:", so)
+    // log("ls state exists:", JSON.parse(so).pair.trace.points)
     json2state(so)
 }
 else {
+    log("ls state does not exist, create")
     localStorage.setItem("so", state2json())
 }
 
