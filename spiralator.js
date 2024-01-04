@@ -153,19 +153,19 @@ class Trace {
         so = {}
         so.lw = this.lw;
         so.color = this.color;
-        let points=[]
+        let points = []
         // log("nPoints", this.points.length)
         // log("points",this.points)
-        this.points.forEach(point => points.push([(point.x).toFixed(1),(point.y).toFixed(1)]))
+        this.points.forEach(point => points.push([(point.x).toFixed(1), (point.y).toFixed(1)]))
         so.points = points;
         // log("trace.toSSobj() returning:",so)
         return so
     }
     fromSSobj(so) {
         // log("trace from so")
-        this.color=so.color;
-        this.lw=so.lw;
-        this.points=[]
+        this.color = so.color;
+        this.lw = so.lw;
+        this.points = []
 
         so.points.forEach(point => this.points.push(new Point(parseFloat(point[0]), parseFloat(point[1]))))
     }
@@ -1051,7 +1051,7 @@ class Pair {
         ss.trace = this.trace.toSSobj();
 
 
-        ss.traces=[];
+        ss.traces = [];
         this.traces.forEach(trace => ss.traces.push(trace.toSSobj()))
         // log("pair.toSSobj() ss.traces",ss.traces)
         // log("Pair.toSSobj", ss)
@@ -1078,7 +1078,7 @@ class Pair {
 
         this.trace.fromSSobj(so.trace);
         so.traces.forEach(trace => {
-            let newTrace= new Trace(this,1);
+            let newTrace = new Trace(this, 1);
             newTrace.fromSSobj(trace);
             this.traces.push(newTrace)
         })
@@ -1720,7 +1720,7 @@ function createButtonsPanel() {
 
 
     panel.buttonArray.push(
-        new PButton(panel, 0.375, 0.0, 0.125, 0.333,  ["?"],
+        new PButton(panel, 0.375, 0.0, 0.125, 0.333, ["?"],
             function () { toggleDocs(); })
     );
     let lockButton = new PButton(panel, 0.125, 0, 0.125, 0.333, ["Lock", "Ring"],
@@ -1771,7 +1771,7 @@ function createButtonsPanel() {
     panel.buttonArray.push(demoButton);
 
     panel.buttonArray.push(
-        new PButton(panel, 0.0, 0.0, 0.125, 0.333,  ["Share/", "Gallery"],
+        new PButton(panel, 0.0, 0.0, 0.125, 0.333, ["Share/", "Gallery"],
             function () { sharePanel.active = true; })
     );
 
@@ -2220,19 +2220,24 @@ function toggleGalleryForm() {
     }
 }
 function toggleDocs() {
-    docs = document.getElementById("docs").style;
+    let docs = document.getElementById("docs").style;
+    let docsCompVis = getComputedStyle(document.getElementById("docs")).visibility
     // console.log(form.visibility)
-    if (!(docs.visibility == "visible")) {
-        docs.visibility = "visible"
+    // log("docsCompVis",docsCompVis)
+    if (docsCompVis == "hidden") {
+        log('docs hidden, making visible')
+        docs.visibility = "visible";
         showDocs = true;
+        localStorage.setItem('showDocs', true);
     }
     else {
-        docs.visibility = "hidden"
+        log('docs visible, hiding')
+        docs.visibility = "hidden";
         showDocs = false;
+        localStorage.setItem('showDocs', false);
         if (!pair.auto) {
             anim();
         }
-
     }
 
 
@@ -2534,7 +2539,7 @@ function state2json() {
 
     // log("state2json", so)
     let stateString = JSON.stringify(so)
-    log("SS size",stateString.length)
+    log("SS size", stateString.length)
     return stateString
 }
 
@@ -2606,7 +2611,7 @@ let showRadInfo = false;
 let showLWInfo = false;
 let showColInfo = false;
 let showgalleryForm = false;
-let showDocs = false;
+let showDocs = true;
 let showArcInfo = false;
 let playDemo = false;
 let previewState = false;
@@ -2704,6 +2709,14 @@ if (urlskey) {
             sharePanel.wait = false;
             if (!pair.auto) { requestAnimationFrame(anim); }
         })
+}
+
+if (localStorage.getItem('showDocs') == null) {
+    log("showDocs not set, setting true")
+    localStorage.setItem('showDocs', true)
+}
+if (!(localStorage.getItem('showDocs')=="true")) {
+    toggleDocs();
 }
 
 anim();
