@@ -50,7 +50,7 @@
    border-color: var(--fgColor);
    background-color: var(--bgColor);
    color: white;
-   visibility:visible;
+   visibility:hidden;
    font-size: var(--textSize);
    z-index: 1;
    padding: 1px;

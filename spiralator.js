@@ -2611,7 +2611,7 @@ let showRadInfo = false;
 let showLWInfo = false;
 let showColInfo = false;
 let showgalleryForm = false;
-let showDocs = true;
+let showDocs = false;
 let showArcInfo = false;
 let playDemo = false;
 let previewState = false;
@@ -2711,12 +2711,10 @@ if (urlskey) {
         })
 }
 
-if (localStorage.getItem('showDocs') == null) {
+if ((localStorage.getItem('showDocs') == null) | (localStorage.getItem('showDocs') == "true")) {
     log("showDocs not set, setting true")
-    localStorage.setItem('showDocs', true)
-}
-if (!(localStorage.getItem('showDocs')=="true")) {
     toggleDocs();
+
 }
 
 anim();
