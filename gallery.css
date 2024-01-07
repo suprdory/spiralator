@@ -22,7 +22,7 @@
 
  div {
    margin-bottom: 00px;
-  margin: auto;
+   margin: auto;
  }
 
  .name {
@@ -41,38 +41,43 @@
    font-size: var(--commentSize);
  }
 
- .delButton{
+ .delButton {
    padding: 2%;
-  margin: 0 0 0 0;
+   margin: 0 0 0 0;
 
  }
 
  h1 {
+   text-align: center;
+   margin-left: auto;
+   /* border-top: 0%; */
+   margin-top: 0%;
+   margin-bottom: 0%;
+   /* padding-top: 0; */
+ }
+
+ a {
+  /* border: green solid 5px; */
+   /* text-align: center; */
+   /* margin-left: auto; */
+   color: white;
+ }
+
+ a:link {
+   text-decoration: none;
+ }
+
+ a:visited {
+   text-decoration: none;
+ }
+
+ a:hover {
+   text-decoration: none;
+ }
+
+ a:active {
+   text-decoration: none;
+ }
+ div.centred {
   text-align: center;
-  margin-left: auto;
-  /* border-top: 0%; */
-  margin-top: 0%;
-  /* padding-top: 0; */
  }
-
- .backLink {
-  position: absolute;
-  margin-left: 2.5%;
-  margin-top: 0.5%;
-  color: white;
-  /* text-align: center;
-  margin-left: auto; */
- }
-
- a:link { 
-  text-decoration: none; 
-} 
-a:visited { 
-  text-decoration: none; 
-} 
-a:hover { 
-  text-decoration: none; 
-} 
-a:active { 
-  text-decoration: none; 
-}
