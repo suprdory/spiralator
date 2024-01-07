@@ -46,3 +46,30 @@
   margin: 0 0 0 0;
 
  }
+
+ h1 {
+  text-align: center;
+  margin-left: auto;
+ }
+
+ .backLink {
+  position: absolute;
+  margin-left: 2.5%;
+  margin-top: 1.5%;
+  color: white;
+  /* text-align: center;
+  margin-left: auto; */
+ }
+
+ a:link { 
+  text-decoration: none; 
+} 
+a:visited { 
+  text-decoration: none; 
+} 
+a:hover { 
+  text-decoration: none; 
+} 
+a:active { 
+  text-decoration: none; 
+}

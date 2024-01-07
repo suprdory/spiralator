@@ -1,5 +1,3 @@
-
-
 function add_image_from_meta(data) {
 
     // console.log(data)
