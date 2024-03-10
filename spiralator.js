@@ -735,7 +735,10 @@ class Pair {
         this.penUp()
         this.moving.th0 = 0;
         this.move(0);
-        this.penDown()
+        this.penDown();
+        if (this.showPreview) {
+            this.calcPreview();
+        }
     }
     move(th, skipCrossCheck = false, preview = false) {
         if (!skipCrossCheck) {
@@ -2718,3 +2721,7 @@ if ((localStorage.getItem('showDocs') == null) | (localStorage.getItem('showDocs
 }
 
 anim();
+
+// togglePreview()
+// pair.nudge(1)
+// anim()
