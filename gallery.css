@@ -27,6 +27,7 @@
 
  .name {
    text-align: left;
+   word-wrap: break-word;
    margin: 0 0 0 0;
    margin-bottom: 5%;
    padding-left: 1%;
@@ -35,6 +36,7 @@
 
  .comment {
    text-align: left;
+   word-wrap: break-word;
    margin: 0 0 0 0;
    padding-left: 1%;
    margin-bottom: 5%;
