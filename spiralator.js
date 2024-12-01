@@ -2790,7 +2790,7 @@ if ((localStorage.getItem('showDocs') == null) | (localStorage.getItem('showDocs
 
 }
 
-sharePanel.active = true;
+// sharePanel.active = true;
 anim();
 
 
