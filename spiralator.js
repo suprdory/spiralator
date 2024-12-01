@@ -1588,6 +1588,67 @@ function shareImage() {
         })
     }
 }
+function downloadSVG() {
+    if (pair.traces.length > 0) {
+        let date = new Date().toJSON();
+        // console.log(date); // 2022-06-17T11:06:50.369Z
+        sharePanel.wait = true;
+        svgString = createSVGstring();
+        var blob = new Blob([svgString]);
+        let file=new File(
+            [blob],
+            "spiralator-" + date + ".svg",
+            {
+                type: "image/svg",
+                lastModified: new Date().getTime()
+            }
+        );
+        downloadFile(file);
+        sharePanel.wait = false;
+        anim()
+
+    }
+}
+
+function createSVGstring() {
+
+    let tracesBounds = pair.getTracesBounds();
+    let viewscale=1.05;
+    let twidth=tracesBounds.xmax-tracesBounds.xmin;
+    let theight = tracesBounds.ymax - tracesBounds.ymin;
+    let headString = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="'
+    headString += (tracesBounds.xmin-twidth*(viewscale-1)/2).toFixed(1) + ' '+ (tracesBounds.ymin-theight*(viewscale-1)/2).toFixed(1) +' '
+    headString += (viewscale*twidth).toFixed(1) + ' ' + (viewscale*theight).toFixed(1)+'" '
+    headString += 'style="background-color:' + pair.colorBG +'"'
+    headString +='>'
+
+    let tailString ='</svg>'
+
+    let polyLines=[]
+    pair.traces.forEach(trace => {
+        let polyLine=trace2polyline(trace);
+        polyLines.push(polyLine)
+    })
+
+    let outString=headString
+    polyLines.forEach(polyLine =>{
+        outString=outString+polyLine
+    })
+    outString=outString+tailString
+    return outString
+}
+function trace2polyline(trace){
+    log(trace)
+    pstring ='<polyline points="'
+    trace.points.forEach(point =>{
+       pstring+= point.x.toFixed(1)+','+point.y.toFixed(1)+' '
+    })
+    letcolstring=
+    pstring +='" style="fill:none; stroke:' +trace.color+'; stroke-width: '+trace.lw+ '" />'
+    return pstring
+}
+
+
 function downloadImage() {
     if (pair.traces.length > 0) {
         let date = new Date().toJSON();
@@ -1620,6 +1681,7 @@ function downloadImage() {
         })
     }
 }
+
 function downloadFile(file) {
     // Create a link and set the URL using `createObjectURL`
     const link = document.createElement("a");
@@ -1680,6 +1742,8 @@ function uploadImage(name, comment) {
         })
     }
 }
+let ybut = 0.0714
+let ybuts = 0.0714 * 2
 function createSharePanel() {
     let xsize = 200 * pixRat;
     let ysize = 400 * pixRat;
@@ -1688,27 +1752,33 @@ function createSharePanel() {
     panel.wait = false;
     panel.active = false;
     panel.buttonArray.push(
-        new PButton(panel, 0.0, 0, 1, 0.083, ["Close"],
+        new PButton(panel, 0.0, 0, 1, ybut, ["Close"],
             function () { panel.active = false; })
     );
     panel.buttonArray.push(
-        new PButton(panel, 0.1, 0.1666, .8, 0.083, ["Share URL"],
+        new PButton(panel, 0.1, ybuts, .8, ybut, ["Share URL"],
             function () { shareURL(); })
     );
     panel.buttonArray.push(
-        new PButton(panel, 0.1, .3333, .8, 0.083, ["Share Image"],
+        new PButton(panel, 0.1, ybuts * 2, .8, ybut, ["Share Image"],
             function () { shareImage(); })
     );
     panel.buttonArray.push(
-        new PButton(panel, 0.1, .5000, .8, 0.083, ["Download Image"],
+        new PButton(panel, 0.1, ybuts * 3, .8, ybut, ["Download Image"],
             function () { downloadImage(); })
     );
+
     panel.buttonArray.push(
-        new PButton(panel, 0.1, .6666, .8, 0.083, ["Upload to Gallery"],
+        new PButton(panel, 0.1, ybuts * 4, .8, ybut, ["Download SVG"],
+            function () { downloadSVG(); })
+    );
+
+    panel.buttonArray.push(
+        new PButton(panel, 0.1, ybuts * 5, .8, ybut, ["Upload to Gallery"],
             function () { toggleGalleryForm() })
     );
     panel.buttonArray.push(
-        new PButton(panel, 0.1, .83333, .8, 0.083, ["View Gallery"],
+        new PButton(panel, 0.1, ybuts * 6, .8, ybut, ["View Gallery"],
             function () { window.location.href = 'gallery.html' })
     );
 
@@ -2720,7 +2790,10 @@ if ((localStorage.getItem('showDocs') == null) | (localStorage.getItem('showDocs
 
 }
 
+sharePanel.active = true;
 anim();
+
+
 
 // togglePreview()
 // pair.nudge(1)
